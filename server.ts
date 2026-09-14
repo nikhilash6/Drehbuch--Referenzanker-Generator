@@ -492,6 +492,7 @@ app.post('/api/screenplay/generate-proposals', async (req: Request, res: Respons
       globalWeather = 'Sonnig & klarer blauer Himmel',
       globalBackground = 'Neubausiedlung / Grüne Wohnsiedlung',
       globalCam = 'Drohnenflug Orbit 360°',
+      genre = 'Architektur & Lifestyle (Immobilien)',
     } = req.body;
 
     // Use references array if provided, or fallback to subjects
@@ -547,24 +548,24 @@ In den Referenzen ist ein Logo / Brand-Mark hinterlegt. Das Logo muss in ALLEN V
 `;
     }
 
-    const systemPrompt = `Du bist ein hochdotierter internationaler Regisseur und Prompt-Ingenieur für High-End Architektur- und Lifestyle-Werbespots auf Video-KIs (MiniMax H3 / Maestro 2.1.6).
+    const systemPrompt = `Du bist ein hochdotierter internationaler Regisseur und Prompt-Ingenieur für High-End Videos auf Video-KIs (MiniMax H3 / Maestro 2.1.6). Du bist extrem flexibel bezüglich Genres und Themen (z.B. Comedy, Horror, Erotik, Drama, Reise, Kunst, Lifestyle oder Architektur) und passt die Handlung, die Atmosphäre, die Tonalität und alle Beschreibungen exakt an die Vorgaben des Nutzers an.
 Deine Aufgabe: Entwickle genau 1 KREATIVES, HOCHWERTIGES DREHBUCH-KONZEPT für ein Video bestehend aus ${windowCount} Szenenfenstern (Windows) mit je ${windowDurationSeconds} Sekunden Dauer.
 
 CRITICAL HARD CONSTRAINT (STRIKTES ENGLISCH-GEBOT FÜR MINIMAX H3 PROMPTS):
 MiniMax H3 und Maestro benötigen zwingend 100% ENGLISCHE PROMPTS für Bild-, Kamera- und Handlungsanweisungen, um Verformungen, Geplappere und Klon-Fehler zu verhindern!
 Daher gilt folgende eiserne Regel:
-- "actionDescription": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "Smooth Steadicam glide following <Subject 1> entering the open foyer, admiring natural oak wood surfaces..."). Binde zwingend die Referenz-Tags (<Subject 1>, <Building 1>, <Object 1>, etc.) ein!
-- "cameraMovement": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "360-degree orbital drone shot descending smoothly to eye-level", "Slow reverse dolly and ascending crane rise into the golden evening twilight")
-- "focus": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "Natural oiled oak timber, floor-to-ceiling triple-glazed panoramic glass, warm diffused sunlight")
+- "actionDescription": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH. Binde zwingend die Referenz-Tags (<Subject 1>, <Building 1>, <Object 1>, etc.) ein! Passe die Action exakt an das Thema des Nutzers an (z.B. bei Comedy: "Close up of <Subject 1> looking around nervously and humorously picking his nose..." oder bei Architektur: "Smooth Steadicam glide following <Subject 1> entering the open foyer...").
+- "cameraMovement": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "360-degree orbital drone shot descending smoothly to eye-level", "Slow reverse dolly and ascending crane rise into the golden evening twilight", or for everyday scenes "Handheld camera slightly shaking, natural eye-level close-up panning slowly")
+- "focus": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "Facial expressions of <Subject 1>, specific humorous hand movements, or architectural details like natural oiled oak timber")
 - "dialogueSpeaker": Name des Sprechers (z.B. "Bauherrin")
 - "dialogueSnippet": Gesprochener Dialog-Satz in der vorgegebenen Zielsprache "${dialogueLanguage}"
 - "claimOrCta": Claim / Call-to-Action (z.B. "${finalCallToAction}")
-- "soundDesign": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "Gentle rustle of wind through oak leaves, crisp leather shoe steps, soft hum of heat pump, zero harsh synths")
-- "musicStyle": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "Soft cinematic warm piano keys with delicate violin strings, calm acoustic tempo, no vocals, nothing else")
+- "soundDesign": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "Foley sound of quiet sniffling, birds chirping, soft footsteps, or wind through leaves")
+- "musicStyle": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "Soft cinematic warm piano keys, suspenseful horror soundscapes, light-hearted comedic acoustic guitar, or upbeat electronic beats")
 - "title", "tagline", "descriptionForLayperson", "dramaturgyHighlights", "toneAndStyle": Können auf Deutsch für die verständliche Präsentation in der UI formuliert sein.
 
 WICHTIGE ANFORDERUNGEN:
-1. Bereite jedes Konzept so auf, dass ein LAIE (z.B. Bauherr, Kunde) sofort versteht, worum es geht und wie die Stimmung ist!
+1. Bereite das Konzept so auf, dass ein LAIE sofort versteht, worum es geht und wie die Stimmung ist!
 2. Jedes Konzept benötigt:
    - title: Griffiger Titel
    - tagline: Einprägsame Unterzeile
@@ -590,11 +591,11 @@ ${logoDirective}
 
 VERPFLICHTENDE REFERENZEN (Objekte, Gebäude, Personen, Tiere):
 Die folgenden Referenzen sind Gegenstand des kreativen Gesamtkonzepts. Definiere genau, WER WAS MACHT und WER MIT WEM WIE ZUSAMMEN GEHÖRT:
-${refDescriptions || '• <Subject 1> "Bauherrin": Erkundet die Räume\n• <Subject 2> "Partner": Begleitet die Besichtigung\n• <Building 1> "Musterhaus": Das architektonische Hauptmotiv'}
+${refDescriptions || '• <Subject 1> "Protagonist": Agiert aktiv im Video gemäß den Stichpunkten'}
 
 USER-STICHPUNKTE & VORGABEN:
-${stichpunkte || 'Modernes Wohnhaus, offener Raum, Drohnenüberflug, Holzterrasse, Schlüsselübergabe'}
-Wetter: ${globalWeather} | Setting: ${globalBackground} | Bevorzugte Kamera: ${globalCam}
+${stichpunkte || 'Eine kreative, fesselnde Szene nach Vorgabe des Regisseurs'}
+Genre: ${genre} | Wetter: ${globalWeather} | Setting: ${globalBackground} | Bevorzugte Kamera: ${globalCam}
 
 Antworte AUSSCHLIESSLICH im validen JSON-Format:
 {
@@ -637,7 +638,7 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 120000); // 120s timeout (much safer for slow local models)
+    const timeout = setTimeout(() => controller.abort(), 240000); // 240s timeout (much safer for slow local models)
 
     let rawOutput = '';
     let fetchErrorMsg = '';
@@ -665,7 +666,7 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
       }
     } catch (fetchErr: any) {
       if (fetchErr.name === 'AbortError') {
-        fetchErrorMsg = 'Zeitüberschreitung (Timeout): LM Studio antwortete nicht innerhalb von 120 Sekunden. Eventuell läuft die Generierung auf Ihrem System zu langsam oder blockiert.';
+        fetchErrorMsg = 'Zeitüberschreitung (Timeout): LM Studio antwortete nicht innerhalb von 240 Sekunden. Eventuell läuft die Generierung auf Ihrem System zu langsam oder blockiert.';
       } else {
         fetchErrorMsg = `Verbindung zu LM Studio fehlgeschlagen: ${fetchErr.message || fetchErr}. Bitte stelle sicher, dass LM Studio gestartet, der Server aktiv und das Modell geladen ist.`;
       }
@@ -2124,11 +2125,13 @@ app.post('/api/projects/create', async (req: Request, res: Response) => {
       windowDurationSeconds: 14,
       dialogueLanguage: 'German',
       aspectRatio: '16:9',
+      genre: 'Architektur & Lifestyle (Immobilien)',
       targetAudienceId: 'standard',
       globalWeather: 'Warmes Nachmittagslicht & goldene Stunde',
       globalBackground: 'Moderne Architektur in natürlicher Umgebung',
       globalMusic: 'Cinematic Ambient Soundtrack',
       globalSoundDesign: 'Subtile Raumakustik & sanftes Windrauschen',
+      finalCallToAction: '',
       references: [],
       windows: [],
       ...(templateData || {}),

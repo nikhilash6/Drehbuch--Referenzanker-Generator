@@ -535,11 +535,17 @@ export function buildSingleLineWindowPrompt(params: {
 
   const bldTagStr = primaryBuilding ? ` at ${primaryBuilding.tag} (${cleanMaestroAnchorName(primaryBuilding.name, 'Building')})` : '';
 
+  const enNarrativeAction = toEnglishCinematicText(narrativeAction);
+
   // Timecode 1: Start to T1
-  let timecodeSegment = `TIMECODE ${tcStart}–${t1End}: ${humanTagsStr} interact naturally${bldTagStr}. ${enCamMovement}. `;
+  let timecodeSegment = `TIMECODE ${tcStart}–${t1End}: ${humanTagsStr} interact in the scene${bldTagStr}. ${enCamMovement}. `;
 
   // Timecode 2: T1 to T2
-  timecodeSegment += `TIMECODE ${t1End}–${t2End}: They explore the architectural quality of ${enVisualFocus}. The sunlight accentuates authentic textures and natural materials. `;
+  if (enNarrativeAction) {
+    timecodeSegment += `TIMECODE ${t1End}–${t2End}: ${enNarrativeAction}. The environment and elements of ${enVisualFocus} are visible. `;
+  } else {
+    timecodeSegment += `TIMECODE ${t1End}–${t2End}: They explore and interact with ${enVisualFocus}. The scene lighting emphasizes authentic details. `;
+  }
 
   // Dialogue Trigger exactly at T2 (No gap between T2 and dialogue!)
   let speakerObj = activeHumans[0] || primaryHuman1;
@@ -577,29 +583,29 @@ export function buildSingleLineWindowPrompt(params: {
   const otherHumans = activeHumans.filter((h) => h.id !== speakerObj.id);
   if (otherHumans.length > 0) {
     const otherNames = otherHumans.map((h) => `${h.tag} ${cleanMaestroAnchorName(h.name, 'Partner')}`).join(' and ');
-    timecodeSegment += `TIMECODE ${t2End}–${t3End}: Simultaneously, ${otherNames} listen attentively and nod with evident satisfaction, taking in the generous sightlines. `;
+    timecodeSegment += `TIMECODE ${t2End}–${t3End}: Simultaneously, ${otherNames} listen attentively and react naturally in the environment, taking in the scene. `;
   } else {
-    timecodeSegment += `TIMECODE ${t2End}–${t3End}: Simultaneously, the camera glides fluidly across the space, highlighting the connection between interior and garden. `;
+    timecodeSegment += `TIMECODE ${t2End}–${t3End}: Simultaneously, the camera glides fluidly across the space, highlighting ${enVisualFocus}. `;
   }
 
   // Timecode 4: T3 to End (Final Call to Action or smooth transition)
   if (isLastWindow && cleanClaimOrCta) {
     const objMention = primaryObject ? ` Featuring ${primaryObject.tag} (${cleanMaestroAnchorName(primaryObject.name, 'Object')}).` : '';
-    timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: The camera pulls back revealing the complete architectural masterwork against the sky.${objMention} Graphic Call-to-Action overlay fades in with text: '${cleanClaimOrCta}'. Fade to soft cinematic black over the last second.`;
+    timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: The camera captures the final moments of the scene.${objMention} Graphic Call-to-Action overlay fades in with text: '${cleanClaimOrCta}'. Fade to soft cinematic black over the last second.`;
   } else {
     timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: Smooth cinematic transition into the next perspective with ${enVisualFocus} gleaming in the light.`;
   }
 
   // 6. EXTREME CLOSE-UP Macro Inserts (100mm macro, T1.8)
-  const macro1 = `EXTREME CLOSE-UP, 100mm macro, T1.8 – close observation of ${enVisualFocus}, capturing authentic textures and fine details in the light.`;
+  const macro1 = `EXTREME CLOSE-UP, 100mm macro, T1.8 – close observation of ${enVisualFocus}, capturing fine details in the light.`;
   const macro2 = primaryBuilding
-    ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – reflections and ambient light interacting with the facade of ${primaryBuilding.tag}.`
+    ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – reflections and ambient light interacting with ${primaryBuilding.tag}.`
     : `EXTREME CLOSE-UP, 100mm macro, T1.8 – reflections and ambient light interacting with the environment, emphasizing depth.`;
   const macro3 = isLastWindow && cleanClaimOrCta
     ? (primaryObject
         ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – ${primaryObject.tag} (${primaryObject.name}) held firmly in hand, followed by the crisp typography of '${cleanClaimOrCta}'.`
         : `EXTREME CLOSE-UP, 100mm macro, T1.8 – a central focal detail of the final scene, followed by the pristine typography of '${cleanClaimOrCta}'.`)
-    : `EXTREME CLOSE-UP, 100mm macro, T1.8 – soft shadow patterns moving slowly across the surface, emphasizing the passage of time.`;
+    : `EXTREME CLOSE-UP, 100mm macro, T1.8 – soft light patterns moving slowly across the surface, emphasizing the passage of time.`;
 
   const macroSegment = `${macro1} ${macro2} ${macro3}`;
 

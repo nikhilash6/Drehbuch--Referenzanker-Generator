@@ -229,6 +229,7 @@ export interface DrehbuchKonfiguratorState {
   dialogueLanguage: DialogueLanguage; // default: 'German'
   actionCode: string; // default: 'ASTROCINEMAV01K2T'
   aspectRatio: '16:9' | '9:16' | '2.39:1';
+  genre?: string;
   targetAudienceId: string; // ID of selected target audience
   targetAudienceCustom?: TargetAudience;
   customTargetAudiences?: TargetAudience[];
