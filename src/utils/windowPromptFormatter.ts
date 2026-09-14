@@ -251,130 +251,6 @@ export const DEFAULT_PROPOSALS: ConceptProposal[] = [
       },
     ],
   },
-  {
-    id: 'prop-2',
-    title: 'Der Lifestyle-Walkthrough: Dynamik & Präzision',
-    tagline: 'Fokus auf zukunftsweisende Technik, Energieeffizienz und flüssige Raumübergänge',
-    descriptionForLayperson:
-      'Ein moderner, temporeicher Architektur-Spot. Schnelle, elegante Kamerafahrten zeigen die funktionale Perfektion: Smarthome, Photovoltaik, offene Kochinsel und das Leben im Grünen.',
-    dramaturgyHighlights: [
-      'Window 1: Dynamischer Drohnen-Anflug aus den Baumkronen direkt auf das Panoramafenster',
-      'Window 2: Moderne Küche, offene Zubereitung & Wohlfühl-Klima',
-      'Window 3: Galerie im Obergeschoss & Wellness-Badezimmer',
-      'Window 4: Gartenidylle im Abendlicht mit großem Schluss-Claim',
-    ],
-    toneAndStyle: 'Modern, dynamisch, technologie-affin, Premium-Qualität',
-    dialogueLanguage: 'German',
-    callToAction: 'Einzugsbereit in nur 4 Monaten – Jetzt unverbindlich anfragen',
-    windowBreakdown: [
-      {
-        windowNumber: 1,
-        title: 'FPV-Anflug & Energie-Design',
-        actionDescription:
-          'Eine flüssige FPV-Kamerabewegung fliegt über das Solardach von <Building 1>, sinkt hinab zur Terrasse und fängt die Bedienung der modernen Wallbox ein.',
-        cameraMovement: 'FPV Fly-Through entlang der Dachlinie hinab zum Carport',
-        dialogueSnippet: 'Autarkie und modernes Design perfekt vereint.',
-        dialogueSpeaker: 'Partner',
-        focus: 'Photovoltaik, Architektur-Geometrie und nachhaltige Baustoffe',
-        claimOrCta: 'KfW 40 Plus: Zukunftssicher wohnen',
-      },
-      {
-        windowNumber: 2,
-        title: 'Kochinsel & Living Space',
-        actionDescription:
-          'Die Protagonistin bereitet frische Zutaten auf der Granit-Kochinsel vor. Die Schiebetür zur Terrasse gleitet lautlos auf. Vogelgezwitscher aus dem Garten.',
-        cameraMovement: 'Gleitende Schwenk-Kamerafahrt um die Kücheninsel',
-        dialogueSnippet: 'Kochen, leben, durchatmen – alles in einem harmonischen Raum.',
-        dialogueSpeaker: 'Bauherrin',
-        focus: 'Designerküche, Induktion mit Muldenlüfter und offene Flurachse',
-        claimOrCta: 'Wohnraum, der verbindet',
-      },
-      {
-        windowNumber: 3,
-        title: 'Rückzugsort & Galerie',
-        actionDescription:
-          'Blick nach oben: Die freitragende Eichentreppe führt auf die lichte Galerie mit Leseecke und Blick durch das Oberlicht.',
-        cameraMovement: 'Vertikale Kranfahrt vom Erdgeschoss empor zur Galerie',
-        dialogueSnippet: 'Hier oben herrscht absolute Ruhe und Weitsicht.',
-        dialogueSpeaker: 'Partner',
-        focus: 'Eichentreppe, rahmenloses Glasgeländer und Dachfenster-Lichtachse',
-        claimOrCta: 'Ruhezonen für höchste Lebensqualität',
-      },
-      {
-        windowNumber: 4,
-        title: 'Garten-Idylle & Finaler Call-to-Action',
-        actionDescription:
-          'Die Abendstimmung taucht die Terrasse in warmes Licht. Sanfte Gartenbeleuchtung spiegelt sich in den Fenstern. Der Abspann blendet den konkreten Call-to-Action ein.',
-        cameraMovement: 'Kamera gleitet langsam zurück in den Garten, während das Haus erstrahlt',
-        dialogueSnippet: 'Starten Sie noch heute in Ihr eigenes Bauprojekt.',
-        dialogueSpeaker: 'Bauherrin',
-        focus: 'Beleuchtetes Traumhaus in der Dämmerung & On-Screen Call-to-Action',
-        claimOrCta: 'Einzugsbereit in nur 4 Monaten – Jetzt unverbindlich anfragen',
-      },
-    ],
-  },
-  {
-    id: 'prop-3',
-    title: 'Die Cineastische Ode: Licht, Ästhetik & Ruhe',
-    tagline: 'Minimalistischer Kunstfilm-Ansatz mit intensiver Atmosphäre und Poesie',
-    descriptionForLayperson:
-      'Für Liebhaber von purer Ästhetik. Ruhige, epische Einstellungen, poetische Lichtreflexionen auf Glas und Beton, sanfte Windgeräusche in den Bäumen und eine berührende Botschaft über Geborgenheit.',
-    dramaturgyHighlights: [
-      'Window 1: Morgendunst, erster Sonnenstrahl auf den Naturholzlamellen',
-      'Window 2: Barfuß auf gewachstem Eichenparkett, Tasse Kaffee am Fenster',
-      'Window 3: Spiel von Licht und Schatten im doppelgeschossigen Wohnraum',
-      'Window 4: Abenddämmerung, das Haus als leuchtender Zufluchtsort mit edlem CTA',
-    ],
-    toneAndStyle: 'Poetisch, ruhig, meditativ, High-End Kinofilm-Look',
-    dialogueLanguage: 'German',
-    callToAction: 'Bauen ohne Kompromisse. Fordern Sie jetzt den Katalog an.',
-    windowBreakdown: [
-      {
-        windowNumber: 1,
-        title: 'Morgenstille & Naturerwachen',
-        actionDescription:
-          'Dunst steigt über der Wiese auf. Die Morgensonne bricht durch die Kiefernkronen und wirft warme Kantenlichter auf die Fassade von <Building 1>.',
-        cameraMovement: 'Extrem langsamer Tilt & Pan im 35mm Anamorphic Widescreen',
-        dialogueSnippet: 'Wenn der Tag so beginnt, bleibt die Hektik der Welt draußen.',
-        dialogueSpeaker: 'Bauherrin',
-        focus: 'Tautropfen auf Grashalmen, Holzfassade im goldenen Frühlicht',
-        claimOrCta: 'Ein Ort zum Durchatmen',
-      },
-      {
-        windowNumber: 2,
-        title: 'Haptik & Achtsamkeit',
-        actionDescription:
-          'Der Partner geht barfuß über den warmen Parkettboden. Er hält eine dampfende Tasse Kaffee in beiden Händen und blickt durch die 3 Meter hohe Scheibe.',
-        cameraMovement: 'Low-Angle Steadicam auf die Schritte, dann Schwenk zum Gesicht',
-        dialogueSnippet: 'Einfach ankommen und tief durchatmen.',
-        dialogueSpeaker: 'Partner',
-        focus: 'Barfuß auf warmem Holz, Kaffeedampf gegen das Gegenlicht',
-        claimOrCta: 'Materialien, die man spüren möchte',
-      },
-      {
-        windowNumber: 3,
-        title: 'Lichtspiel im Raum',
-        actionDescription:
-          'Die Bauherrin sitzt auf der Lesebank im Fenstererker. Ein Buch auf den Knien. Das Schattenmuster der Holzlamellen wandert langsam über die Wand.',
-        cameraMovement: 'Statische Meistereinstellung mit sanftem Micro-Dolly',
-        dialogueSnippet: 'Zeit verliert hier jede Eile.',
-        dialogueSpeaker: 'Bauherrin',
-        focus: 'Schattenwurf der Lamellen, offener Luftraum und Panoramafenster',
-        claimOrCta: 'Architektur als Lebensgefühl',
-      },
-      {
-        windowNumber: 4,
-        title: 'Dämmerung & Leuchtendes Zuhause',
-        actionDescription:
-          'Blue Hour. Das Haus strahlt von innen in warmem Licht. Beide stehen entspannt am Fenster. Der finale Claim und das Logo faden elegant ein.',
-        cameraMovement: 'Langsamer Rückflug der Drohne über das spiegelnde Wasserbecken',
-        dialogueSnippet: 'Ihr Lebensraum wartet auf Sie.',
-        dialogueSpeaker: 'Partner',
-        focus: 'Haus als leuchtender Kristall in der Dämmerung & finaler Call-to-Action',
-        claimOrCta: 'Bauen ohne Kompromisse. Fordern Sie jetzt den Katalog an.',
-      },
-    ],
-  },
 ];
 
 /**
@@ -531,16 +407,16 @@ export function buildSingleLineWindowPrompt(params: {
     category: 'human' as const,
     referenceIndex: 1,
     tag: '<Subject 1>',
-    charTag: 'char Protagonistin',
-    name: 'Bauherrin',
-    roleOrAction: 'Erkundet die Architektur',
-    relationship: 'Hauptprotagonistin',
+    charTag: 'char Protagonist',
+    name: 'Protagonist',
+    roleOrAction: 'Nimmt aktiv an der Haupthandlung teil',
+    relationship: 'Hauptprotagonist',
   };
   const primaryBuilding = activeBuildings[0] || allSubjects.find((r) => r.category === 'building');
   const primaryObject = activeObjects[0] || allSubjects.find((r) => r.category === 'object');
 
-  // Align visual focus with primaryBuilding if present to avoid "Solid brick facade" vs "modern wood facade" contradictions!
-  let enVisualFocus = toEnglishCinematicText(visualFocus, 'Architectural facade and tactile natural materials');
+  // Align visual focus with primaryBuilding if present
+  let enVisualFocus = toEnglishCinematicText(visualFocus, 'The primary subject of the scene and its atmospheric surroundings');
   if (primaryBuilding) {
     const bldMat = primaryBuilding.hairOrMaterial || primaryBuilding.clothingOrFinish || '';
     if (bldMat && /wood|plaster|glass|aluminum|modern/i.test(bldMat) && /brick|traditional roofline/i.test(enVisualFocus)) {
@@ -549,14 +425,14 @@ export function buildSingleLineWindowPrompt(params: {
   }
 
   // 1. Window Tag & Action header
-  const windowTag = `window${windowNumber}: (${tcStart}–${tcEnd}) Action: ${actionCode}. Native ${aspectRatio} widescreen.`;
+  const windowTag = `window${windowNumber}: (${tcStart}–${tcEnd}) Native ${aspectRatio} widescreen.`;
 
   // English-normalized scene descriptors
-  const enWeather = toEnglishCinematicText(weather, 'Sunny and clear blue sky with warm architectural illumination');
-  const enBackground = toEnglishCinematicText(background, 'A modern high-end architectural residence with landscaped grounds and wooden terrace');
+  const enWeather = toEnglishCinematicText(weather, 'Natural clear daylight with balanced atmospheric illumination');
+  const enBackground = toEnglishCinematicText(background, 'A cinematic environment matching the scene context');
   const enCamMovement = toEnglishCinematicText(cameraMovement, 'Smooth cinematic camera glide');
-  const enSoundDesign = toEnglishCinematicText(soundDesign, 'Subtle acoustic room presence, soft breeze through trees and gentle footsteps on wood');
-  const enMusicStyle = toEnglishCinematicText(musicStyle, 'Warm cinematic ambient soundtrack with gentle acoustic guitar and piano accents');
+  const enSoundDesign = toEnglishCinematicText(soundDesign, 'Natural environmental ambience matching the surroundings');
+  const enMusicStyle = toEnglishCinematicText(musicStyle, 'Cinematic music matching the tone of the scene');
 
   // 2. Setting and Environment (Strict Cinematic English)
   const audienceColor = targetAudience?.colorSpectrum ? `, Color palette: ${toEnglishCinematicText(targetAudience.colorSpectrum)}` : '';
@@ -692,8 +568,10 @@ export function buildSingleLineWindowPrompt(params: {
   const cleanClaimOrCta = sanitizeQuotesForJSON(claimOrCta || '');
   const timePrefix = `[TIME:${startSec}s-${endSec}s]`;
 
-  // Precise time-boxed dialogue: start at t2End, end at t3End, with strict [TIME:XXs-YYs] prefix to prevent LLM hallucination!
-  timecodeSegment += `TIMECODE ${t2End}–${t3End}: ${speakerObj.tag} ${cleanSpeakerName} (${sanitizedSpeakerAnchor}) turns toward camera/partner and speaks strictly between ${t2End} and ${t3End} with synchronized lip movement: ${timePrefix} <d[${speakerObj.tag} ${sanitizedSpeakerAnchor}][${dialogueLanguage}]> ${sanitizedDialogue} </d> (dialogue strictly limited to this duration, lips stop speaking exactly at ${t3End}). `;
+  // Clean timecoded dialogue trigger: strictly matching working template to prevent off-speaker babbling!
+  if (dialogueText) {
+    timecodeSegment += `TIMECODE ${t2End}, ${speakerObj.tag} ${cleanSpeakerName}: ${timePrefix} <d[${cleanSpeakerName}][${dialogueLanguage}]> ${sanitizedDialogue} </d> `;
+  }
 
   // Timecode 3: T2 to T3 (Reaction of other humans, e.g. Subject 3 and Subject 4, simultaneous with dialogue)
   const otherHumans = activeHumans.filter((h) => h.id !== speakerObj.id);
@@ -713,15 +591,15 @@ export function buildSingleLineWindowPrompt(params: {
   }
 
   // 6. EXTREME CLOSE-UP Macro Inserts (100mm macro, T1.8)
-  const macro1 = `EXTREME CLOSE-UP, 100mm macro, T1.8 – fingers lightly touching the brushed natural wood surface of ${enVisualFocus}, wood grain warm and tactile in the light.`;
+  const macro1 = `EXTREME CLOSE-UP, 100mm macro, T1.8 – close observation of ${enVisualFocus}, capturing authentic textures and fine details in the light.`;
   const macro2 = primaryBuilding
-    ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – reflections of the blue sky and trees across the floor-to-ceiling glass facade of ${primaryBuilding.tag}.`
-    : `EXTREME CLOSE-UP, 100mm macro, T1.8 – reflections of the blue sky across the floor-to-ceiling panoramic glass facade.`;
+    ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – reflections and ambient light interacting with the facade of ${primaryBuilding.tag}.`
+    : `EXTREME CLOSE-UP, 100mm macro, T1.8 – reflections and ambient light interacting with the environment, emphasizing depth.`;
   const macro3 = isLastWindow && cleanClaimOrCta
     ? (primaryObject
         ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – ${primaryObject.tag} (${primaryObject.name}) held firmly in hand, followed by the crisp typography of '${cleanClaimOrCta}'.`
-        : `EXTREME CLOSE-UP, 100mm macro, T1.8 – the gleaming architectural key in hand, followed by the pristine typography of '${cleanClaimOrCta}'.`)
-    : `EXTREME CLOSE-UP, 100mm macro, T1.8 – crisp architectural shadow lines moving slowly across the natural facade surface.`;
+        : `EXTREME CLOSE-UP, 100mm macro, T1.8 – a central focal detail of the final scene, followed by the pristine typography of '${cleanClaimOrCta}'.`)
+    : `EXTREME CLOSE-UP, 100mm macro, T1.8 – soft shadow patterns moving slowly across the surface, emphasizing the passage of time.`;
 
   const macroSegment = `${macro1} ${macro2} ${macro3}`;
 
@@ -733,9 +611,13 @@ export function buildSingleLineWindowPrompt(params: {
   const soundAcoustic = targetSoundEn ? `${enSoundDesign}. ${targetSoundEn}` : enSoundDesign;
   const musicAcoustic = targetSoundEn ? `${enMusicStyle}. ${targetSoundEn}` : enMusicStyle;
 
-  const audioDeliverySegment = `STRICT LIP-SYNC & AUDIO BINDING: Lip and mouth movement of ${speakerObj.tag} (${cleanSpeakerName}, ${speakerAnchorTag}) is 100% physically synchronized with the spoken ${dialogueLanguage} dialogue tag <d[...]>. Absolute silence and clean environmental ambience apart from this explicit timestamped dialogue cue. Zero off-screen voiceover, zero lip drift, zero silent mouth movements, zero unscripted background chatter, no unscripted narrator, no improvised words, no repetitive babbling, no gibberish. Characters ONLY speak when their exact tagged dialogue cue is triggered.`;
+  const audioDeliverySegment = dialogueText
+    ? `Audio Delivery: No narrator. No voice-over. No off-screen dialogue. No improvised words. Only the marked dialogue lines.`
+    : `Audio Delivery: No narrator. No voice-over. No off-screen dialogue. No improvised words. No dialogue in this window.`;
   const audioDesignSegment = `Audio Design: ${soundAcoustic}, nothing else.`;
-  const musicSegment = `Music: ${musicAcoustic}. Only pristine ambience and the marked dialogue.`;
+  const musicSegment = dialogueText
+    ? `Music: ${musicAcoustic}. Only ambience and the marked dialogue lines.`
+    : `Music: ${musicAcoustic}. Only ambience.`;
 
   // 9. Active References Tag
   const activeRefTags: string[] = [];
@@ -791,7 +673,7 @@ export function buildSingleLineWindowPrompt(params: {
     summary: narrativeAction || `${visualFocus} mit ${cameraMovement}`,
     activeSubjects: activeSubjects.map((s) => s.name),
     activeReferences: activeSubjects.map((s) => `${s.tag} ${s.name}`),
-    dialogueSnippet: dialogueText ? `${timePrefix} <d[${speakerObj.tag} ${sanitizedSpeakerAnchor}][${dialogueLanguage}]> ${sanitizedDialogue} </d>` : undefined,
+    dialogueSnippet: dialogueText ? `${timePrefix} <d[${cleanSpeakerName}][${dialogueLanguage}]> ${sanitizedDialogue} </d>` : undefined,
     extremeCloseups: [macro1, macro2, macro3],
     cameraMove: cameraMovement,
     musicAudio: `${musicAcoustic} / ${soundAcoustic}`,
@@ -846,8 +728,8 @@ export function pressProposalToSingleLineWindows(params: {
       background: globalBackground || 'Modern energy-efficient residence with landscaped grounds and wooden terrace',
       cameraMovement: win.cameraMovement,
       visualFocus: win.focus,
-      soundDesign: targetAudience ? targetAudience.soundAesthetic : 'Gentle breeze, crisp footsteps, acoustic resonance of high ceiling rooms',
-      musicStyle: targetAudience ? targetAudience.soundAesthetic : 'Cinematic ambient music with warm acoustic presence',
+      soundDesign: win.soundDesign || (targetAudience ? targetAudience.soundAesthetic : 'Gentle breeze, crisp footsteps, acoustic resonance of high ceiling rooms'),
+      musicStyle: win.musicStyle || (targetAudience ? targetAudience.soundAesthetic : 'Cinematic ambient music with warm acoustic presence'),
       dialogueLanguage,
       dialogueSpeaker: win.dialogueSpeaker || firstHuman?.name || 'Bauherrin',
       dialogueText: win.dialogueSnippet,
@@ -948,6 +830,128 @@ export function toEnglishCinematicText(text?: string, fallback: string = ''): st
 
   // 2. Vocabulary & Word-Level Architectural / Cinematic Replacements
   const vocabReplacements: [RegExp, string][] = [
+    // Custom German to English references and descriptors
+    [/\bdunkles\b/gi, 'dark'],
+    [/\bgepflegtes\b/gi, 'well-groomed'],
+    [/\bHaar\b/gi, 'hair'],
+    [/\bHaare\b/gi, 'hair'],
+    [/\bAugen\b/gi, 'eyes'],
+    [/\bleichter\b/gi, 'light'],
+    [/\bleichtes\b/gi, 'light'],
+    [/\bleichte\b/gi, 'light'],
+    [/\bBart\b/gi, 'beard'],
+    [/\bBartwuchs\b/gi, 'beard growth'],
+    [/\bfreundliches\b/gi, 'friendly'],
+    [/\bfreundliche\b/gi, 'friendly'],
+    [/\bLächeln\b/gi, 'smile'],
+    [/\bhellgraues\b/gi, 'light gray'],
+    [/\bhellgrauer\b/gi, 'light gray'],
+    [/\bhellgrau\b/gi, 'light gray'],
+    [/\bBlazer\b/gi, 'blazer'],
+    [/\büber\b/gi, 'over'],
+    [/\blueber\b/gi, 'over'],
+    [/\bdunklen\b/gi, 'dark'],
+    [/\bdunkle\b/gi, 'dark'],
+    [/\bdunkler\b/gi, 'dark'],
+    [/\bdunkles\b/gi, 'dark'],
+    [/\bHosen\b/gi, 'trousers'],
+    [/\bHose\b/gi, 'trousers'],
+    [/\bsportlich\b/gi, 'athletic'],
+    [/\bMittelblondes\b/gi, 'medium blonde'],
+    [/\bmittelblond\b/gi, 'medium blonde'],
+    [/\bwelliges\b/gi, 'wavy'],
+    [/\bwellige\b/gi, 'wavy'],
+    [/\bnatürlichen\b/gi, 'natural'],
+    [/\bnatürliche\b/gi, 'natural'],
+    [/\bnatuerliche\b/gi, 'natural'],
+    [/\bBräunungen\b/gi, 'highlights'],
+    [/\bsanften\b/gi, 'soft'],
+    [/\bsanfte\b/gi, 'soft'],
+    [/\bWellen\b/gi, 'waves'],
+    [/\bDunkelbraune\b/gi, 'dark brown'],
+    [/\bdunkelbraune\b/gi, 'dark brown'],
+    [/\bFeine\b/gi, 'fine'],
+    [/\bfeine\b/gi, 'fine'],
+    [/\bgoldfarbene\b/gi, 'golden'],
+    [/\bgoldene\b/gi, 'golden'],
+    [/\bHalskette\b/gi, 'necklace'],
+    [/\bdezente\b/gi, 'subtle'],
+    [/\bdezent\b/gi, 'subtle'],
+    [/\bOhrringe\b/gi, 'earrings'],
+    [/\boffenes\b/gi, 'open'],
+    [/\boffene\b/gi, 'open'],
+    [/\bprofessionelle\b/gi, 'professional'],
+    [/\bwarme\b/gi, 'warm'],
+    [/\bwarmer\b/gi, 'warm'],
+    [/\bwarmes\b/gi, 'warm'],
+    [/\bAusstrahlung\b/gi, 'aura/look'],
+    [/\bElegante\b/gi, 'elegant'],
+    [/\belegante\b/gi, 'elegant'],
+    [/\bcremefarbene\b/gi, 'cream-colored'],
+    [/\bSeidenbluse\b/gi, 'silk blouse'],
+    [/\bV-Ausschnitt\b/gi, 'V-neck'],
+    [/\bmineblaue\b/gi, 'navy blue'],
+    [/\bmarineblaue\b/gi, 'navy blue'],
+    [/\bmarineblau\b/gi, 'navy blue'],
+    [/\bstrukturierte\b/gi, 'structured'],
+    [/\bstrukturiert\b/gi, 'structured'],
+    [/\bJahre\b/gi, 'years'],
+    [/\bStatur\b/gi, 'stature'],
+    [/\bschlank\b/gi, 'slender'],
+    [/\bschlanke\b/gi, 'slender'],
+    [/\bproportioniert\b/gi, 'proportioned'],
+    [/\bkahlköpfig\b/gi, 'bald'],
+    [/\bmeliertes\b/gi, 'grizzled'],
+    [/\bmelierter\b/gi, 'grizzled'],
+    [/\bschwarze\b/gi, 'black'],
+    [/\bschwarzer\b/gi, 'black'],
+    [/\bBrille\b/gi, 'glasses'],
+    [/\bsilberner\b/gi, 'silver'],
+    [/\bsilberne\b/gi, 'silver'],
+    [/\bArmbanduhr\b/gi, 'wristwatch'],
+    [/\bam\b/gi, 'on'],
+    [/\blinken\b/gi, 'left'],
+    [/\bHandgelenk\b/gi, 'wrist'],
+    [/\bblauer\b/gi, 'blue'],
+    [/\bblaues\b/gi, 'blue'],
+    [/\bmassgeschneiderter\b/gi, 'tailored'],
+    [/\btailored\b/gi, 'tailored'],
+    [/\bHemd\b/gi, 'shirt'],
+    [/\bAnzug\b/gi, 'suit'],
+    [/\bBlazer\b/gi, 'blazer'],
+    [/\bGrauer\b/gi, 'gray'],
+    [/\bgrauer\b/gi, 'gray'],
+    [/\bgraues\b/gi, 'gray'],
+    [/\bFassadenbereichen\b/gi, 'facade areas'],
+    [/\bGroßflächige\b/gi, 'large panoramic'],
+    [/\bgrossflaechige\b/gi, 'large panoramic'],
+    [/\bschwarzem\b/gi, 'black'],
+    [/\bschwarzen\b/gi, 'black'],
+    [/\bschwarzer\b/gi, 'black'],
+    [/\bRahmen\b/gi, 'frame'],
+    [/\btransparenter\b/gi, 'transparent'],
+    [/\bVerglasung\b/gi, 'glazing'],
+    [/\bTerrasse\b/gi, 'terrace'],
+    [/\bmoderne\b/gi, 'modern'],
+    [/\bohne\b/gi, 'without'],
+    [/\bdekorative\b/gi, 'decorative'],
+    [/\bElemente\b/gi, 'elements'],
+    [/\bszenerie\b/gi, 'scenery'],
+    [/\bMusterhaus\b/gi, 'show home'],
+    [/\bTraumhaus\b/gi, 'dream home'],
+    [/\bEinfache\b/gi, 'clean'],
+    [/\beinfache\b/gi, 'clean'],
+    [/\bfunktionale\b/gi, 'functional'],
+    [/\bGestaltung\b/gi, 'design'],
+    [/\bübermäßige\b/gi, 'excessive'],
+    [/\buebermaessige\b/gi, 'excessive'],
+    [/\bDekoration\b/gi, 'decoration'],
+    [/\bgut\b/gi, 'well-'],
+    [/\bbefestigte\b/gi, 'paved'],
+    [/\bStraße\b/gi, 'road'],
+    [/\bStrasse\b/gi, 'road'],
+    [/\bStrukturierte\b/gi, 'structured'],
+
     // Shot types & Camera
     [/\bTotale\b/gi, 'Wide establishing shot'],
     [/\bHalbtotale\b/gi, 'Medium wide shot'],

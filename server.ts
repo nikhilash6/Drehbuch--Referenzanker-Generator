@@ -548,7 +548,7 @@ In den Referenzen ist ein Logo / Brand-Mark hinterlegt. Das Logo muss in ALLEN V
     }
 
     const systemPrompt = `Du bist ein hochdotierter internationaler Regisseur und Prompt-Ingenieur für High-End Architektur- und Lifestyle-Werbespots auf Video-KIs (MiniMax H3 / Maestro 2.1.6).
-Deine Aufgabe: Entwickle genau 3 KREATIVE, UNTERSCHIEDLICHE DREHBUCH-KONZEPTE für ein Video bestehend aus ${windowCount} Szenenfenstern (Windows) mit je ${windowDurationSeconds} Sekunden Dauer.
+Deine Aufgabe: Entwickle genau 1 KREATIVES, HOCHWERTIGES DREHBUCH-KONZEPT für ein Video bestehend aus ${windowCount} Szenenfenstern (Windows) mit je ${windowDurationSeconds} Sekunden Dauer.
 
 CRITICAL HARD CONSTRAINT (STRIKTES ENGLISCH-GEBOT FÜR MINIMAX H3 PROMPTS):
 MiniMax H3 und Maestro benötigen zwingend 100% ENGLISCHE PROMPTS für Bild-, Kamera- und Handlungsanweisungen, um Verformungen, Geplappere und Klon-Fehler zu verhindern!
@@ -559,6 +559,8 @@ Daher gilt folgende eiserne Regel:
 - "dialogueSpeaker": Name des Sprechers (z.B. "Bauherrin")
 - "dialogueSnippet": Gesprochener Dialog-Satz in der vorgegebenen Zielsprache "${dialogueLanguage}"
 - "claimOrCta": Claim / Call-to-Action (z.B. "${finalCallToAction}")
+- "soundDesign": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "Gentle rustle of wind through oak leaves, crisp leather shoe steps, soft hum of heat pump, zero harsh synths")
+- "musicStyle": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "Soft cinematic warm piano keys with delicate violin strings, calm acoustic tempo, no vocals, nothing else")
 - "title", "tagline", "descriptionForLayperson", "dramaturgyHighlights", "toneAndStyle": Können auf Deutsch für die verständliche Präsentation in der UI formuliert sein.
 
 WICHTIGE ANFORDERUNGEN:
@@ -579,6 +581,8 @@ WICHTIGE ANFORDERUNGEN:
      - dialogueSpeaker: Name des Sprechers
      - dialogueSnippet: Gesprochener Dialog in "${dialogueLanguage}"
      - focus: EXCLUSIVELY IN HIGH-END CINEMATIC ENGLISH
+     - soundDesign: EXCLUSIVELY IN HIGH-END CINEMATIC ENGLISH
+     - musicStyle: EXCLUSIVELY IN HIGH-END CINEMATIC ENGLISH
      - claimOrCta: Call-to-Action Text
 
 ${audienceDirective}
@@ -613,6 +617,8 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
           "dialogueSpeaker": "...",
           "dialogueSnippet": "...",
           "focus": "Cinematic English focus...",
+          "soundDesign": "Cinematic English sound design...",
+          "musicStyle": "Cinematic English music style...",
           "claimOrCta": "..."
         }
       ]
@@ -631,9 +637,10 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 35000); // 35s timeout
+    const timeout = setTimeout(() => controller.abort(), 120000); // 120s timeout (much safer for slow local models)
 
     let rawOutput = '';
+    let fetchErrorMsg = '';
     try {
       const response = await fetch(targetUrl, {
         method: 'POST',
@@ -652,9 +659,16 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
       if (response.ok) {
         const data = await response.json();
         rawOutput = data.choices?.[0]?.message?.content || '';
+      } else {
+        const errText = await response.text().catch(() => '');
+        fetchErrorMsg = `LM Studio hat mit Status ${response.status} geantwortet: ${errText || response.statusText}`;
       }
-    } catch (fetchErr) {
-      console.warn('LM Studio not reachable for proposals, using intelligent synthesizer:', fetchErr);
+    } catch (fetchErr: any) {
+      if (fetchErr.name === 'AbortError') {
+        fetchErrorMsg = 'Zeitüberschreitung (Timeout): LM Studio antwortete nicht innerhalb von 120 Sekunden. Eventuell läuft die Generierung auf Ihrem System zu langsam oder blockiert.';
+      } else {
+        fetchErrorMsg = `Verbindung zu LM Studio fehlgeschlagen: ${fetchErr.message || fetchErr}. Bitte stelle sicher, dass LM Studio gestartet, der Server aktiv und das Modell geladen ist.`;
+      }
     }
 
     // Try parsing LM Studio output
@@ -663,12 +677,34 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
       try {
         const parsed = JSON.parse(cleaned);
         if (parsed.proposals && Array.isArray(parsed.proposals) && parsed.proposals.length > 0) {
-          res.json({ success: true, proposals: parsed.proposals, source: 'lmstudio' });
+          // Exclusively return exactly 1 proposal to the frontend
+          const singleProposal = parsed.proposals.slice(0, 1);
+          res.json({ success: true, proposals: singleProposal, source: 'lmstudio' });
+          return;
+        } else {
+          res.status(500).json({
+            success: false,
+            error: 'Die Antwort von LM Studio enthielt kein gülitges "proposals"-Array.'
+          });
           return;
         }
-      } catch (pErr) {
-        console.warn('Could not parse LM studio JSON response, using fallback generator:', pErr);
+      } catch (pErr: any) {
+        res.status(500).json({
+          success: false,
+          error: `JSON-Parsing-Fehler der LM Studio-Antwort: ${pErr.message}. Die Ausgabe des Modells entsprach nicht dem geforderten Format.`,
+          rawOutput: rawOutput.slice(0, 500)
+        });
+        return;
       }
+    }
+
+    // If fetch failed or we got no output, throw real error instead of silent fallbacks!
+    if (fetchErrorMsg) {
+      res.status(500).json({
+        success: false,
+        error: fetchErrorMsg
+      });
+      return;
     }
 
     // Determine first and second human names dynamically
@@ -678,100 +714,403 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
     const buildingRef = refList.find((r: any) => r.category === 'building')?.name || 'Musterhaus';
     const objectRef = refList.find((r: any) => r.category === 'object')?.name || 'Schlüssel & Exposé';
 
+    // Parse user's own windows if they supplied bullet points
+    const lines = stichpunkte.split('\n').map((l: string) => l.trim()).filter(Boolean);
+    const parsedWindowsDe: string[] = [];
+    let customCta = finalCallToAction;
+
+    // Detect if lines contain explicit Window/Fenster markings
+    for (const line of lines) {
+      const winMatch = line.match(/(?:fenster|window|szene)\s*(\d+)\s*[:\-]\s*(.*)/i);
+      if (winMatch) {
+        const num = parseInt(winMatch[1]);
+        if (num >= 1 && num <= windowCount) {
+          parsedWindowsDe[num - 1] = winMatch[2].trim();
+        }
+      }
+      const ctaMatch = line.match(/(?:call to action|cta|claim)\s*[:\-]\s*["'„]*(.*?)["'“]*/i);
+      if (ctaMatch) {
+        customCta = ctaMatch[1].trim();
+      }
+    }
+
+    // If no explicit window structure, try collecting bullet points
+    if (parsedWindowsDe.filter(Boolean).length === 0) {
+      const bullets = lines
+        .filter((l: string) => l.startsWith('-') || l.startsWith('•') || /^\d+[\.\:]/.test(l))
+        .map((l: string) => l.replace(/^[-•\d.\:\s]+/, '').trim())
+        .filter((l: string) => l.length > 8);
+      for (let i = 0; i < windowCount; i++) {
+        if (bullets[i]) {
+          parsedWindowsDe[i] = bullets[i];
+        }
+      }
+    }
+
+    // Determine the main theme of the stichpunkte
+    const lowerStich = stichpunkte.toLowerCase();
+    let themeKey = 'architecture'; // default
+
+    if (lowerStich.includes('resilienz') || lowerStich.includes('coaching') || lowerStich.includes('berater') || lowerStich.includes('therapie') || lowerStich.includes('mental') || lowerStich.includes('wald') || lowerStich.includes('geist') || lowerStich.includes('psycholog')) {
+      themeKey = 'coaching';
+    } else if (lowerStich.includes('horror') || lowerStich.includes('grusel') || lowerStich.includes('unheimlich') || lowerStich.includes('angst') || lowerStich.includes('thriller') || lowerStich.includes('schatten')) {
+      themeKey = 'horror';
+    } else if (lowerStich.includes('reise') || lowerStich.includes('urlaub') || lowerStich.includes('travel') || lowerStich.includes('abenteuer') || lowerStich.includes('strand') || lowerStich.includes('natur')) {
+      themeKey = 'travel';
+    } else if (lowerStich.includes('erotik') || lowerStich.includes('intim') || lowerStich.includes('sex') || lowerStich.includes('bett') || lowerStich.includes('körper')) {
+      themeKey = 'sensual';
+    }
+
+    // Simple word translation helper to generate cinematic English prompts from German input
+    const translateToEnFallback = (deText: string, defaultEn: string): string => {
+      if (!deText) return defaultEn;
+      let en = deText;
+      const replacements = [
+        [/\bDrohnenaufnahme\b/gi, 'drone orbit shot'],
+        [/\bDrohnenflug\b/gi, 'drone flight'],
+        [/\bNahaufnahme\b/gi, 'close-up shot'],
+        [/\bMorgennebel\b/gi, 'morning mist'],
+        [/\bBergwald\b/gi, 'mountain pine forest'],
+        [/\bPraxis\b/gi, 'office'],
+        [/\bBeratungsraum\b/gi, 'counseling room'],
+        [/\bKlient\b/gi, 'client'],
+        [/\bBeraterin\b/gi, 'counselor'],
+        [/\bHund\b/gi, 'dog'],
+        [/\bHunden\b/gi, 'dogs'],
+        [/\bWaldweg\b/gi, 'forest path'],
+        [/\bTee\b/gi, 'tea'],
+        [/\bTür\b/gi, 'door'],
+        [/\blächelnd\b/gi, 'smilingly'],
+        [/\bentspannt\b/gi, 'relaxed'],
+      ];
+      for (const [reg, rep] of replacements) {
+        en = en.replace(reg, rep as string);
+      }
+      return en;
+    };
+
+    // Theme configurations mapping
+    const themes: Record<string, {
+      p1Title: string;
+      p1Tagline: string;
+      p1Desc: string;
+      p2Title: string;
+      p2Tagline: string;
+      p2Desc: string;
+      p3Title: string;
+      p3Tagline: string;
+      p3Desc: string;
+      p1Tone: string;
+      p2Tone: string;
+      p3Tone: string;
+      defaultDeWindows: string[];
+      defaultEnActions: string[];
+      defaultFocus: string[];
+      defaultDialoguesDe: string[];
+      defaultDialoguesEn: string[];
+    }> = {
+      coaching: {
+        p1Title: 'Die Entdeckung: Innere Ruhe & Resilienz',
+        p1Tagline: 'Eine Reise zur inneren Stärke und Achtsamkeit',
+        p1Desc: `Ein einfühlsamer Werbespot über Entschleunigung und Kraft, maßgeschneidert für ${targetAudience ? targetAudience.name : 'Achtsamkeits-Suchende'}. Die Protagonisten finden in der Natur und im geschützten Raum neue Balance.`,
+        p2Title: 'Klarheit im Fokus: Die Kraft der Reflexion',
+        p2Tagline: 'Schritt für Schritt zurück zur persönlichen Balance',
+        p2Desc: `Ein moderner Coaching-Spot, der den Weg von Alltagshektik zu gelassener Souveränität zeigt. Ein klarer roter Faden führt den Zuschauer direkt ins beratende Gespräch.`,
+        p3Title: 'Die Cineastische Atempause: Zeit für mich',
+        p3Tagline: 'Minimalistischer Kunstfilm-Ansatz für mentale Stärke',
+        p3Desc: `Für anspruchsvolle Menschen, die sich nach Entlastung und Geborgenheit sehnen. Ruhige Einstellungen und eine berührende Botschaft über Achtsamkeit.`,
+        p1Tone: 'Calm, meditative, warm, reassuring cinematic atmosphere',
+        p2Tone: 'Empowering, clear, warm, high-end professional aesthetic',
+        p3Tone: 'Poetic, slow, sensory, deeply calming and aesthetic',
+        defaultDeWindows: [
+          'Ankunft in der Natur & tiefes Durchatmen im nebligen Bergwald',
+          'Naturerfahrung & haptische Details der Umgebung',
+          'Übergang in den warmen, sicheren Beratungsraum',
+          'Ein Lächeln voller Zuversicht & Ausblick auf neue Wege'
+        ],
+        defaultEnActions: [
+          `The protagonist walks calmly through a serene natural landscape. A smooth camera glide captures the quiet surrounding atmosphere and soft daylight.`,
+          `Close-up of hands touching natural textured surfaces or showing a quiet moment of absolute mindfulness.`,
+          `Transition into a warm, comfortable room with soft ambient light, steaming tea, and a sense of absolute security.`,
+          `The protagonist looks confidently towards the camera with a gentle smile, as a clean typography overlay appears.`
+        ],
+        defaultFocus: [
+          'Misty pine forest, soft natural daylight and calm atmosphere',
+          'Tactile natural textures, soft sunbeams and relaxed posture',
+          'Steaming cup of tea, warm ambient lighting and safe environment',
+          'Smiling confident eyes, soft background and elegant typography'
+        ],
+        defaultDialoguesDe: [
+          'Hier finde ich Zeit. Zeit zum Atmen und Verstehen.',
+          'Die Natur gibt mir Kraft. Jeden Tag aufs Neue.',
+          'Willkommen an Ihrem Ort für Klarheit und neue Perspektiven.',
+          'Es tut gut, diesen Weg gemeinsam zu gehen.'
+        ],
+        defaultDialoguesEn: [
+          'Here I find time. Time to breathe and understand.',
+          'Nature gives me strength. Anew every day.',
+          'Welcome to your space for clarity and new perspectives.',
+          'It feels good to walk this path together.'
+        ]
+      },
+      horror: {
+        p1Title: 'Das Echo des Schattens',
+        p1Tagline: 'Manche Geheimnisse bleiben besser verborgen',
+        p1Desc: `Ein atmosphärischer Horror-Thriller voller unheimlicher Spannung und düsterer Ästhetik. Die Protagonisten spüren, dass an diesem einsamen Schauplatz etwas lauert.`,
+        p2Title: 'Hinter verschlossenen Türen',
+        p2Tagline: 'Die Angst, die im Dunkeln wartet',
+        p2Desc: `Ein intensiver Psychothriller. Schnelle Schnitte, flackerndes Licht und die wachsende Panik der Charaktere, die keinen Ausweg finden.`,
+        p3Title: 'Das Flüstern der Nacht',
+        p3Tagline: 'Ein cineastischer Albtraum in Schwarz und Weiß',
+        p3Desc: `Minimalistisches Grusel-Meisterwerk mit poetischem Schattenwurf und beklemmendem Sounddesign. Nichts für schwache Nerven.`,
+        p1Tone: 'Suspenseful, eerie, dark, high-contrast low-key lighting',
+        p2Tone: 'Terrifying, rapid, claustrophobic, high-tension cinematic style',
+        p3Tone: 'Poetic, slow-burn psychological horror, chilling atmosphere',
+        defaultDeWindows: [
+          'Der einsame, neblige Schauplatz im dichten Zwielicht',
+          'Flackerndes Licht & unheimliche Geräusche im Korridor',
+          'Eine plötzliche Bewegung im Augenwinkel & blanke Angst',
+          'Ein fluchtartiger Abbruch & das Dunkel bricht herein'
+        ],
+        defaultEnActions: [
+          `A desolate, mist-shrouded environment in deep twilight. Shivering branches casting long, skeletal shadows in the cold wind.`,
+          `The protagonist walks down a dim corridor as a single light bulb flickers violently, creating jittery shadow patterns.`,
+          `Close-up on terrified, wide-open eyes. A dark, silent silhouette moves swiftly in the soft background reflection.`,
+          `A locked door handle shakes violently. A sudden abrupt camera movement fades into complete pitch-black darkness.`
+        ],
+        defaultFocus: [
+          'Thick fog, skeletal tree branches and looming dark shadows',
+          'Flickering raw light bulb, peeling textured wallpaper and dark corners',
+          'Terrified reflective eyes, cold glass surface and swift shadow silhouette',
+          'Violently shaking metal door handle, absolute darkness and text'
+        ],
+        defaultDialoguesDe: [
+          'Hier stimmt etwas nicht. Wir hätten nicht kommen sollen.',
+          'Hast du das auch gehört? Es kam von oben.',
+          'Da ist jemand... direkt hinter uns!',
+          'Schließ die Tür! Schneller!'
+        ],
+        defaultDialoguesEn: [
+          'Something is wrong here. We should not have come.',
+          'Did you hear that too? It came from upstairs.',
+          'There is someone... right behind us!',
+          'Lock the door! Faster!'
+        ]
+      },
+      travel: {
+        p1Title: 'Grenzenlose Freiheit: Das Abenteuer',
+        p1Tagline: 'Neue Horizonte spüren und das Leben intensiv erfahren',
+        p1Desc: `Ein bildgewaltiger, atemberaubender Urlaubs- und Reisefilm. Weite Landschaften, frischer Wind und das pure Lebensgefühl der Freiheit.`,
+        p2Title: 'Unterwegs zu mir: Der Roadtrip',
+        p2Tagline: 'Der Weg ist das Ziel – Freiheit auf vier Rädern',
+        p2Desc: `Ein dynamischer, mitreißender Reise-Spot. Aufbruch, weite Straßen, lachende Gesichter und unvergessliche Momente im Sonnenuntergang.`,
+        p3Title: 'Die Poesie des Reisens: Stille & Weite',
+        p3Tagline: 'Ein minimalistisches Porträt der schönsten Orte der Erde',
+        p3Desc: `Ruhige, epische Panoramaaufnahmen, majestätische Berggipfel, das Rauschen der Wellen und das Gefühl von tiefer Zufriedenheit.`,
+        p1Tone: 'Epic, organic, cinematic, inspiring and full of life',
+        p2Tone: 'Dynamic, fast-paced, cheerful, warm roadtrip vibe',
+        p3Tone: 'Poetic, slow, vast panoramas, deeply soothing and breath-taking',
+        defaultDeWindows: [
+          'Epischer Drohnenüberflug über spektakuläre Naturlandschaften',
+          'Wandern am Hang & der weite Blick über den Horizont',
+          'Ein warmes Lagerfeuer unter dem glitzernden Sternenhimmel',
+          'Die aufgehende Sonne & die Sehnsucht nach dem nächsten Abenteuer'
+        ],
+        defaultEnActions: [
+          `An awe-inspiring drone flight panning over a breathtaking vast natural landscape in glorious clear daylight.`,
+          `The protagonists stand side-by-side, feeling the fresh wind, looking out at the endless beauty of nature.`,
+          `Sitting close together around a warm, glowing campfire as golden sparks fly up into the deep blue starry night sky.`,
+          `The sun breaks over the horizon in a stunning, bright sunrise, painting the landscape in vibrant orange and gold.`
+        ],
+        defaultFocus: [
+          'Vast natural horizon, crisp mountain peaks or rolling ocean waves',
+          'Smiling wind-blown faces, natural elements and organic textures',
+          'Crackling fire sparks, warm faces and deep blue starry night sky',
+          'Vibrant sunrise, dramatic sky and final Call-to-Action typography'
+        ],
+        defaultDialoguesDe: [
+          'Das ist die Freiheit, nach der wir so lange gesucht haben.',
+          'Jeder Schritt hat sich gelohnt. Schau dir diesen Ausblick an.',
+          'Diese Abende sind es, die man niemals vergisst.',
+          'Lass uns weitergehen. Das nächste Abenteuer wartet schon.'
+        ],
+        defaultDialoguesEn: [
+          'This is the freedom we have been searching for.',
+          'Every step was worth it. Look at this incredible view.',
+          'These are the evenings you will never forget.',
+          'Let us keep moving. The next adventure is already waiting.'
+        ]
+      },
+      sensual: {
+        p1Title: 'Haut auf Haut: Das Zusammenspiel der Sinne',
+        p1Tagline: 'Ein ästhetischer, hochkarätiger und sinnlicher Kurzfilm',
+        p1Desc: `Ein stilvoller, intimer und zutiefst ästhetischer Film über Anziehung und Verlangen. Sanftes Licht, haptische Details und eine intensive Atmosphäre des Begehrens.`,
+        p2Title: 'Sinnliche Fragmente',
+        p2Tagline: 'Das Spiel von Licht und Schatten auf der Haut',
+        p2Desc: `Ein moderner, kunstvoller Spot mit Fokus auf Ästhetik, Silhouette und sanfte Bewegungen im warmen Gegenlicht.`,
+        p3Title: 'Die Eleganz des Verlangens',
+        p3Tagline: 'Eine poetische Hommage an die Intimität',
+        p3Desc: `Ruhige Einstellungen, sanfte Berührungen und das tiefe Gefühl von Vertrautheit und Leidenschaft, frei von Clichés.`,
+        p1Tone: 'Sensual, intimate, high-contrast backlight, soft cinematic aesthetics',
+        p2Tone: 'Artistic, mysterious, warm silhouettes, high-end macro cinema',
+        p3Tone: 'Poetic, slow, elegant, highlighting touch, texture and soft ambient light',
+        defaultDeWindows: [
+          'Sanfte Berührungen & warmes Licht im gemütlichen Schlafgemach',
+          'Der Moment der Hingabe & zärtliche Gesten der Zuneigung',
+          'Intensive Nähe & das faszinierende Spiel von Licht und Schatten auf der Haut',
+          'Zwei Silhouetten im sanften Nachglühen der Abenddämmerung'
+        ],
+        defaultEnActions: [
+          `Soft golden afternoon light filtering through linen curtains, illuminating a peaceful and warm bed setting.`,
+          `Close-up of gentle hands tracing contours with deep, respectful intimacy and beautiful skin textures.`,
+          `An elegant and respectful portrayal of physical connection and deep desire, framed by soft shadow patterns.`,
+          `Two silhouettes lying close together, breathing softly in the warm twilight as a clean graphic CTA overlay fades in.`
+        ],
+        defaultFocus: [
+          'Warm afternoon sunlight, linen fabrics and gentle shadow patterns',
+          'Tactile skin texture, soft shadows and warm highlights',
+          'High-contrast light and shadow on elegant, aesthetic curves',
+          'Relaxed profiles, warm ambient glow and elegant typography'
+        ],
+        defaultDialoguesDe: [
+          'Ich kann deine Nähe auf meiner Haut spüren.',
+          'Nichts anderes zählt in diesem Moment.',
+          'Bleib ganz nah bei mir.',
+          'Genau so soll es sein.'
+        ],
+        defaultDialoguesEn: [
+          'I can feel your warmth on my skin.',
+          'Nothing else matters in this very moment.',
+          'Stay close to me.',
+          'This is exactly how it should be.'
+        ]
+      },
+      architecture: {
+        p1Title: 'Die Entdeckung: Emotionale Ankunft & Raumgefühl',
+        p1Tagline: `Vom spektakulären Drohnenflug über ${buildingRef} bis zur Übergabe`,
+        p1Desc: `Eine emotionale Ankunft im neuen Zuhause, maßgeschneidert für ${targetAudience ? targetAudience.name : 'anspruchsvolle Bauherren'}. Die Protagonisten (${firstHuman} und ${secondHuman}) erkunden Schritt für Schritt die Architektur und edle Materialien bei ${globalWeather}. Im finalen Window folgt ein klarer Call-to-Action.`,
+        p2Title: 'Der Lifestyle-Walkthrough: Dynamik & Präzision',
+        p2Tagline: 'Fokus auf moderne Technik, Energieeffizienz und flüssige Raumübergänge',
+        p2Desc: `Ein moderner, temporeicher Architektur-Spot mit Fokus auf ${targetAudience ? (Array.isArray(targetAudience.coreValues) ? targetAudience.coreValues.join(', ') : targetAudience.coreValues) : 'Zukunftssicherheit'}. Schnelle, elegante Kamerafahrten zeigen die funktionale Perfektion von ${buildingRef}.`,
+        p3Title: 'Die Cineastische Ode: Licht, Ästhetik & Ruhe',
+        p3Tagline: 'Minimalistischer Kunstfilm-Ansatz mit intensiver Atmosphäre und Poesie',
+        p3Desc: `Für Liebhaber von purer Ästhetik und Werthaltigkeit. Ruhige, epische Einstellungen, poetische Lichtreflexionen auf Glas und Holz, sanfte Windgeräusche und eine berührende Botschaft über Geborgenheit.`,
+        p1Tone: targetAudience ? targetAudience.soundAesthetic : 'Warm, emotional, inviting, high-end architectural cinema',
+        p2Tone: 'Modern, dynamic, technology-focused, premium architectural quality',
+        p3Tone: 'Poetic, calm, meditative, high-end cinematic aesthetic',
+        defaultDeWindows: [
+          `Ankunft & spektakulärer ${globalCam} über ${buildingRef}`,
+          'Eingangsbereich, Foyer & Haptik der Naturmaterialien',
+          'Entdeckung des offenen Wohnraums mit Panoramaverglasung',
+          `Sonnenuntergang auf der Holzterrasse mit Aufruf: "${finalCallToAction}"`
+        ],
+        defaultEnActions: [
+          `${firstHuman} and ${secondHuman} arrive at the architectural estate of ${buildingRef}. A smooth orbital drone shot reveals the modern facade and lush landscaped grounds in warm sunlight.`,
+          `They step through the entrance door, enjoying tactile close-up details of natural materials, warm lighting, and beautiful clean design.`,
+          `They explore the open-concept living space, stepping across natural parquet while inspecting the floor-to-alignment glass facade.`,
+          `Both stand together on the wooden terrace deck in golden evening twilight. Handover of ${objectRef} with an elegant on-screen graphic Call-to-Action.`
+        ],
+        defaultFocus: [
+          `${buildingRef} architectural facade and master roofline geometry`,
+          'Natural materials, clean joint alignments and warm ambient light',
+          'Natural wood, panoramic insulated glass and generous spatial depth',
+          'Wooden terrace deck, sunset edge lighting and final Call-to-Action'
+        ],
+        defaultDialoguesDe: [
+          'Hier ist es also. Unser neues Zuhause.',
+          'Spürst du diese Qualität? Genau so wollten wir es haben.',
+          'Dieses Licht... genau so habe ich es mir immer vorgestellt.',
+          'Willkommen daheim. Unser schlüsselfertiges Traumhaus ist bereit.'
+        ],
+        defaultDialoguesEn: [
+          'Here it is. Our brand new home.',
+          'Can you feel this quality? This is exactly what we wanted.',
+          'This beautiful light... exactly as I always imagined it.',
+          'Welcome home. Our turn-key dream house is fully ready.'
+        ]
+      }
+    };
+
+    const activeTheme = themes[themeKey];
+
+    const makeWindowBreakdown = (proposalIndex: number) => {
+      return Array.from({ length: windowCount }, (_, i) => {
+        const customDeContent = parsedWindowsDe[i];
+        
+        let title = activeTheme.defaultDeWindows[i] || `Szene ${i + 1}`;
+        let actionDe = customDeContent || activeTheme.defaultDeWindows[i] || `Beschreibung der Szene ${i + 1}`;
+        let actionEn = customDeContent 
+          ? translateToEnFallback(customDeContent, activeTheme.defaultEnActions[i]) 
+          : activeTheme.defaultEnActions[i];
+        
+        if (proposalIndex === 2) {
+          actionEn = `[Dynamic high-tempo movement] ${actionEn}`;
+        } else if (proposalIndex === 3) {
+          actionEn = `[Slow aesthetic cinematography] ${actionEn}`;
+        }
+
+        const dialogueDe = activeTheme.defaultDialoguesDe[i] || 'Genau so habe ich mir das vorgestellt.';
+        const dialogueEn = activeTheme.defaultDialoguesEn[i] || 'Exactly as I envisioned it.';
+
+        return {
+          windowNumber: i + 1,
+          title: customDeContent ? `Szene ${i + 1}: ${customDeContent.slice(0, 30)}...` : title,
+          actionDescription: actionEn,
+          cameraMovement: i === 0 
+            ? (globalCam || '360-degree orbital drone shot smoothly descending to eye-level') 
+            : i === windowCount - 1 
+            ? 'Slow reverse dolly and ascending crane rise into the golden evening twilight' 
+            : 'Fluid eye-level Steadicam walkthrough along the central action paths',
+          dialogueSpeaker: i % 2 === 0 ? firstHuman : secondHuman,
+          dialogueSnippet: dialogueLanguage === 'German' ? dialogueDe : dialogueEn,
+          focus: activeTheme.defaultFocus[i] || 'Atmospheric natural lighting and expressive spatial details',
+          soundDesign: targetAudience ? targetAudience.soundAesthetic : 'Natural environmental ambient sounds with high acoustic fidelity',
+          musicStyle: targetAudience ? targetAudience.soundAesthetic : 'Warm cinematic soundtrack matching the emotional tone of the scene',
+          claimOrCta: i === windowCount - 1 ? customCta : `Detail-Highlight (Szene ${i + 1})`
+        };
+      });
+    };
+
     // Graceful intelligent fallback with 3 tailored proposals matching user keywords and target audience
     const fallbackProposals = [
       {
         id: 'prop-fallback-1',
-        title: 'Die Entdeckung: Emotionale Ankunft & Raumgefühl',
-        tagline: `Vom spektakulären Drohnenflug über ${buildingRef} bis zur Übergabe`,
-        descriptionForLayperson: `Eine emotionale Ankunft im neuen Zuhause, maßgeschneidert für ${targetAudience ? targetAudience.name : 'anspruchsvolle Bauherren'}. Die Protagonisten (${firstHuman} und ${secondHuman}) erkunden Schritt für Schritt die Architektur und edle Materialien bei ${globalWeather}. Im finalen Window folgt ein klarer Call-to-Action.`,
-        dramaturgyHighlights: [
-          `Window 1: Ankunft & spektakulärer ${globalCam} über ${buildingRef}`,
-          'Window 2: Eingangsbereich, Foyer & Haptik der Naturmaterialien',
-          'Window 3: Entdeckung des offenen Wohnraums mit Panoramaverglasung',
-          `Window 4: Sonnenuntergang auf der Holzterrasse mit Aufruf: "${finalCallToAction}"`,
-        ],
-        toneAndStyle: targetAudience ? targetAudience.soundAesthetic : 'Warm, emotional, inviting, high-end architectural cinema',
+        title: activeTheme.p1Title,
+        tagline: activeTheme.p1Tagline,
+        descriptionForLayperson: activeTheme.p1Desc,
+        dramaturgyHighlights: Array.from({ length: windowCount }, (_, i) => {
+          return `Window ${i + 1}: ${parsedWindowsDe[i] ? parsedWindowsDe[i].slice(0, 50) + '...' : activeTheme.defaultDeWindows[i]}`;
+        }),
+        toneAndStyle: activeTheme.p1Tone,
         dialogueLanguage,
-        callToAction: finalCallToAction,
-        windowBreakdown: Array.from({ length: windowCount }, (_, i) => ({
-          windowNumber: i + 1,
-          title: `Window ${i + 1}: ${i === 0 ? `Ankunft & Drohnenflug über ${buildingRef}` : i === windowCount - 1 ? 'Sonnenuntergang & Call-to-Action' : `Raumerlebnis ${i + 1}`}`,
-          actionDescription: i === 0
-            ? `${firstHuman} and ${secondHuman} arrive at the architectural estate of ${buildingRef}. A smooth orbital drone shot reveals the modern facade and lush landscaped grounds in warm sunlight.`
-            : i === windowCount - 1
-            ? `Both stand together on the wooden terrace deck in golden evening twilight. Handover of ${objectRef} with an elegant on-screen graphic Call-to-Action: "${finalCallToAction}".`
-            : `They explore the open-concept living space, stepping across natural oak parquet while inspecting the floor-to-ceiling panoramic glass facade.`,
-          cameraMovement: i === 0 ? '360-degree orbital drone shot smoothly descending to eye-level' : i === windowCount - 1 ? 'Slow reverse dolly and ascending crane rise into the golden evening twilight' : 'Fluid eye-level Steadicam walkthrough along architectural sightlines',
-          dialogueSpeaker: i % 2 === 0 ? firstHuman : secondHuman,
-          dialogueSnippet: dialogueLanguage === 'German'
-            ? (i === 0 ? 'Hier ist es also. Unser neues Zuhause.' : i === windowCount - 1 ? 'Genau hier wollen wir bleiben.' : 'Schau dir diese architektonische Qualität an.')
-            : (i === 0 ? 'Here it is. Our brand new home.' : i === windowCount - 1 ? 'This is where we want to stay.' : 'Look at this stunning craftsmanship.'),
-          focus: i === 0 ? `${buildingRef} architectural facade and master roofline geometry` : i === windowCount - 1 ? 'Wooden terrace deck, sunset edge lighting and final Call-to-Action' : 'Natural oak wood, panoramic insulated glass and generous spatial depth',
-          claimOrCta: i === windowCount - 1 ? finalCallToAction : `Quality in every detail (Window ${i + 1})`,
-        })),
+        callToAction: customCta,
+        windowBreakdown: makeWindowBreakdown(1),
       },
       {
         id: 'prop-fallback-2',
-        title: 'Der Lifestyle-Walkthrough: Dynamik & Präzision',
-        tagline: 'Fokus auf moderne Technik, Energieeffizienz und flüssige Raumübergänge',
-        descriptionForLayperson: `Ein moderner, temporeicher Architektur-Spot mit Fokus auf ${targetAudience ? (Array.isArray(targetAudience.coreValues) ? targetAudience.coreValues.join(', ') : targetAudience.coreValues) : 'Zukunftssicherheit'}. Schnelle, elegante Kamerafahrten zeigen die funktionale Perfektion von ${buildingRef}: Smarthome, offene Kochinsel und das Leben im Grünen.`,
-        dramaturgyHighlights: [
-          `Window 1: Dynamischer Anflug direkt auf das Panoramafenster von ${buildingRef}`,
-          'Window 2: Moderne Küche, offene Zubereitung & Wohlfühl-Klima',
-          'Window 3: Galerie im Obergeschoss & Wellness-Badezimmer',
-          `Window 4: Finale Abendstimmung mit Call-to-Action: "${finalCallToAction}"`,
-        ],
-        toneAndStyle: 'Modern, dynamic, technology-focused, premium architectural quality',
+        title: activeTheme.p2Title,
+        tagline: activeTheme.p2Tagline,
+        descriptionForLayperson: activeTheme.p2Desc,
+        dramaturgyHighlights: Array.from({ length: windowCount }, (_, i) => {
+          return `Window ${i + 1}: ${parsedWindowsDe[i] ? parsedWindowsDe[i].slice(0, 50) + '...' : activeTheme.defaultDeWindows[i]}`;
+        }),
+        toneAndStyle: activeTheme.p2Tone,
         dialogueLanguage,
-        callToAction: finalCallToAction,
-        windowBreakdown: Array.from({ length: windowCount }, (_, i) => ({
-          windowNumber: i + 1,
-          title: `Window ${i + 1}: ${i === 0 ? 'FPV-Anflug & Energie-Design' : i === windowCount - 1 ? 'Garten-Idylle & Outro' : `Innenarchitektur ${i + 1}`}`,
-          actionDescription: i === 0
-            ? `Dynamic FPV drone glide along the solar photovoltaic roof of ${buildingRef}, descending swiftly towards the terrace, highlighting sustainability and clean design.`
-            : i === windowCount - 1
-            ? `The illuminated residence glows in the evening blue hour twilight. Final Call-to-Action graphic fades in alongside ${objectRef}.`
-            : `Smooth interaction in the open designer kitchen and living area as natural sunbeams illuminate the minimalist space.`,
-          cameraMovement: i === 0 ? 'Dynamic FPV fly-through along the solar roofline and architectural facade' : i === windowCount - 1 ? 'Slow ascending camera orbit in twilight' : 'Smooth forward dolly-in with 35mm master prime lens',
-          dialogueSpeaker: i % 2 === 0 ? secondHuman : firstHuman,
-          dialogueSnippet: dialogueLanguage === 'German'
-            ? (i === 0 ? 'Design und Energieeffizienz perfekt vereint.' : i === windowCount - 1 ? 'Einziehen und ankommen.' : 'Hier greift jedes Detail ineinander.')
-            : (i === 0 ? 'Design and energy efficiency united.' : i === windowCount - 1 ? 'Move in and feel at home.' : 'Every single detail fits perfectly.'),
-          focus: i === 0 ? 'Photovoltaic array and crisp cubic facade geometry' : i === windowCount - 1 ? 'Glowing architectural residence and prominent Call-to-Action' : 'Minimalist kitchen island and oiled oak parquet',
-          claimOrCta: i === windowCount - 1 ? finalCallToAction : `Future-proof living with maximum energy efficiency`,
-        })),
+        callToAction: customCta,
+        windowBreakdown: makeWindowBreakdown(2),
       },
       {
         id: 'prop-fallback-3',
-        title: 'Die Cineastische Ode: Licht, Ästhetik & Ruhe',
-        tagline: 'Minimalistischer Kunstfilm-Ansatz mit intensiver Atmosphäre und Poesie',
-        descriptionForLayperson: `Für Liebhaber von purer Ästhetik und Werthaltigkeit. Ruhige, epische Einstellungen, poetische Lichtreflexionen auf Glas und Holz, sanfte Windgeräusche und eine berührende Botschaft über Geborgenheit.`,
-        dramaturgyHighlights: [
-          `Window 1: Morgenstille & erster Sonnenstrahl auf der Fassade von ${buildingRef}`,
-          'Window 2: Barfuß auf gewachstem Parkett, Kaffee am Fenster',
-          'Window 3: Spiel von Licht und Schatten im doppelgeschossigen Wohnraum',
-          `Window 4: Dämmerung, das Haus als leuchtender Zufluchtsort mit CTA: "${finalCallToAction}"`,
-        ],
-        toneAndStyle: 'Poetic, calm, meditative, high-end cinematic aesthetic',
+        title: activeTheme.p3Title,
+        tagline: activeTheme.p3Tagline,
+        descriptionForLayperson: activeTheme.p3Desc,
+        dramaturgyHighlights: Array.from({ length: windowCount }, (_, i) => {
+          return `Window ${i + 1}: ${parsedWindowsDe[i] ? parsedWindowsDe[i].slice(0, 50) + '...' : activeTheme.defaultDeWindows[i]}`;
+        }),
+        toneAndStyle: activeTheme.p3Tone,
         dialogueLanguage,
-        callToAction: finalCallToAction,
-        windowBreakdown: Array.from({ length: windowCount }, (_, i) => ({
-          windowNumber: i + 1,
-          title: `Window ${i + 1}: ${i === 0 ? 'Morgenstille & Natur' : i === windowCount - 1 ? 'Leuchtender Zufluchtsort' : `Lichtspiel ${i + 1}`}`,
-          actionDescription: i === 0
-            ? `Soft morning haze backlit by early dawn. The morning sun breaks through mature treetops, illuminating the natural timber louvers of ${buildingRef}.`
-            : i === windowCount - 1
-            ? `Blue hour twilight. Warm interior ambient lights radiate through panoramic glazing into the night. Discrete CTA overlay fades in.`
-            : `Poetic movement of architectural shadow lines gliding across smooth fair-faced concrete and warm oak wood.`,
-          cameraMovement: i === 0 ? 'Extremely slow tilt and gentle pan' : i === windowCount - 1 ? 'Hovering cinematic drone pull-back into twilight' : 'Static master shot with subtle micro-dolly track',
-          dialogueSpeaker: i % 2 === 0 ? firstHuman : secondHuman,
-          dialogueSnippet: dialogueLanguage === 'German'
-            ? (i === 0 ? 'Wenn der Tag so beginnt, bleibt die Welt draußen.' : i === windowCount - 1 ? 'Ein Ort für immer.' : 'Zeit verliert hier jede Eile.')
-            : (i === 0 ? 'When the day begins like this, peace is everywhere.' : i === windowCount - 1 ? 'A place forever.' : 'Time slows down completely here.'),
-          focus: i === 0 ? 'Natural wood louvers in atmospheric morning backlight' : i === windowCount - 1 ? 'Warm interior light and final Call-to-Action' : 'Shadow patterns and tactile acoustic room presence',
-          claimOrCta: i === windowCount - 1 ? finalCallToAction : `Building without compromises`,
-        })),
+        callToAction: customCta,
+        windowBreakdown: makeWindowBreakdown(3),
       },
     ];
 

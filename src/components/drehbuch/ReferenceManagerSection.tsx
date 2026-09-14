@@ -362,28 +362,28 @@ export const ReferenceManagerSection: React.FC<ReferenceManagerSectionProps> = (
 
     if (category === 'human') {
       defaultName = `Protagonist ${nextIndex}`;
-      defaultRole = 'Erkundet die Architektur, prüft Materialien und Lichtachsen';
-      defaultRelationship = 'Teil der Kernhandlung, Interaktion mit den anderen Protagonisten';
-      defaultBuild = 'natürliche aufrechte Haltung';
-      defaultHairOrMat = 'gepflegtes dezentes Haar';
-      defaultGlazingOrEyes = 'ruhiger, wacher Blick';
-      defaultClothingOrFinish = 'hochwertige Leinenkleidung in Naturtönen';
+      defaultRole = 'Nimmt aktiv an der Haupthandlung der Szene teil';
+      defaultRelationship = 'Teil der Kernhandlung, Interaktion mit anderen Beteiligten';
+      defaultBuild = 'Natürliche, dem Charakter entsprechende Statur';
+      defaultHairOrMat = 'Gepflegtes, dem Charakter entsprechendes Haar';
+      defaultGlazingOrEyes = 'Wacher und ausdrucksstarker Blick';
+      defaultClothingOrFinish = 'Passende zeitgemäße Kleidung je nach Szenen-Kontext';
     } else if (category === 'building') {
-      defaultName = `Musterhaus / Grundriss ${nextIndex}`;
-      defaultRole = 'Hauptmotiv & architektonische Kulisse in allen Windows';
-      defaultRelationship = 'Architektonisches Zentrum, Lebensmittelpunkt der Protagonisten';
-      defaultBuild = 'Moderner 2-geschossiger Baukörper in Holzständerbauweise';
-      defaultHairOrMat = 'Vertikale Lärchenholz-Lamellen und heller Glattputz';
-      defaultGlazingOrEyes = 'Dreifach-Isolierverglasung vom Boden bis zur Decke';
-      defaultClothingOrFinish = 'Holz-Aluminium-Profile in Anthrazit matt';
+      defaultName = `Schauplatz / Kulisse ${nextIndex}`;
+      defaultRole = 'Hauptmotiv und Kulisse über alle Szenen hinweg';
+      defaultRelationship = 'Zentraler Schauplatz der Handlung';
+      defaultBuild = 'Baukörper passend zum gewählten Genre';
+      defaultHairOrMat = 'Fassaden- und Wandmaterialien des gewählten Settings';
+      defaultGlazingOrEyes = 'Fensterflächen passend zum Baustil';
+      defaultClothingOrFinish = 'Oberflächenstruktur passend zur Szenerie';
     } else if (category === 'object') {
       defaultName = `Requisite ${nextIndex}`;
       defaultRole = 'Wird in Window-Closeups und Haptik-Sequenzen fokussiert';
-      defaultRelationship = 'Verknüpft mit Protagonisten und Hausübergabe';
-      defaultBuild = 'Kompakt, präzise gefertigt';
-      defaultHairOrMat = 'Gebürstetes Metall / Leder';
-      defaultGlazingOrEyes = 'Fein gravierte Details';
-      defaultClothingOrFinish = 'Matt eloxiertes Finish';
+      defaultRelationship = 'Verknüpft mit den Charakteren in der Haupthandlung';
+      defaultBuild = 'Kompakt, präzise gefertigt, passend zum Setting';
+      defaultHairOrMat = 'Materialien passend zum Verwendungszweck';
+      defaultGlazingOrEyes = 'Fein ausgearbeitete Detail-Merkmale';
+      defaultClothingOrFinish = 'Oberflächendetails passend zur Szene';
     } else if (category === 'logo') {
       defaultName = `Firmenlogo`;
       defaultRole = 'Dezentes CI-Wasserzeichen in der rechten unteren Ecke (Bottom-Right)';
@@ -437,21 +437,21 @@ export const ReferenceManagerSection: React.FC<ReferenceManagerSectionProps> = (
             if (!item.roleOrAction) item.roleOrAction = 'Dezentes CI-Wasserzeichen in der rechten unteren Ecke (Bottom-Right)';
             if (!item.relationship) item.relationship = 'Markenidentität über alle Windows hinweg';
           } else if (newCat === 'building') {
-            item.charTag = `@Building${idx}_${cleanName || 'Musterhaus'}`;
-            if (!item.roleOrAction) item.roleOrAction = 'Hauptmotiv & architektonische Kulisse in allen Windows';
-            if (!item.relationship) item.relationship = 'Architektonisches Zentrum, Lebensmittelpunkt der Protagonisten';
+            item.charTag = `@Building${idx}_${cleanName || 'Kulisse'}`;
+            if (!item.roleOrAction) item.roleOrAction = 'Hauptmotiv und Kulisse über alle Szenen hinweg';
+            if (!item.relationship) item.relationship = 'Zentraler Schauplatz der Handlung';
           } else if (newCat === 'object') {
             item.charTag = `@Object${idx}_${cleanName || 'Prop'}`;
             if (!item.roleOrAction) item.roleOrAction = 'Wird in Window-Closeups und Haptik-Sequenzen fokussiert';
-            if (!item.relationship) item.relationship = 'Verknüpft mit Protagonisten und Hausübergabe';
+            if (!item.relationship) item.relationship = 'Verknüpft mit den Charakteren in der Haupthandlung';
           } else if (newCat === 'animal') {
             item.charTag = `@Animal${idx}_${cleanName || 'Tier'}`;
           } else if (newCat === 'environment') {
             item.charTag = `@Env${idx}_${cleanName || 'Umgebung'}`;
           } else {
             item.charTag = `@Subject${idx}_${cleanName || 'Protagonist'}`;
-            if (!item.roleOrAction) item.roleOrAction = 'Erkundet die Architektur, prüft Materialien und Lichtachsen';
-            if (!item.relationship) item.relationship = 'Teil der Kernhandlung, Interaktion mit den anderen Protagonisten';
+            if (!item.roleOrAction) item.roleOrAction = 'Nimmt aktiv an der Haupthandlung der Szene teil';
+            if (!item.relationship) item.relationship = 'Teil der Kernhandlung, Interaktion mit anderen Beteiligten';
           }
         }
         return item;

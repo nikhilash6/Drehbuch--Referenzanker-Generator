@@ -115,14 +115,14 @@ const CALL_TO_ACTION_PRESETS = [
 
 const SAMPLE_STICHPUNKTE_LIST = [
   {
-    label: 'Resilienztraining: Dr. Heidi Klein im Bergwald',
-    text: `- Person: Dr. Heidi Klein (Resilienz-Beraterin) mit ihren 2 Hunden (Golden Retriever & Border Collie)
+    label: 'Mental- & Resilienzcoaching im Bergwald',
+    text: `- Person: Die Resilienz-Beraterin (Coaching-Spezialistin) mit ihren 2 Hunden (Golden Retriever & Border Collie)
 - Setting: Nebliger Bergkiefernwald, frische Bergluft, danach gemütliche Beratungspraxis mit Holz & Glasfront
-- Fenster 1: Große Drohnenaufnahme über den nebligen Bergwald, Heidi läuft entspannt mit ihren 2 Hunden über den Waldweg
-- Fenster 2: Nahaufnahme & Atmosphäre: Heidi atmet die frische Bergluft ein, krault einen der Hunde, Blick in den Morgennebel
-- Fenster 3: Übergang in die warme Praxis: Heidi bereitet den Beratungsraum vor, stellt Dampfenden Tee bereit
-- Fenster 4: POV-Perspektive: Der Klient betritt die Tür des Beratungsraums und wird von Dr. Heidi Klein lächelnd empfangen
-- Call to Action: "Innere Stärke & Resilienz finden – Buchen Sie Ihr Erstgespräch bei Dr. Heidi Klein"`,
+- Fenster 1: Große Drohnenaufnahme über den nebligen Bergwald, die Beraterin läuft entspannt mit ihren 2 Hunden über den Waldweg
+- Fenster 2: Nahaufnahme & Atmosphäre: Sie atmet die frische Bergluft ein, krault einen der Hunde, Blick in den Morgennebel
+- Fenster 3: Übergang in die warme Praxis: Sie bereitet den Beratungsraum vor, stellt dampfenden Tee bereit
+- Fenster 4: POV-Perspektive: Der Klient betritt die Tür des Beratungsraums und wird von der Beraterin lächelnd empfangen
+- Call to Action: "Innere Stärke & Resilienz finden – Jetzt kostenloses Erstgespräch anfordern"`,
   },
   {
     label: 'Grundriss-Geführt: Vom Flur gezielt in die Küche',
@@ -188,8 +188,8 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
 
   // Active References derived (synced with config.references or config.subjects)
   const currentReferences = useMemo(() => {
-    if (config.references && config.references.length > 0) return config.references;
-    if (config.subjects && config.subjects.length > 0) return config.subjects;
+    if (config.references !== undefined) return config.references;
+    if (config.subjects !== undefined) return config.subjects;
     return DEFAULT_SUBJECT_REFERENCES;
   }, [config.references, config.subjects]);
 
@@ -449,9 +449,12 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
     loadedState: Partial<DrehbuchKonfiguratorState>,
     projectName: string
   ) => {
+    const nextRefs = loadedState.references !== undefined ? loadedState.references : loadedState.subjects;
     onChangeConfig({
       ...config,
       ...loadedState,
+      references: nextRefs,
+      subjects: nextRefs,
       title: loadedState.title || projectName,
       projectName: projectName,
       projectId: projectName,
@@ -508,19 +511,14 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         });
         onShowToast(
           'success',
-          `3 Drehbuch-Vorschläge ${data.source === 'lmstudio' ? 'aus LM Studio' : 'erfolgreich'} geladen!`
+          `Drehbuch-Vorschlag ${data.source === 'lmstudio' ? 'aus LM Studio' : 'erfolgreich'} geladen!`
         );
       } else {
         throw new Error('Keine Vorschläge empfangen.');
       }
     } catch (err: any) {
       console.error(err);
-      onShowToast('info', `Nutze intelligente Standard-Vorschläge: ${err.message}`);
-      onChangeConfig({
-        ...config,
-        proposals: DEFAULT_PROPOSALS,
-        selectedProposalId: DEFAULT_PROPOSALS[0].id,
-      });
+      onShowToast('error', `Generierungsfehler: ${err.message}`);
     } finally {
       setIsGeneratingProposals(false);
     }

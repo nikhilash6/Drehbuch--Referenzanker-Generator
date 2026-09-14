@@ -182,6 +182,8 @@ export interface ConceptProposalWindow {
   dialogueSpeaker?: string;
   focus: string;
   claimOrCta?: string;
+  soundDesign?: string;
+  musicStyle?: string;
 }
 
 export interface ConceptProposal {
