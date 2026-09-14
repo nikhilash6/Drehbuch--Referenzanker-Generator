@@ -1,0 +1,6 @@
+{
+  "name": "Drehbuch- & Referenzanker-Generator",
+  "description": "Drehbuch- und Prompt-Generator für MiniMax H3, Maestro und LM Studio mit multimodaler Referenz- und Charakteranker-Analyse.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

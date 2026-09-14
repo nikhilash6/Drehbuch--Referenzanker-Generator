@@ -1,0 +1,233 @@
+export type Language = 'DE' | 'EN';
+
+export const translations: Record<Language, Record<string, string>> = {
+  DE: {
+    // Navigation
+    'nav.referenzen': 'Referenzen & Bilder',
+    'nav.referenzen_desc': 'Bild-Uploads & Vision-Analyse',
+    'nav.anker': 'Charakter-Anker',
+    'nav.anker_desc': 'Extrahierte Merkmale & Tags',
+    'nav.drehbuchkonfigurator': 'Drehbuchkonfigurator',
+    'nav.drehbuchkonfigurator_desc': 'Windows, Drohne, Cam & Claims',
+    'nav.drehbuch': 'Drehbuch & Shots',
+    'nav.drehbuch_desc': 'MiniMax H3 & Maestro Prompts',
+    'nav.lmstudio': 'LM Studio Schnittstelle',
+    'nav.lmstudio_desc': 'Lokale API (Port 1234) & Modell',
+    'nav.workflow': 'Workflow & Debatte',
+    'nav.workflow_desc': 'Prompt-Logik & Feinjustierung',
+    'nav.production_steps': 'Produktionsschritte',
+    'nav.sponsors': 'Sponsoren',
+    'nav.language': 'Sprache / Language',
+    'nav.inference_engine': 'Inferenz-Engine (100% Lokal)',
+    'nav.port_model': 'Port & Modell',
+    'nav.active_model': 'Modell aktiv',
+    'nav.local_api_active': 'Lokale API aktiv',
+
+    // Header
+    'header.title': 'Drehbuch Studio Pro',
+    'header.subtitle': 'MiniMax H3 • Maestro 2.1.6 Pipeline',
+    'header.settings': 'Einstellungen',
+    'header.local_active': 'Lokaler Server aktiv',
+    'header.images': 'Bilder',
+    'header.anchors': 'Anker',
+    'header.windows': 'Windows',
+
+    // Reference Manager
+    'ref.title': 'Referenzmedien & Bildanalyse',
+    'ref.subtitle': 'Hochgeladene Personen, Gebäude, Requisiten und Logos für Maestro 2.1.6 Binding-Slots',
+    'ref.upload_btn': 'Neues Bild hochladen',
+    'ref.preset_btn': 'Demo-Bilder laden',
+    'ref.vision_btn': 'LM Studio Vision Analyse',
+    'ref.vision_analyzing': 'Analysiere Bilder via Vision API...',
+    'ref.slot_matrix': 'Maestro 2.1.6 Binding-Matrix',
+    'ref.copy_cheat_sheet': 'Maestro Spickzettel kopieren',
+    'ref.no_refs': 'Keine Referenzmedien vorhanden. Laden Sie Bilder hoch oder nutzen Sie Demo-Bilder.',
+    'ref.category_human': 'Person / Darsteller',
+    'ref.category_building': 'Gebäude / Architektur',
+    'ref.category_object': 'Requisite / Objekt',
+    'ref.category_logo': 'Markenlogo / Wasserzeichen',
+    'ref.name': 'Name / Bezeichnung',
+    'ref.role': 'Rolle / Aktion in der Szene',
+    'ref.relationship': 'Beziehung / Kontext',
+    'ref.actions': 'Aktionen',
+    'ref.active': 'Aktiv',
+
+    // Drehbuchkonfigurator
+    'konfig.title': 'Drehbuchkonfigurator',
+    'konfig.subtitle': 'Erstelle perfekte Single-Line Windows für MiniMax H3 mit exakter Prompt-Struktur',
+    'konfig.target_audience': 'Zielgruppen-Profil & Tonalität',
+    'konfig.target_audience_desc': 'LM Studio passt Farben, Sound, Architektur und Claims automatisch an das Zielgruppenprofil an.',
+    'konfig.generate_proposals': '3 Konzepte via LM Studio generieren',
+    'konfig.generating_proposals': 'Generiere Konzepte via LM Studio...',
+    'konfig.selected_concept': 'Gewähltes Konzept',
+    'konfig.concept_proposals': 'Konzept-Entwürfe',
+    'konfig.apply_concept': 'Konzept übernehmen',
+    'konfig.window_settings': 'Szenen-Einstellungen & Parameter',
+    'konfig.window_count': 'Anzahl Windows (Szenen-Segmente)',
+    'konfig.window_duration': 'Dauer pro Window (Sekunden)',
+    'konfig.dialogue_language': 'Dialog-Sprache in <d[...]>',
+    'konfig.action_code': 'Action-Code / Visual Preset',
+    'konfig.aspect_ratio': 'Seitenverhältnis',
+    'konfig.weather': 'Wetter & Beleuchtung',
+    'konfig.background': 'Hintergrund & Umgebung',
+    'konfig.call_to_action': 'Finaler Call to Action (Claim)',
+    'konfig.repress_prompts': 'Alle Windows neu formatieren',
+    'konfig.generated_windows': 'Generierte Single-Line Windows',
+    'konfig.copy_all_windows': 'Alle Single-Line Windows kopieren',
+    'konfig.copy_success': 'Kopiert!',
+
+    // Screenplay Generator
+    'generator.title': 'Drehbuch & Shot-Prompts',
+    'generator.subtitle': 'Fertige Single-Line Prompts für MiniMax H3 & Maestro 2.1.6',
+    'generator.window_label': 'Window',
+    'generator.copy_prompt': 'Single-Line Prompt kopieren',
+    'generator.prompt_label': 'Single-Line Prompt (MiniMax H3 Format):',
+    'generator.closeups_label': 'Makro & Detail-Inserts (100mm T1.8):',
+    'generator.audio_label': 'Audio Design & Musik:',
+    'generator.references_label': 'Aktiv gebundene Referenzen:',
+
+    // Anchor Inspector
+    'anker.title': 'Charakter-Anker & Visuelle Merkmale',
+    'anker.subtitle': 'Aus der Bildanalyse extrahierte Merkmale zur Vermeidung von Klon- und Morphing-Fehlern',
+    'anker.no_anchors': 'Bisher keine Anker analysiert. Führen Sie in den Referenzen die LM Studio Vision Bildanalyse aus.',
+
+    // LM Studio View
+    'lmstudio.title': 'LM Studio Schnittstelle & Modell-Status',
+    'lmstudio.subtitle': 'Konfiguration des lokalen LLM/Vision-Servers auf Port 1234',
+    'lmstudio.endpoint': 'Server Endpunkt URL',
+    'lmstudio.model': 'Modellname',
+    'lmstudio.test_connection': 'Verbindung jetzt testen',
+    'lmstudio.status_connected': 'Verbindung erfolgreich hergestellt',
+    'lmstudio.status_error': 'Verbindungsfehler - Bitte prüfen ob LM Studio läuft',
+    'lmstudio.instructions': 'Anleitung für LM Studio:',
+    'lmstudio.step1': '1. Starten Sie LM Studio auf Ihrem Rechner.',
+    'lmstudio.step2': '2. Laden Sie ein Modell (z.B. Qwen2.5-7B, Llama-3 oder Llava Vision).',
+    'lmstudio.step3': '3. Starten Sie den Local Server unter "Developer / Local Server" auf Port 1234.',
+
+    // Workflow Debate View
+    'workflow.title': 'Workflow & Prompt-Logik Debatte',
+    'workflow.subtitle': 'Architektur der Single-Line Prompting Regeln für MiniMax H3',
+
+    // Sponsors & Links
+    'sponsors.title': 'Sponsoren & Partner',
+    'sponsors.ai_wizards': 'AI Wizards',
+    'sponsors.johannes_wobus': 'Johannes Wobus',
+  },
+  EN: {
+    // Navigation
+    'nav.referenzen': 'References & Images',
+    'nav.referenzen_desc': 'Image Uploads & Vision Analysis',
+    'nav.anker': 'Character Anchors',
+    'nav.anker_desc': 'Extracted Features & Tags',
+    'nav.drehbuchkonfigurator': 'Screenplay Configurator',
+    'nav.drehbuchkonfigurator_desc': 'Windows, Drone, Cam & Claims',
+    'nav.drehbuch': 'Screenplay & Shots',
+    'nav.drehbuch_desc': 'MiniMax H3 & Maestro Prompts',
+    'nav.lmstudio': 'LM Studio Interface',
+    'nav.lmstudio_desc': 'Local API (Port 1234) & Model',
+    'nav.workflow': 'Workflow & Debate',
+    'nav.workflow_desc': 'Prompt Logic & Fine-tuning',
+    'nav.production_steps': 'Production Steps',
+    'nav.sponsors': 'Sponsors',
+    'nav.language': 'Language',
+    'nav.inference_engine': 'Inference Engine (100% Local)',
+    'nav.port_model': 'Port & Model',
+    'nav.active_model': 'Model Active',
+    'nav.local_api_active': 'Local API Active',
+
+    // Header
+    'header.title': 'Screenplay Studio Pro',
+    'header.subtitle': 'MiniMax H3 • Maestro 2.1.6 Pipeline',
+    'header.settings': 'Settings',
+    'header.local_active': 'Local Server Active',
+    'header.images': 'Images',
+    'header.anchors': 'Anchors',
+    'header.windows': 'Windows',
+
+    // Reference Manager
+    'ref.title': 'Reference Media & Image Analysis',
+    'ref.subtitle': 'Uploaded persons, buildings, props, and logos for Maestro 2.1.6 binding slots',
+    'ref.upload_btn': 'Upload New Image',
+    'ref.preset_btn': 'Load Demo Images',
+    'ref.vision_btn': 'LM Studio Vision Analysis',
+    'ref.vision_analyzing': 'Analyzing images via Vision API...',
+    'ref.slot_matrix': 'Maestro 2.1.6 Binding Matrix',
+    'ref.copy_cheat_sheet': 'Copy Maestro Cheat Sheet',
+    'ref.no_refs': 'No reference media available. Upload images or use demo images.',
+    'ref.category_human': 'Person / Actor',
+    'ref.category_building': 'Building / Architecture',
+    'ref.category_object': 'Prop / Object',
+    'ref.category_logo': 'Brand Logo / Watermark',
+    'ref.name': 'Name / Identifier',
+    'ref.role': 'Role / Action in Scene',
+    'ref.relationship': 'Relationship / Context',
+    'ref.actions': 'Actions',
+    'ref.active': 'Active',
+
+    // Drehbuchkonfigurator
+    'konfig.title': 'Screenplay Configurator',
+    'konfig.subtitle': 'Create perfect Single-Line Windows for MiniMax H3 with precise prompt structure',
+    'konfig.target_audience': 'Target Audience Profile & Tone',
+    'konfig.target_audience_desc': 'LM Studio automatically aligns colors, sound, architecture, and claims to the target audience profile.',
+    'konfig.generate_proposals': 'Generate 3 Concepts via LM Studio',
+    'konfig.generating_proposals': 'Generating concepts via LM Studio...',
+    'konfig.selected_concept': 'Selected Concept',
+    'konfig.concept_proposals': 'Concept Proposals',
+    'konfig.apply_concept': 'Apply Concept',
+    'konfig.window_settings': 'Scene Settings & Parameters',
+    'konfig.window_count': 'Window Count (Scene Segments)',
+    'konfig.window_duration': 'Duration per Window (Seconds)',
+    'konfig.dialogue_language': 'Dialogue Language in <d[...]>',
+    'konfig.action_code': 'Action Code / Visual Preset',
+    'konfig.aspect_ratio': 'Aspect Ratio',
+    'konfig.weather': 'Weather & Lighting',
+    'konfig.background': 'Background & Environment',
+    'konfig.call_to_action': 'Final Call to Action (Claim)',
+    'konfig.repress_prompts': 'Re-format All Windows',
+    'konfig.generated_windows': 'Generated Single-Line Windows',
+    'konfig.copy_all_windows': 'Copy All Single-Line Windows',
+    'konfig.copy_success': 'Copied!',
+
+    // Screenplay Generator
+    'generator.title': 'Screenplay & Shot Prompts',
+    'generator.subtitle': 'Ready Single-Line Prompts for MiniMax H3 & Maestro 2.1.6',
+    'generator.window_label': 'Window',
+    'generator.copy_prompt': 'Copy Single-Line Prompt',
+    'generator.prompt_label': 'Single-Line Prompt (MiniMax H3 Format):',
+    'generator.closeups_label': 'Macro & Detail Inserts (100mm T1.8):',
+    'generator.audio_label': 'Audio Design & Music:',
+    'generator.references_label': 'Actively Bound References:',
+
+    // Anchor Inspector
+    'anker.title': 'Character Anchors & Visual Features',
+    'anker.subtitle': 'Extracted features from image analysis to prevent clone and morphing errors',
+    'anker.no_anchors': 'No anchors analyzed yet. Run LM Studio Vision Image Analysis in References.',
+
+    // LM Studio View
+    'lmstudio.title': 'LM Studio Interface & Model Status',
+    'lmstudio.subtitle': 'Configuration of local LLM/Vision server on port 1234',
+    'lmstudio.endpoint': 'Server Endpoint URL',
+    'lmstudio.model': 'Model Name',
+    'lmstudio.test_connection': 'Test Connection Now',
+    'lmstudio.status_connected': 'Connection successfully established',
+    'lmstudio.status_error': 'Connection error - Please check if LM Studio is running',
+    'lmstudio.instructions': 'Instructions for LM Studio:',
+    'lmstudio.step1': '1. Start LM Studio on your machine.',
+    'lmstudio.step2': '2. Load a model (e.g. Qwen2.5-7B, Llama-3 or Llava Vision).',
+    'lmstudio.step3': '3. Start the Local Server under "Developer / Local Server" on port 1234.',
+
+    // Workflow Debate View
+    'workflow.title': 'Workflow & Prompt Logic Debate',
+    'workflow.subtitle': 'Architecture of Single-Line Prompting Rules for MiniMax H3',
+
+    // Sponsors & Links
+    'sponsors.title': 'Sponsors & Partners',
+    'sponsors.ai_wizards': 'AI Wizards',
+    'sponsors.johannes_wobus': 'Johannes Wobus',
+  },
+};
+
+export function t(lang: Language | string, key: string, fallback?: string): string {
+  const currentLang: Language = (lang === 'EN') ? 'EN' : 'DE';
+  return translations[currentLang]?.[key] || translations['DE']?.[key] || fallback || key;
+}

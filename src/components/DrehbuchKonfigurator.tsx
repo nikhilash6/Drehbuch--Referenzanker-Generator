@@ -1,0 +1,1634 @@
+import React, { useState, useMemo } from 'react';
+import {
+  Layers,
+  Sparkles,
+  Music,
+  Volume2,
+  Compass,
+  Sun,
+  Trees,
+  MessageSquareQuote,
+  Plus,
+  Minus,
+  RefreshCw,
+  Copy,
+  Check,
+  ArrowRight,
+  Sliders,
+  FileText,
+  Camera,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  Users,
+  Globe,
+  Download,
+  ShieldCheck,
+  Eye,
+  Settings2,
+  Home,
+  Box,
+} from 'lucide-react';
+import {
+  DrehbuchKonfiguratorState,
+  WindowConfig,
+  LMStudioSettings,
+  DialogueLanguage,
+  ConfigReference,
+  ConceptProposal,
+  SingleLineWindow,
+  ReferenceImage,
+  TargetAudience,
+} from '../types';
+import { Language, t } from '../utils/i18n';
+import {
+  formatTimecode,
+  checkSingleLineValidity,
+  DEFAULT_SUBJECT_REFERENCES,
+  DEFAULT_PROPOSALS,
+  pressProposalToSingleLineWindows,
+  pressConfigToSingleLineWindows,
+  translateWindowPromptToGerman,
+} from '../utils/windowPromptFormatter';
+import {
+  TARGET_AUDIENCE_CATALOG,
+  getTargetAudienceById,
+  DEFAULT_TARGET_AUDIENCE,
+} from '../utils/targetAudienceCatalog';
+import { TargetAudienceSelector } from './drehbuch/TargetAudienceSelector';
+import { ReferenceManagerSection } from './drehbuch/ReferenceManagerSection';
+import { SavedPromptsModal } from './drehbuch/SavedPromptsModal';
+import { CameraDirectorModal } from './drehbuch/CameraDirectorModal';
+import { DesignConceptModal } from './drehbuch/DesignConceptModal';
+import { ProjectManagerModal } from './drehbuch/ProjectManagerModal';
+import { MaestroWindowsBindingList } from './drehbuch/MaestroWindowsBindingList';
+import { FolderOpen, FileJson, Video, Palette, HardDrive, FolderPlus, Save } from 'lucide-react';
+
+interface DrehbuchKonfiguratorProps {
+  config: DrehbuchKonfiguratorState;
+  references?: ReferenceImage[];
+  onChangeConfig: (newConfig: DrehbuchKonfiguratorState) => void;
+  onApplyToScreenplay: (config: DrehbuchKonfiguratorState) => void;
+  settings: LMStudioSettings;
+  onShowToast: (type: 'success' | 'error' | 'info', message: string) => void;
+  language?: Language;
+}
+
+const CAMERA_PRESETS = [
+  'Drohnenflug Orbit 360° (Gleitender Kreisflug um das Gebäude)',
+  'Drohnenflug Top-Down (Senkrechte Vogelperspektive & Übersicht)',
+  'Drohnenflug FPV Fly-Through (Vom Garten durchs Panoramafenster ins Wohnzimmer)',
+  'Dolly-In (Gleitende Kamerafahrt auf die Eingangstür / Fassade)',
+  'Crane-Up (Vertikale Kranfahrt vom Vorgarten bis zum Dachfirst)',
+  'Steadicam Walkthrough (Flüssiger Spaziergang auf Augenhöhe durch den Flur)',
+  'Slow Tilt & Pan (Langsamer Schwenk über Holzlamellen & Glasfassade)',
+  'Weitwinkel Statisch (Epische Architektur-Totale mit 24mm Master Prime)',
+];
+
+const WEATHER_PRESETS = [
+  'Sonnig & klarer blauer Himmel mit warmem Sonnenlicht',
+  'Goldene Stunde / Sunset (Warme Abendsonne, lange weiche Schatten)',
+  'Cinematic Overcast (Diffuses, weiches Architektur-Tageslicht)',
+  'Dämmerung / Blue Hour (Hausbeleuchtung warm eingeschaltet)',
+  'Morgennebel (Mystisch aufsteigender Frühdunst im Gegenlicht)',
+  'Frischer Sommerregen (Nasse spiegelnde Terrassenfliesen, saftiges Grün)',
+];
+
+const BACKGROUND_PRESETS = [
+  'Neubausiedlung / Grüne Wohnsiedlung mit gepflegtem Vorgarten & Holzterrasse',
+  'Wald & hohe Baumkronen (Naturverbunden, geschützt, Kiefernwald)',
+  'Idyllische Hanglage mit Panoramablick ins weite Tal',
+  'Strand & Meeresküste mit Holzsteg & ruhigem türkisfarbenem Wasser',
+  'Alpenpanorama / Majestätische Bergkulisse im Hintergrund',
+  'Moderner minimalistischer Designergarten mit Pool & Sonnendeck',
+];
+
+const CALL_TO_ACTION_PRESETS = [
+  'Jetzt Musterhaus besichtigen & Ihr Traumhaus planen',
+  'Einzugsbereit in nur 4 Monaten – Jetzt unverbindlich anfragen',
+  'Bauen ohne Kompromisse. Fordern Sie jetzt den kostenlosen Katalog an.',
+  'Ihr Lebensraum für Generationen. Vereinbaren Sie ein Beratungsgespräch.',
+  'Qualität spüren. Besuchen Sie unsere Schauhäuser am kommenden Wochenende.',
+];
+
+const SAMPLE_STICHPUNKTE_LIST = [
+  {
+    label: 'Resilienztraining: Dr. Heidi Klein im Bergwald',
+    text: `- Person: Dr. Heidi Klein (Resilienz-Beraterin) mit ihren 2 Hunden (Golden Retriever & Border Collie)
+- Setting: Nebliger Bergkiefernwald, frische Bergluft, danach gemütliche Beratungspraxis mit Holz & Glasfront
+- Fenster 1: Große Drohnenaufnahme über den nebligen Bergwald, Heidi läuft entspannt mit ihren 2 Hunden über den Waldweg
+- Fenster 2: Nahaufnahme & Atmosphäre: Heidi atmet die frische Bergluft ein, krault einen der Hunde, Blick in den Morgennebel
+- Fenster 3: Übergang in die warme Praxis: Heidi bereitet den Beratungsraum vor, stellt Dampfenden Tee bereit
+- Fenster 4: POV-Perspektive: Der Klient betritt die Tür des Beratungsraums und wird von Dr. Heidi Klein lächelnd empfangen
+- Call to Action: "Innere Stärke & Resilienz finden – Buchen Sie Ihr Erstgespräch bei Dr. Heidi Klein"`,
+  },
+  {
+    label: 'Grundriss-Geführt: Vom Flur gezielt in die Küche',
+    text: `- Referenz: Grundriss (Wohnbereich, Flurachse, offene Kochinsel) & Musterhaus
+- 2 Personen: Bauherrin (Subject 1) und Partner (Subject 2)
+- Fenster 1: Blick auf den Grundriss/Eingangsbereich, Betreten des Foyers durch die Haustür
+- Fenster 2: Gezielter Walkthrough entlang der Sichtachse aus dem Grundriss direkt in die Küche
+- Fenster 3: Bauherrin kocht am Induktionskochfeld, Partner schaut am Tresen zu
+- Fenster 4: Gemeinsamer Blick durch die Glasfront auf die Garten-Terrasse mit Call to Action: "Grundriss live erleben – Besuchen Sie unser Schauhaus"`,
+  },
+  {
+    label: 'Fertighaus: Einzug & Sunset-Terrasse',
+    text: `- 2 Personen: Bauherrin (32) und Partner (36) kommen am neuen Fertighaus an
+- Objekt: Modernes Holzständer-Musterhaus 'Avantgarde 180' mit Photovoltaik und Garten
+- Fenster 1: Großer Drohnen-Überflug 360° über Dach mit Photovoltaik und Garten
+- Fenster 2: Betreten des Foyers, Haptik von Eichenholz und Haustür
+- Fenster 3: Staunen über den offenen Wohn- und Essbereich mit Panoramafenster
+- Fenster 4: Gemeinsamer Moment bei Sonnenuntergang auf der Holzterrasse mit Schlüsselübergabe
+- Dialog auf Deutsch, am Ende starker Call to Action: "Jetzt Musterhaus besichtigen & Ihr Traumhaus planen"`,
+  },
+  {
+    label: 'Katamaran & Strand-Pier (Film-Format)',
+    text: `- 3 Personen: Schiffsführerin, Crew-Mitglied mit moderner Hand-Prothese und Kapitän
+- Objekt: 45ft Katamaran am Holzsteg
+- Fenster 1: Holzsteg am Strand, Schiffsführerin zeigt auf den Katamaran, Übergabe der Festmacherleine
+- Fenster 2: Katamaran gleitet über ruhiges türkisfarbenes Meer, Zweisamkeit an Bord
+- Fenster 3: Ankunft in der versteckten Lagune mit Wasserfall, Sprung ins Wasser
+- Fenster 4: Rückkehr zum Steg, Anlegen und Blick in den Abendhimmel
+- Fokus auf 14s Windows, realistische Zeitcodes und extreme Nahaufnahmen (100mm Macro)`,
+  },
+  {
+    label: 'Luxus-Penthouse mit Smarthome',
+    text: `- 2 Personen: Architektin und Bauherr erkunden High-End Dachgeschoss mit 360° Skyline-Blick
+- Objekt: Penthouse mit raumhoher 3-fach Verglasung
+- Drohnenflug über die Dachterrasse mit Infinity-Pool
+- Steadicam durch die Designerküche mit freistehendem Küchenblock
+- Automatische Beschattung und Lichtsteuerung im Sonnenuntergang
+- Call to Action: "Exklusives Wohnen über den Dächern der Stadt"`,
+  },
+];
+
+export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
+  config,
+  references = [],
+  onChangeConfig,
+  onApplyToScreenplay,
+  settings,
+  onShowToast,
+  language = 'DE',
+}) => {
+  // Navigation / active tabs inside configurator
+  const [activeTab, setActiveTab] = useState<'workflow' | 'subjects' | 'pressedView'>('workflow');
+  const [inputMode, setInputMode] = useState<'stichpunkte' | 'presets'>('stichpunkte');
+
+  // Generation & UI states
+  const [isGeneratingProposals, setIsGeneratingProposals] = useState(false);
+  const [copiedPromptId, setCopiedPromptId] = useState<string | null>(null);
+  const [expandedWindowIndex, setExpandedWindowIndex] = useState<number | null>(null);
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+  const [isDesignModalOpen, setIsDesignModalOpen] = useState(false);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+
+  // Active References derived (synced with config.references or config.subjects)
+  const currentReferences = useMemo(() => {
+    if (config.references && config.references.length > 0) return config.references;
+    if (config.subjects && config.subjects.length > 0) return config.subjects;
+    return DEFAULT_SUBJECT_REFERENCES;
+  }, [config.references, config.subjects]);
+
+  // Target Audience derived from config
+  const currentTargetAudience = useMemo(() => {
+    if (config.targetAudienceCustom) return config.targetAudienceCustom;
+    return (
+      getTargetAudienceById(config.targetAudienceId, config.customTargetAudiences) ||
+      DEFAULT_TARGET_AUDIENCE
+    );
+  }, [config.targetAudienceId, config.targetAudienceCustom, config.customTargetAudiences]);
+
+  // Concept proposals
+  const proposals = useMemo(() => {
+    return config.proposals && config.proposals.length > 0
+      ? config.proposals
+      : DEFAULT_PROPOSALS;
+  }, [config.proposals]);
+
+  const selectedProposal = useMemo(() => {
+    return (
+      proposals.find((p) => p.id === config.selectedProposalId) ||
+      proposals[0]
+    );
+  }, [proposals, config.selectedProposalId]);
+
+  // Window duration helper (Default 14s)
+  const windowDuration = config.windowDurationSeconds || 14;
+  const dialogueLang = config.dialogueLanguage || 'German';
+  const finalCta =
+    config.finalCallToAction || 'Jetzt Musterhaus besichtigen & Ihr Traumhaus planen';
+
+  // Handler: Update References & sync subjects
+  const handleUpdateReferences = (newRefs: ConfigReference[]) => {
+    onChangeConfig({
+      ...config,
+      references: newRefs,
+      subjects: newRefs,
+    });
+  };
+
+  // Handler: Select Target Audience
+  const handleSelectAudience = (audience: TargetAudience) => {
+    onChangeConfig({
+      ...config,
+      targetAudienceId: audience.id,
+      targetAudienceCustom: audience,
+    });
+    onShowToast('info', `Zielgruppe "${audience.name}" aktiviert.`);
+  };
+
+  // Handler: Add Custom Audience
+  const handleAddCustomAudience = (audience: TargetAudience) => {
+    const existing = config.customTargetAudiences || [];
+    const updated = [...existing.filter((a) => a.id !== audience.id), audience];
+    onChangeConfig({
+      ...config,
+      customTargetAudiences: updated,
+      targetAudienceId: audience.id,
+      targetAudienceCustom: audience,
+    });
+  };
+
+  // Handler: Delete Custom Audience
+  const handleDeleteCustomAudience = (id: string) => {
+    const existing = config.customTargetAudiences || [];
+    const updated = existing.filter((a) => a.id !== id);
+    const newSelectedId =
+      config.targetAudienceId === id ? DEFAULT_TARGET_AUDIENCE.id : config.targetAudienceId;
+    onChangeConfig({
+      ...config,
+      customTargetAudiences: updated,
+      targetAudienceId: newSelectedId,
+      targetAudienceCustom: getTargetAudienceById(newSelectedId, updated),
+    });
+  };
+
+  // Handler: Apply Target Audience CTA
+  const handleApplyAudienceCta = (ctaText: string) => {
+    onChangeConfig({
+      ...config,
+      finalCallToAction: ctaText,
+    });
+    onShowToast('success', `Zielgruppen-CTA übernommen: "${ctaText}"`);
+  };
+
+  // Handler: Change duration
+  const handleSetDuration = (duration: number) => {
+    const valid = Math.max(4, Math.min(30, duration));
+    const updatedWindows = (config.windows || []).map((w) => ({
+      ...w,
+      durationSeconds: valid,
+    }));
+    onChangeConfig({
+      ...config,
+      windowDurationSeconds: valid,
+      windows: updatedWindows,
+    });
+    onShowToast('info', `Dauer auf ${valid} Sekunden pro Window gesetzt.`);
+  };
+
+  // Handler: Change window count
+  const handleSetWindowCount = (count: number) => {
+    const valid = Math.max(1, Math.min(12, count));
+    const currentWins = config.windows || [];
+    const updatedWins: WindowConfig[] = [];
+
+    for (let i = 1; i <= valid; i++) {
+      const existing = currentWins.find((w) => w.windowNumber === i);
+      if (existing) {
+        updatedWins.push(existing);
+      } else {
+        updatedWins.push({
+          id: `win-${i}-${Date.now()}`,
+          windowNumber: i,
+          title: `Window ${i}: ${i === 1 ? 'Anflug & Totale' : i === valid ? 'Outro & Call-to-Action' : `Szenenabschnitt ${i}`}`,
+          durationSeconds: windowDuration,
+          cameraMovement: CAMERA_PRESETS[(i - 1) % CAMERA_PRESETS.length],
+          weather: config.globalWeather || WEATHER_PRESETS[0],
+          background: config.globalBackground || BACKGROUND_PRESETS[0],
+          musicStyle: config.globalMusic || 'Cinematic Ambient',
+          soundDesign: config.globalSoundDesign || 'Sanfter Sommerwind & Atmos',
+          claim: i === valid ? finalCta : `Qualität in jedem Detail (Window ${i})`,
+          visualFocus: i === 1 ? 'Architektur & Fassade' : 'Raumaufteilung & Materialästhetik',
+        });
+      }
+    }
+
+    onChangeConfig({
+      ...config,
+      windowCount: valid,
+      windows: updatedWins,
+    });
+  };
+
+  // Handler: Apply single camera movement to window
+  const handleApplyCameraMovementToWindow = (windowIndex: number, movementPrompt: string) => {
+    const currentWins = [...(config.windows || [])];
+    if (currentWins[windowIndex]) {
+      currentWins[windowIndex] = {
+        ...currentWins[windowIndex],
+        cameraMovement: movementPrompt,
+      };
+      onChangeConfig({
+        ...config,
+        windows: currentWins,
+      });
+    }
+  };
+
+  // Handler: Apply whole camera plan to all windows
+  const handleApplyCameraPlanToAll = (
+    cameraPlan: { windowIndex: number; movementPrompt: string }[]
+  ) => {
+    const currentWins = [...(config.windows || [])];
+    cameraPlan.forEach(({ windowIndex, movementPrompt }) => {
+      if (currentWins[windowIndex]) {
+        currentWins[windowIndex] = {
+          ...currentWins[windowIndex],
+          cameraMovement: movementPrompt,
+        };
+      }
+    });
+    onChangeConfig({
+      ...config,
+      windows: currentWins,
+    });
+  };
+
+  // Handler: Apply LM Studio Design Concept (Colors, Light, Sound, Atmosphere)
+  const handleApplyDesignConcept = (design: {
+    globalWeather: string;
+    globalBackground: string;
+    globalMusic: string;
+    globalSoundDesign: string;
+    colorPalette?: { name: string; hex: string; usage?: string }[];
+    themeTitle?: string;
+  }) => {
+    const updatedWindows = (config.windows || []).map((w) => ({
+      ...w,
+      weather: design.globalWeather || w.weather,
+      background: design.globalBackground || w.background,
+      musicStyle: design.globalMusic || w.musicStyle,
+      soundDesign: design.globalSoundDesign || w.soundDesign,
+    }));
+
+    onChangeConfig({
+      ...config,
+      globalWeather: design.globalWeather,
+      globalBackground: design.globalBackground,
+      globalMusic: design.globalMusic,
+      globalSoundDesign: design.globalSoundDesign,
+      windows: updatedWindows,
+    });
+  };
+
+  // Handler: Load project from saved JSON file (legacy)
+  const handleLoadProjectState = (
+    loadedState: Partial<DrehbuchKonfiguratorState>,
+    title?: string
+  ) => {
+    onChangeConfig({
+      ...config,
+      ...loadedState,
+      title: title || loadedState.title || config.title,
+    });
+  };
+
+  // Handler: Save complete project to /data/projects/{slug}/
+  const handleSaveProjectToDisk = async (projectName: string, title?: string): Promise<boolean> => {
+    try {
+      const payload = {
+        name: projectName,
+        title: title || config.title || projectName,
+        description: config.stichpunkte?.slice(0, 150) || 'Drehbuch & Windows',
+        projectData: {
+          ...config,
+          title: title || config.title || projectName,
+          references: currentReferences,
+          subjects: currentReferences,
+          targetAudienceId: currentTargetAudience.id,
+          targetAudienceCustom: currentTargetAudience,
+        },
+      };
+
+      const res = await fetch('/api/projects/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        onChangeConfig({
+          ...config,
+          title: title || config.title || projectName,
+          projectName: data.slug,
+          projectId: data.slug,
+        });
+        onShowToast(
+          'success',
+          `Projekt "${title || projectName}" erfolgreich in /data/projects/${data.slug}/ abgelegt!`
+        );
+        return true;
+      } else {
+        onShowToast('error', data.error || 'Fehler beim Speichern des Projekts.');
+        return false;
+      }
+    } catch (err: any) {
+      onShowToast('error', `Fehler beim Speichern: ${err.message}`);
+      return false;
+    }
+  };
+
+  // Handler: Load project from /data/projects/{slug}/
+  const handleLoadProjectFromDisk = (
+    loadedState: Partial<DrehbuchKonfiguratorState>,
+    projectName: string
+  ) => {
+    onChangeConfig({
+      ...config,
+      ...loadedState,
+      title: loadedState.title || projectName,
+      projectName: projectName,
+      projectId: projectName,
+    });
+  };
+
+  // Handler: Change dialogue language
+  const handleSetDialogueLanguage = (lang: DialogueLanguage) => {
+    onChangeConfig({
+      ...config,
+      dialogueLanguage: lang,
+    });
+    onShowToast('success', `Dialogsprache auf ${lang} umgeschaltet.`);
+  };
+
+  // Handler: Generate 3 Proposals via LM Studio
+  const handleGenerateProposalsWithLMStudio = async () => {
+    setIsGeneratingProposals(true);
+    try {
+      const payload = {
+        endpoint: settings.endpoint,
+        modelName: settings.modelName,
+        apiKey: settings.apiKey,
+        stichpunkte: config.stichpunkte || '',
+        windowCount: config.windowCount || 4,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        references: currentReferences,
+        subjects: currentReferences,
+        targetAudience: currentTargetAudience,
+        finalCallToAction: finalCta,
+        globalWeather: config.globalWeather || currentTargetAudience.colorSpectrum || WEATHER_PRESETS[0],
+        globalBackground: config.globalBackground || BACKGROUND_PRESETS[0],
+        globalCam: config.windows?.[0]?.cameraMovement || CAMERA_PRESETS[0],
+      };
+
+      const res = await fetch('/api/screenplay/generate-proposals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Serverfehler beim Generieren');
+      }
+
+      const data = await res.json();
+      if (data.proposals && Array.isArray(data.proposals) && data.proposals.length > 0) {
+        onChangeConfig({
+          ...config,
+          proposals: data.proposals,
+          selectedProposalId: data.proposals[0].id,
+        });
+        onShowToast(
+          'success',
+          `3 Drehbuch-Vorschläge ${data.source === 'lmstudio' ? 'aus LM Studio' : 'erfolgreich'} geladen!`
+        );
+      } else {
+        throw new Error('Keine Vorschläge empfangen.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      onShowToast('info', `Nutze intelligente Standard-Vorschläge: ${err.message}`);
+      onChangeConfig({
+        ...config,
+        proposals: DEFAULT_PROPOSALS,
+        selectedProposalId: DEFAULT_PROPOSALS[0].id,
+      });
+    } finally {
+      setIsGeneratingProposals(false);
+    }
+  };
+
+  // Handler: Press Proposal into Single-Line Windows format!
+  const handlePressProposalToSingleLine = (proposal: ConceptProposal) => {
+    const pressed = pressProposalToSingleLineWindows({
+      proposal,
+      allSubjects: currentReferences,
+      windowDurationSeconds: windowDuration,
+      dialogueLanguage: dialogueLang,
+      actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+      aspectRatio: config.aspectRatio || '16:9',
+      globalWeather: config.globalWeather,
+      globalBackground: config.globalBackground,
+      finalCallToAction: finalCta,
+      targetAudience: currentTargetAudience,
+    });
+
+    onChangeConfig({
+      ...config,
+      selectedProposalId: proposal.id,
+      pressedWindows: pressed,
+    });
+
+    setActiveTab('pressedView');
+    onShowToast(
+      'success',
+      `Erfolgreich gepresst! Alle ${pressed.length} Windows sind garantiert 1 Zeile ohne Umbrüche.`
+    );
+  };
+
+  // Handler: Press Current Manual Windows to Single-Line Windows format!
+  const handlePressCurrentConfigToSingleLine = () => {
+    const pressed = pressConfigToSingleLineWindows({
+      windows: config.windows,
+      allSubjects: currentReferences,
+      windowDurationSeconds: windowDuration,
+      dialogueLanguage: dialogueLang,
+      actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+      aspectRatio: config.aspectRatio || '16:9',
+      globalWeather: config.globalWeather,
+      globalBackground: config.globalBackground,
+      finalCallToAction: finalCta,
+      targetAudience: currentTargetAudience,
+    });
+
+    onChangeConfig({
+      ...config,
+      pressedWindows: pressed,
+    });
+
+    setActiveTab('pressedView');
+    onShowToast(
+      'success',
+      `Erfolgreich gepresst! Alle ${pressed.length} Windows im exakten Single-Line Format.`
+    );
+  };
+
+  // Copy full prompt string (all windows combined with single newline separator)
+  const handleCopyAllSingleLineWindows = () => {
+    if (!config.pressedWindows || config.pressedWindows.length === 0) return;
+    const fullText = config.pressedWindows.map((w) => w.singleLinePrompt).join('\n\n');
+    navigator.clipboard.writeText(fullText);
+    setCopiedPromptId('all');
+    setTimeout(() => setCopiedPromptId(null), 2500);
+    onShowToast('success', 'Alle Windows in die Zwischenablage kopiert!');
+  };
+
+  // Copy individual window
+  const handleCopySingleWindow = (windowNumber: number, promptText: string) => {
+    navigator.clipboard.writeText(promptText);
+    setCopiedPromptId(`win-${windowNumber}`);
+    setTimeout(() => setCopiedPromptId(null), 2500);
+    onShowToast('info', `Window ${windowNumber} kopiert (garantiert 1 Zeile)!`);
+  };
+
+  // Download as text file
+  const handleDownloadTxt = () => {
+    if (!config.pressedWindows || config.pressedWindows.length === 0) return;
+    const fullText = config.pressedWindows.map((w) => w.singleLinePrompt).join('\n\n');
+    const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `single_line_windows_${windowDuration}s_${dialogueLang.toLowerCase()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    onShowToast('success', 'Textdatei heruntergeladen!');
+  };
+
+  return (
+    <div className="space-y-6 max-w-6xl pb-16">
+      {/* Top Header Card */}
+      <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs">
+        {/* Project Context & Storage Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-900 text-white px-4 py-2.5 rounded-xl mb-4 shadow-xs">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-amber-400 text-zinc-950 flex items-center justify-center font-bold shrink-0">
+              <HardDrive className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-bold text-amber-300 tracking-wider">
+                  Projektordner
+                </span>
+                <span className="text-xs font-bold text-white truncate">
+                  {config.title || config.projectName || 'Musterhaus Drehbuch'}
+                </span>
+              </div>
+              <span className="text-[10px] text-zinc-400 font-mono block truncate">
+                /data/projects/{config.projectName || 'standard'}/
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => handleSaveProjectToDisk(config.projectName || config.title || 'Musterhaus')}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition cursor-pointer shadow-2xs"
+              title="Speichert Referenzen, Windows & Prompts direkt in den Unterordner /data/projects/{name}"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>In data speichern</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsProjectModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-amber-300 border border-zinc-700 rounded-lg text-xs font-bold transition cursor-pointer"
+            >
+              <FolderOpen className="w-3.5 h-3.5" />
+              <span>Projekte ({config.projectName || 'standard'})</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300 flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
+                Single-Line Windows Format
+              </span>
+              <span className="text-[11px] font-mono text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">
+                1 Window = Exakt 1 Zeile ohne Umbrüche
+              </span>
+              <span className="text-[11px] font-mono text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-full border border-zinc-200">
+                Default: 14.000s
+              </span>
+              <span className="text-[11px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                Zielgruppe: {currentTargetAudience.name.split(' ')[0]}
+              </span>
+            </div>
+            <h2 className="text-xl font-bold text-zinc-900 tracking-tight">
+              Drehbuchkonfigurator &amp; Single-Line Windows-Studio
+            </h2>
+            <p className="text-xs text-zinc-600 mt-1 max-w-3xl leading-relaxed">
+              Erstelle per Stichpunkt oder Preset 3 laientaugliche Drehbuch-Vorschläge mit LM Studio.
+              Wähle die Zielgruppe und hinterlege Referenzen für Menschen, Haus/Objekt, Grundriss und Requisiten.
+              Drücke das Ergebnis mit 1 Klick in das verbindliche Single-Line-Format für MiniMax H3 und Maestro.
+            </p>
+          </div>
+
+          {/* Quick Stats / Global Bar */}
+          <div className="flex flex-wrap items-center gap-3 shrink-0 bg-zinc-50 border border-zinc-200 p-3 rounded-xl">
+            {/* Window Count Control */}
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
+                Windows
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => handleSetWindowCount(config.windowCount - 1)}
+                  disabled={config.windowCount <= 1}
+                  className="w-7 h-7 rounded-lg bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100 flex items-center justify-center transition disabled:opacity-40 cursor-pointer shadow-2xs"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <span className="w-9 text-center font-mono font-bold text-sm text-zinc-900 bg-white border border-zinc-300 rounded-lg py-0.5">
+                  {config.windowCount}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleSetWindowCount(config.windowCount + 1)}
+                  disabled={config.windowCount >= 12}
+                  className="w-7 h-7 rounded-lg bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100 flex items-center justify-center transition disabled:opacity-40 cursor-pointer shadow-2xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="h-8 w-px bg-zinc-200 mx-1 hidden sm:block" />
+
+            {/* Window Duration (Default 14s) */}
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <Clock className="w-3 h-3 text-amber-600" />
+                Dauer / Win
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => handleSetDuration(windowDuration - 1)}
+                  disabled={windowDuration <= 4}
+                  className="w-7 h-7 rounded-lg bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100 flex items-center justify-center transition disabled:opacity-40 cursor-pointer shadow-2xs"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <div className="flex items-center font-mono font-bold text-xs text-zinc-900 bg-white border border-zinc-300 rounded-lg px-2 py-1 shadow-2xs">
+                  <span>{windowDuration}s</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSetDuration(windowDuration + 1)}
+                  disabled={windowDuration >= 30}
+                  className="w-7 h-7 rounded-lg bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100 flex items-center justify-center transition disabled:opacity-40 cursor-pointer shadow-2xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="h-8 w-px bg-zinc-200 mx-1 hidden sm:block" />
+
+            {/* Dialogue Language Switcher */}
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <Globe className="w-3 h-3 text-indigo-600" />
+                Dialog-Sprache
+              </span>
+              <div className="flex items-center gap-1 bg-white border border-zinc-300 rounded-lg p-0.5">
+                {(['German', 'English', 'French', 'Spanish'] as DialogueLanguage[]).map((lang) => (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => handleSetDialogueLanguage(lang)}
+                    className={`px-2 py-1 rounded text-[11px] font-bold transition cursor-pointer ${
+                      dialogueLang === lang
+                        ? 'bg-zinc-900 text-white shadow-2xs'
+                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
+                    }`}
+                  >
+                    {lang === 'German' ? '🇩🇪 DE' : lang === 'English' ? '🇬🇧 EN' : lang === 'French' ? '🇫🇷 FR' : '🇪🇸 ES'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mt-6 pt-4 border-t border-zinc-200">
+          {/* Main 3 Workflow Steps */}
+          <div className="flex items-center gap-1.5 p-1 bg-zinc-100 rounded-2xl border border-zinc-200 overflow-x-auto">
+            <button
+              type="button"
+              onClick={() => setActiveTab('workflow')}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${
+                activeTab === 'workflow'
+                  ? 'bg-zinc-900 text-white shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/60'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>1. Zielgruppe &amp; Vorschläge</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('subjects')}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${
+                activeTab === 'subjects'
+                  ? 'bg-zinc-900 text-white shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/60'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5 text-indigo-400" />
+              <span>2. Referenzen &amp; Objekte ({currentReferences.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (!config.pressedWindows || config.pressedWindows.length === 0) {
+                  handlePressProposalToSingleLine(selectedProposal);
+                } else {
+                  setActiveTab('pressedView');
+                }
+              }}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${
+                activeTab === 'pressedView'
+                  ? 'bg-amber-400 text-zinc-950 font-extrabold shadow-xs'
+                  : 'text-zinc-700 hover:text-zinc-900 hover:bg-zinc-200/60'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>3. Single-Line Windows</span>
+              {config.pressedWindows && (
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              )}
+            </button>
+          </div>
+
+          {/* Quick Tools: Design Concept, Camera Director, Prompt Archive */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsDesignModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 rounded-xl text-xs font-bold transition cursor-pointer shadow-2xs"
+            >
+              <Palette className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Design &amp; Look</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsCameraModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-xl text-xs font-bold transition cursor-pointer shadow-2xs"
+            >
+              <Video className="w-3.5 h-3.5 text-amber-700" />
+              <span>Camführung</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsPromptModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs"
+            >
+              <FolderOpen className="w-3.5 h-3.5 text-amber-400" />
+              <span>JSON-Archiv</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* TAB 1: TARGET AUDIENCE, WORKFLOW & 3 LM STUDIO PROPOSALS */}
+      {activeTab === 'workflow' && (
+        <div className="space-y-6">
+          {/* Target Audience Component: Colors, Sound, Psychology */}
+          <TargetAudienceSelector
+            selectedAudienceId={currentTargetAudience.id}
+            onSelectAudience={handleSelectAudience}
+            onApplyCtaToVideo={handleApplyAudienceCta}
+            currentCta={finalCta}
+            customAudiences={config.customTargetAudiences || []}
+            onAddCustomAudience={handleAddCustomAudience}
+            onDeleteCustomAudience={handleDeleteCustomAudience}
+            lmStudioEndpoint={settings.endpoint}
+            lmStudioModel={settings.modelName}
+            lmStudioApiKey={settings.apiKey}
+            onShowToast={onShowToast}
+          />
+
+          {/* Input Card: Stichpunkte OR Presets */}
+          <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+                  <Sliders className="w-4 h-4 text-zinc-700" />
+                  <span>Schritt A: Drehbuch-Vorgaben (Stichpunkte oder Zusammenklicken)</span>
+                </h3>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  Gib kurz in Stichpunkten vor, was passieren soll – oder nutze die vorgefertigten Schnell-Presets.
+                </p>
+              </div>
+
+              {/* Mode switch */}
+              <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setInputMode('stichpunkte')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                    inputMode === 'stichpunkte'
+                      ? 'bg-white text-zinc-900 shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-800'
+                  }`}
+                >
+                  Stichpunkt-Modus
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInputMode('presets')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                    inputMode === 'presets'
+                      ? 'bg-white text-zinc-900 shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-800'
+                  }`}
+                >
+                  Zusammenklicken
+                </button>
+              </div>
+            </div>
+
+            {inputMode === 'stichpunkte' ? (
+              <div className="space-y-3">
+                {/* Interactive 1-Click Reference Chips Bar */}
+                <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-amber-950 flex items-center gap-1.5 uppercase tracking-wide">
+                      <Users className="w-3.5 h-3.5 text-amber-700" />
+                      <span>Hinterlegte Referenzen per Klick in Stichpunkte einfügen:</span>
+                    </span>
+                    <span className="text-[10px] text-amber-800 font-semibold bg-amber-100/80 px-2 py-0.5 rounded border border-amber-300">
+                      {currentReferences.length} Referenzen verfügbar
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {currentReferences.map((ref, idx) => {
+                      const tagText = ref.tag || `<Ref ${idx + 1}>`;
+                      const insertLine = `- Referenz: ${ref.name} (${tagText}) – Rolle/Aktion: ${ref.roleOrAction || 'Hauptmotiv'}`;
+                      return (
+                        <button
+                          key={ref.id || idx}
+                          type="button"
+                          onClick={() => {
+                            const current = config.stichpunkte || '';
+                            const updated = current.trim() ? `${current.trim()}\n${insertLine}` : insertLine;
+                            onChangeConfig({ ...config, stichpunkte: updated });
+                            onShowToast('info', `Referenz "${ref.name} (${tagText})" eingefügt.`);
+                          }}
+                          className="group flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-amber-100/90 text-zinc-800 hover:text-amber-950 border border-amber-200 hover:border-amber-400 rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer"
+                          title={`Aktion / Referenz "${ref.name}" in Stichpunkte übernehmen`}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-amber-500 group-hover:scale-125 transition" />
+                          <span>+ {ref.name}</span>
+                          <span className="text-[10px] font-mono text-amber-900 bg-amber-100/80 px-1 py-0.2 rounded border border-amber-200">
+                            {tagText}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-bold text-zinc-500 uppercase">
+                    Komplette Szenario-Presets:
+                  </span>
+                  {SAMPLE_STICHPUNKTE_LIST.map((sample, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        onChangeConfig({ ...config, stichpunkte: sample.text });
+                        onShowToast('info', `"${sample.label}" eingefügt.`);
+                      }}
+                      className="text-[11px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-lg transition cursor-pointer"
+                    >
+                      {sample.label}
+                    </button>
+                  ))}
+                </div>
+
+                <textarea
+                  rows={5}
+                  value={config.stichpunkte}
+                  onChange={(e) => onChangeConfig({ ...config, stichpunkte: e.target.value })}
+                  placeholder="Gib hier deine Stichpunkte ein oder klicke oben auf die Referenz-Buttons..."
+                  className="w-full p-4 bg-zinc-50 border border-zinc-300 rounded-xl text-xs text-zinc-900 focus:outline-none focus:border-zinc-900 focus:bg-white resize-none leading-relaxed font-mono shadow-inner"
+                />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* Drohne / Cam */}
+                <div className="bg-zinc-50 border border-zinc-200 p-3 rounded-xl space-y-1.5">
+                  <label className="text-[11px] font-bold text-zinc-700 flex items-center gap-1.5">
+                    <Compass className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Drohnenflug &amp; Kameraführung</span>
+                  </label>
+                  <select
+                    value={config.windows?.[0]?.cameraMovement || CAMERA_PRESETS[0]}
+                    onChange={(e) => {
+                      const updated = config.windows.map((w) => ({
+                        ...w,
+                        cameraMovement: e.target.value,
+                      }));
+                      onChangeConfig({ ...config, windows: updated });
+                    }}
+                    className="w-full text-xs bg-white border border-zinc-300 rounded-lg p-2 text-zinc-900 focus:outline-none"
+                  >
+                    {CAMERA_PRESETS.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Wetter & Licht */}
+                <div className="bg-zinc-50 border border-zinc-200 p-3 rounded-xl space-y-1.5">
+                  <label className="text-[11px] font-bold text-zinc-700 flex items-center gap-1.5">
+                    <Sun className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Wetter &amp; Lichtstimmung</span>
+                  </label>
+                  <select
+                    value={config.globalWeather || WEATHER_PRESETS[0]}
+                    onChange={(e) => onChangeConfig({ ...config, globalWeather: e.target.value })}
+                    className="w-full text-xs bg-white border border-zinc-300 rounded-lg p-2 text-zinc-900 focus:outline-none"
+                  >
+                    {WEATHER_PRESETS.map((w) => (
+                      <option key={w} value={w}>
+                        {w}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Setting / Hintergrund */}
+                <div className="bg-zinc-50 border border-zinc-200 p-3 rounded-xl space-y-1.5">
+                  <label className="text-[11px] font-bold text-zinc-700 flex items-center gap-1.5">
+                    <Trees className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Hintergrund &amp; Setting</span>
+                  </label>
+                  <select
+                    value={config.globalBackground || BACKGROUND_PRESETS[0]}
+                    onChange={(e) => onChangeConfig({ ...config, globalBackground: e.target.value })}
+                    className="w-full text-xs bg-white border border-zinc-300 rounded-lg p-2 text-zinc-900 focus:outline-none"
+                  >
+                    {BACKGROUND_PRESETS.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Final Call to Action (Wichtig für das letzte Window!) */}
+            <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                  <MessageSquareQuote className="w-4 h-4 text-amber-700" />
+                  <span>Claim / Call-to-Action für das letzte Window (Window {config.windowCount})</span>
+                </label>
+                <span className="text-[10px] text-amber-800 font-medium">
+                  Erscheint als On-Screen Text &amp; Schluss-Aktion
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                <input
+                  type="text"
+                  value={config.finalCallToAction || finalCta}
+                  onChange={(e) => onChangeConfig({ ...config, finalCallToAction: e.target.value })}
+                  placeholder="z.B. Jetzt Musterhaus besichtigen & Ihr Traumhaus planen"
+                  className="w-full text-xs font-bold bg-white border border-amber-300 rounded-lg px-3 py-2 text-zinc-900 focus:outline-none focus:border-amber-600 shadow-2xs"
+                />
+
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      onChangeConfig({ ...config, finalCallToAction: e.target.value });
+                    }
+                  }}
+                  className="w-full sm:w-auto text-xs bg-white border border-amber-300 rounded-lg px-3 py-2 text-zinc-700 focus:outline-none shrink-0"
+                >
+                  <option value="">Vorlagen wählen...</option>
+                  {CALL_TO_ACTION_PRESETS.map((cta, i) => (
+                    <option key={i} value={cta}>
+                      {cta}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Trigger Button: Generate 3 Proposals via LM Studio */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+              <span className="text-xs text-zinc-500">
+                Verbindet mit LM Studio ({settings.endpoint || 'http://localhost:1234/v1'}) &bull; Modell:{' '}
+                <strong className="text-zinc-800">{settings.modelName || 'local-model'}</strong>
+              </span>
+
+              <button
+                type="button"
+                onClick={handleGenerateProposalsWithLMStudio}
+                disabled={isGeneratingProposals}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition shadow-xs disabled:opacity-50 cursor-pointer"
+              >
+                {isGeneratingProposals ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                    <span>LM Studio denkt &amp; generiert 3 Vorschläge...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>3 Konzept-Vorschläge mit LM Studio generieren</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Section B: 3 Concept Proposals (Laien-verständlich aufbereitet) */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-indigo-600" />
+                  <span>Schritt B: 3 verständliche Vorschläge – Wähle deinen Favoriten</span>
+                </h3>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  Klicke auf den Button eines Vorschlags, um ihn direkt in das exakte {windowDuration}s Single-Line Format zu pressen.
+                </p>
+              </div>
+
+              <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg">
+                Sprache: {dialogueLang} &bull; {windowDuration}s / Window
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              {proposals.map((prop, idx) => {
+                const isSelected = selectedProposal.id === prop.id;
+
+                return (
+                  <div
+                    key={prop.id || idx}
+                    className={`bg-white rounded-2xl border transition shadow-xs flex flex-col justify-between overflow-hidden ${
+                      isSelected
+                        ? 'border-amber-400 ring-2 ring-amber-400/20 shadow-md'
+                        : 'border-zinc-200 hover:border-zinc-300'
+                    }`}
+                  >
+                    <div className="p-5 space-y-4">
+                      {/* Card Header */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">
+                            Vorschlag {idx + 1}
+                          </span>
+                          <span className="text-[10px] font-medium text-zinc-500">
+                            {prop.windowBreakdown.length} Windows &agrave; {windowDuration}s
+                          </span>
+                        </div>
+                        <h4 className="text-base font-bold text-zinc-900 leading-snug">
+                          {prop.title}
+                        </h4>
+                        <p className="text-xs text-indigo-600 font-medium mt-0.5">
+                          {prop.tagline}
+                        </p>
+                      </div>
+
+                      {/* Description for Layperson */}
+                      <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-3">
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">
+                          Für Laien erklärt:
+                        </span>
+                        <p className="text-xs text-zinc-700 leading-relaxed">
+                          {prop.descriptionForLayperson}
+                        </p>
+                      </div>
+
+                      {/* Window Breakdown list */}
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                          Ablauf der Windows:
+                        </span>
+                        {prop.windowBreakdown.map((win) => (
+                          <div
+                            key={win.windowNumber}
+                            className="text-xs p-2 rounded-lg bg-zinc-50 border border-zinc-100 flex items-start gap-2"
+                          >
+                            <span className="font-mono font-bold text-[11px] text-zinc-800 bg-zinc-200/70 px-1.5 py-0.2 rounded shrink-0">
+                              W{win.windowNumber}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-zinc-900 truncate">
+                                {win.title}
+                              </p>
+                              <p className="text-[11px] text-zinc-500 line-clamp-1">
+                                {win.cameraMovement}
+                              </p>
+                              {win.dialogueSnippet && (
+                                <p className="text-[11px] text-indigo-700 font-mono italic mt-0.5">
+                                  &bdquo;{win.dialogueSnippet}&ldquo;
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Final Call to Action Preview */}
+                      <div className="bg-amber-50/60 border border-amber-200/70 p-2.5 rounded-xl">
+                        <span className="text-[10px] font-bold text-amber-900 uppercase tracking-wider block mb-0.5">
+                          Call-to-Action (Outro):
+                        </span>
+                        <p className="text-xs font-bold text-amber-950">
+                          &bdquo;{prop.callToAction || finalCta}&ldquo;
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bottom Action: Press into Single-Line Format */}
+                    <div className="p-4 bg-zinc-50 border-t border-zinc-100">
+                      <button
+                        type="button"
+                        onClick={() => handlePressProposalToSingleLine(prop)}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold rounded-xl text-xs transition shadow-2xs cursor-pointer"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-zinc-950" />
+                        <span>In Single-Line Format pressen</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: REFERENCE MANAGER (HAUS, GRUNDRISS, MENSCHEN, PROPS) */}
+      {activeTab === 'subjects' && (
+        <ReferenceManagerSection
+          references={currentReferences}
+          onUpdateReferences={handleUpdateReferences}
+          appReferences={references}
+          onShowToast={onShowToast}
+          dialogueLanguage={dialogueLang}
+          targetAudience={currentTargetAudience}
+          projectTitle={config.title || config.projectName || 'Musterhaus Drehbuch'}
+          stichpunkte={config.stichpunkte}
+          lmStudioEndpoint={settings.endpoint}
+          lmStudioModel={settings.modelName}
+          lmStudioApiKey={settings.apiKey}
+        />
+      )}
+
+      {/* TAB 3: THE PRESSED SINGLE-LINE WINDOWS (Exact Reference Prompt Format) */}
+      {activeTab === 'pressedView' && (
+        <div className="space-y-6">
+          {/* Format Validation Banner */}
+          <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-emerald-950 flex items-center gap-2">
+                  <span>100% Valides Single-Line Format bestätigt</span>
+                  <span className="text-[10px] font-mono bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-bold">
+                    0 Linebreaks pro Window
+                  </span>
+                </h3>
+                <p className="text-xs text-emerald-800 mt-0.5">
+                  Jedes Window ist eine einzige, ununterbrochene Zeile inklusive Timecode, Subjekten, Dialogen in {dialogueLang},
+                  Kameraführung, Tonvorgaben und finalem Call-to-Action.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleCopyAllSingleLineWindows}
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+              >
+                {copiedPromptId === 'all' ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-300" />
+                    <span>Alle kopiert!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Alle Windows kopieren</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDownloadTxt}
+                className="p-2.5 rounded-xl bg-white border border-emerald-300 text-emerald-900 hover:bg-emerald-100 transition cursor-pointer"
+                title="Als .txt herunterladen"
+              >
+                <Download className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Dedicated Maestro 2.1.6 Reference Naming & Binding List */}
+          <MaestroWindowsBindingList
+            references={currentReferences}
+            projectTitle={config.title || config.projectName}
+            onShowToast={onShowToast}
+          />
+
+          {/* List of Pressed Single-Line Windows */}
+          <div className="space-y-4">
+            {config.pressedWindows && config.pressedWindows.length > 0 ? (
+              config.pressedWindows.map((win) => {
+                const validity = checkSingleLineValidity(win.singleLinePrompt);
+                const isExpanded = expandedWindowIndex === win.windowNumber;
+
+                return (
+                  <div
+                    key={win.windowNumber}
+                    className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-xs space-y-3 hover:border-zinc-300 transition"
+                  >
+                    {/* Window Bar Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-zinc-900 text-amber-400 font-bold font-mono text-sm flex items-center justify-center shrink-0 shadow-2xs">
+                          W{win.windowNumber}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold font-mono text-zinc-900">
+                              window{win.windowNumber}: ({win.timecodeStart}–{win.timecodeEnd})
+                            </span>
+                            <span className="text-[10px] font-mono bg-zinc-100 text-zinc-600 px-2 py-0.2 rounded border border-zinc-200">
+                              {win.durationSeconds}.000s
+                            </span>
+                            {win.claimOrCta && (
+                              <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.2 rounded border border-amber-300">
+                                {win.windowNumber === config.pressedWindows!.length ? 'Call-to-Action' : 'Claim'}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-zinc-500 mt-0.5">{win.summary}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {/* Copy button */}
+                        <button
+                          type="button"
+                          onClick={() => handleCopySingleWindow(win.windowNumber, win.singleLinePrompt)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 transition cursor-pointer"
+                        >
+                          {copiedPromptId === `win-${win.windowNumber}` ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Kopiert!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Window {win.windowNumber} kopieren</span>
+                            </>
+                          )}
+                        </button>
+
+                        {/* Inspector Toggle */}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedWindowIndex(isExpanded ? null : win.windowNumber)
+                          }
+                          className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition cursor-pointer"
+                          title="Struktur analysieren"
+                        >
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Single-Line Raw Output Box (Strictly 1 Line displayed with overflow scroll) */}
+                    <div className="relative">
+                      <div className="p-3.5 bg-zinc-900 text-zinc-200 rounded-xl font-mono text-[11px] leading-normal overflow-x-auto whitespace-nowrap shadow-inner border border-zinc-800 select-all">
+                        {win.singleLinePrompt}
+                      </div>
+                      <span className="text-[10px] text-zinc-400 mt-1 block">
+                        Zeichen: {validity.totalCharacters} &bull; Zeilenumbrüche im Window:{' '}
+                        <strong className={validity.isValid ? 'text-emerald-600' : 'text-red-600'}>
+                          {validity.lineCount - 1}
+                        </strong>
+                      </span>
+                    </div>
+
+                    {/* Structured Inspector & German Translation (if expanded) */}
+                    {isExpanded && (() => {
+                      const german = translateWindowPromptToGerman(win);
+                      return (
+                        <div className="pt-3 border-t border-zinc-100 text-xs space-y-3 bg-zinc-50 p-4 rounded-xl">
+                          {/* German Translation Highlight Box */}
+                          <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5 text-zinc-800 space-y-2">
+                            <div className="flex items-center justify-between border-b border-amber-200/60 pb-2">
+                              <span className="font-bold text-amber-950 text-xs flex items-center gap-1.5">
+                                <Globe className="w-3.5 h-3.5 text-amber-700" />
+                                <span>Verständliches Deutsch (Prompt-Übersetzung)</span>
+                              </span>
+                              <span className="text-[10px] font-mono text-amber-800 font-semibold">
+                                {german.zeitspanne}
+                              </span>
+                            </div>
+
+                            <div className="space-y-1.5 text-xs">
+                              <div>
+                                <strong className="text-zinc-900 block text-[11px]">Szenenhandlung &amp; Inhalt:</strong>
+                                <p className="text-zinc-700 font-medium">{german.szenenHandlung}</p>
+                              </div>
+
+                              <div>
+                                <strong className="text-zinc-900 block text-[11px]">Kameraführung:</strong>
+                                <p className="text-zinc-700">{german.kamerafuehrung}</p>
+                              </div>
+
+                              {german.dialogueGerman && (
+                                <div>
+                                  <strong className="text-zinc-900 block text-[11px]">Gesprochener Dialog:</strong>
+                                  <p className="text-indigo-950 bg-indigo-50 px-2 py-1 rounded border border-indigo-200 font-medium inline-block mt-0.5">
+                                    {german.dialogueGerman}
+                                  </p>
+                                </div>
+                              )}
+
+                              {german.callToActionGerman && (
+                                <div>
+                                  <strong className="text-zinc-900 block text-[11px]">Einblendung / Call to Action:</strong>
+                                  <p className="text-amber-950 font-bold bg-amber-100 px-2 py-0.5 rounded border border-amber-300 inline-block mt-0.5">
+                                    &bdquo;{german.callToActionGerman}&ldquo;
+                                  </p>
+                                </div>
+                              )}
+
+                              {german.closeupsGerman && german.closeupsGerman.length > 0 && (
+                                <div>
+                                  <strong className="text-zinc-900 block text-[11px]">Makro-Nahaufnahmen (100mm):</strong>
+                                  <ul className="list-disc list-inside text-zinc-600 space-y-0.5 pl-1">
+                                    {german.closeupsGerman.map((c, idx) => (
+                                      <li key={idx}>{c}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              <div>
+                                <strong className="text-zinc-900 block text-[11px]">Ton &amp; Musikstil:</strong>
+                                <p className="text-zinc-600 italic">{german.musikUndSound}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                            <div>
+                              <span className="text-[10px] font-bold text-zinc-400 uppercase block">
+                                Aktive Subjekte &amp; Referenzen:
+                              </span>
+                              <span className="font-semibold text-zinc-800">
+                                {win.activeReferences && win.activeReferences.length > 0
+                                  ? win.activeReferences.join(', ')
+                                  : win.activeSubjects.join(', ')}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] font-bold text-zinc-400 uppercase block">
+                                Kamerabewegung (Englischer Prompt-Code):
+                              </span>
+                              <span className="font-semibold text-zinc-800">{win.cameraMove}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-8 text-center bg-white border border-dashed border-zinc-300 rounded-2xl space-y-3">
+                <FileText className="w-8 h-8 text-zinc-400 mx-auto" />
+                <h4 className="text-sm font-bold text-zinc-800">
+                  Noch keine Windows gepresst
+                </h4>
+                <p className="text-xs text-zinc-500 max-w-md mx-auto">
+                  Wähle oben im Reiter &bdquo;1. Zielgruppe &amp; Vorschläge&ldquo; einen der 3 Vorschläge aus
+                  und klicke auf &bdquo;In Single-Line Format pressen&ldquo;.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handlePressProposalToSingleLine(selectedProposal)}
+                  className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold rounded-xl text-xs transition cursor-pointer"
+                >
+                  Vorschlag 1 jetzt pressen
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Global Final Action Footer */}
+      <div className="bg-zinc-900 text-white p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
+        <div>
+          <h4 className="font-bold text-sm text-white flex items-center gap-2">
+            <span>In Drehbuch- &amp; Video-Runner übernehmen</span>
+            <span className="text-[10px] font-mono bg-amber-400 text-zinc-950 px-2 py-0.5 rounded font-bold">
+              {config.windowCount} Windows &bull; {windowDuration}s &bull; {dialogueLang}
+            </span>
+            <span className="text-[10px] font-mono bg-indigo-400 text-zinc-950 px-2 py-0.5 rounded font-bold">
+              {currentTargetAudience.name.split(' ')[0]}
+            </span>
+          </h4>
+          <p className="text-xs text-zinc-400 mt-0.5">
+            Überträgt alle Windows, gepressten Single-Line Prompts, Zielgruppen-Ästhetik, Referenzen und Claims in den Drehbuchgenerator.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            // Auto-press if not yet pressed
+            if (!config.pressedWindows || config.pressedWindows.length === 0) {
+              const pressed = pressProposalToSingleLineWindows({
+                proposal: selectedProposal,
+                allSubjects: currentReferences,
+                windowDurationSeconds: windowDuration,
+                dialogueLanguage: dialogueLang,
+                actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+                aspectRatio: config.aspectRatio || '16:9',
+                globalWeather: config.globalWeather,
+                globalBackground: config.globalBackground,
+                finalCallToAction: finalCta,
+                targetAudience: currentTargetAudience,
+              });
+              onApplyToScreenplay({
+                ...config,
+                references: currentReferences,
+                subjects: currentReferences,
+                targetAudienceId: currentTargetAudience.id,
+                targetAudienceCustom: currentTargetAudience,
+                pressedWindows: pressed,
+              });
+            } else {
+              onApplyToScreenplay({
+                ...config,
+                references: currentReferences,
+                subjects: currentReferences,
+                targetAudienceId: currentTargetAudience.id,
+                targetAudienceCustom: currentTargetAudience,
+              });
+            }
+          }}
+          className="flex items-center gap-2 px-6 py-3 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold rounded-xl text-xs transition shadow-sm cursor-pointer shrink-0"
+        >
+          <span>In Drehbuch &amp; Shots übertragen</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* JSON Saved Prompts Modal (data/saved_prompts) */}
+      <SavedPromptsModal
+        isOpen={isPromptModalOpen}
+        onClose={() => setIsPromptModalOpen(false)}
+        currentState={{
+          ...config,
+          references: currentReferences,
+          subjects: currentReferences,
+          targetAudienceId: currentTargetAudience.id,
+          targetAudienceCustom: currentTargetAudience,
+        }}
+        onLoadProject={handleLoadProjectState}
+        onShowToast={onShowToast}
+      />
+
+      {/* Camera Director Modal with Cinematic Library & LM Studio AI Guidance */}
+      <CameraDirectorModal
+        isOpen={isCameraModalOpen}
+        onClose={() => setIsCameraModalOpen(false)}
+        windows={config.windows || []}
+        targetAudience={currentTargetAudience}
+        targetAudienceName={currentTargetAudience.name}
+        onApplyCameraMovementToWindow={handleApplyCameraMovementToWindow}
+        onApplyCameraPlanToAll={handleApplyCameraPlanToAll}
+        lmStudioEndpoint={settings.endpoint}
+        lmStudioModel={settings.modelName}
+        lmStudioApiKey={settings.apiKey}
+        onShowToast={onShowToast}
+      />
+
+      {/* LM Studio Design & Look Director Modal */}
+      <DesignConceptModal
+        isOpen={isDesignModalOpen}
+        onClose={() => setIsDesignModalOpen(false)}
+        targetAudience={currentTargetAudience}
+        onApplyDesign={handleApplyDesignConcept}
+        lmStudioEndpoint={settings.endpoint}
+        lmStudioModel={settings.modelName}
+        lmStudioApiKey={settings.apiKey}
+        onShowToast={onShowToast}
+      />
+
+      {/* Project-Based Data Storage Modal (/data/projects/) */}
+      <ProjectManagerModal
+        isOpen={isProjectModalOpen}
+        onClose={() => setIsProjectModalOpen(false)}
+        currentProjectName={config.projectName || config.projectId || 'standard'}
+        currentConfig={config}
+        onLoadProject={handleLoadProjectFromDisk}
+        onSaveProject={handleSaveProjectToDisk}
+        onShowToast={onShowToast}
+      />
+    </div>
+  );
+};
