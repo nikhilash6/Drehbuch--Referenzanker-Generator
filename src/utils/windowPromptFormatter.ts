@@ -618,8 +618,8 @@ export function buildSingleLineWindowPrompt(params: {
   const musicAcoustic = targetSoundEn ? `${enMusicStyle}. ${targetSoundEn}` : enMusicStyle;
 
   const audioDeliverySegment = dialogueText
-    ? `Audio Delivery: No narrator. No voice-over. No off-screen dialogue. No improvised words. Only the marked dialogue lines.`
-    : `Audio Delivery: No narrator. No voice-over. No off-screen dialogue. No improvised words. No dialogue in this window.`;
+    ? `Audio Delivery: STRICTLY ZERO rambling, ZERO background chatter, ZERO unsolicited speech fragments, ZERO voice-over. Only the single precise marked dialogue line spoken cleanly by ${cleanSpeakerName}.`
+    : `Audio Delivery: STRICTLY ZERO speech, ZERO rambling, ZERO background talking. Pure silent cinematic ambience only.`;
   const audioDesignSegment = `Audio Design: ${soundAcoustic}, nothing else.`;
   const musicSegment = dialogueText
     ? `Music: ${musicAcoustic}. Only ambience and the marked dialogue lines.`
@@ -1185,16 +1185,17 @@ export interface MaestroBindingSlot {
   photoUrl?: string;
 }
 
-function cleanMaestroAnchorName(rawName: string, fallback: string): string {
+function cleanMaestroAnchorName(rawName: string, fallback: string, slotIdx: number = 1): string {
   if (!rawName) return fallback;
   let clean = rawName.replace(/\.(png|jpg|jpeg|webp|svg|gif)$/i, '').trim();
   // If it's a raw UUID like "05d6ed5c-b891-40d8-8519-69170ee06e51" or "05d6ed5c b891..."
   if (/^[0-9a-f]{8}[\s_-][0-9a-f]{4}/i.test(clean) || /^[0-9a-f]{16,}/i.test(clean)) {
     return fallback;
   }
-  // If it's a raw WhatsApp filename
-  if (/^whatsapp\s*image/i.test(clean)) {
-    return 'Darsteller';
+  // If it's a raw WhatsApp filename or generic placeholder like mann/frau/darsteller
+  if (/^whatsapp\s*image/i.test(clean) || /^darsteller/i.test(clean) || /^mann/i.test(clean) || /^frau/i.test(clean)) {
+    const defaultNames = ['Sophie', 'Maximilian', 'Alexander', 'Elena', 'Julian', 'Katharina'];
+    return defaultNames[(slotIdx - 1) % defaultNames.length];
   }
   clean = clean.replace(/[^a-zA-Z0-9_]/g, '');
   if (clean.length > 20) clean = clean.substring(0, 20);
@@ -1209,7 +1210,7 @@ export function getMaestro216Bindings(references: ConfigReference[]): MaestroBin
     const slotIdx = idx + 1;
     const cat = ref.category || 'human';
     const fallback = cat === 'human' ? 'Darsteller' : cat === 'building' ? 'Musterhaus' : cat === 'logo' ? 'Wasserzeichen' : 'Requisite';
-    const cleanName = cleanMaestroAnchorName(ref.name || '', fallback);
+    const cleanName = cleanMaestroAnchorName(ref.name || '', fallback, slotIdx);
     let tag = ref.tag || `<Subject ${slotIdx}>`;
     let maestroLabel = ref.charTag?.startsWith('@') ? ref.charTag : `@Subject${slotIdx}_${cleanName}`;
 
