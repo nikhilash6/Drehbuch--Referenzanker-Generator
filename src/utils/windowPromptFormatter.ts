@@ -652,9 +652,9 @@ export function buildSingleLineWindowPrompt(params: {
   // Combine ALL segments into one string and strictly enforce 0 line breaks!
   const rawCombined = [
     windowTag,
-    settingSegment,
     definitionsSegment,
     separationSegment,
+    settingSegment,
     timecodeSegment,
     macroSegment,
     cameraSegment,
