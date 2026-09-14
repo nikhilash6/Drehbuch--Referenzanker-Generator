@@ -1375,26 +1375,31 @@ Führe jetzt die Bildanalyse für alle vorliegenden Bilder durch und arbeite jed
       for (let idx = 0; idx < references.length; idx++) {
         const ref = references[idx];
         const imgInfo = resolveImageData(ref);
-        const singlePrompt = `Analysiere DIESES EINE Referenzbild (${ref.tag || `<Subject ${idx + 1}>`} "${ref.name || 'Referenz'}", Kategorie: ${ref.category || 'human'}) für ein Drehbuch.
-Projektkontext: ${stichpunkte || scenarioContext || 'High-End Architekturfilm'}
+        const cleanNameEng = (ref.name || 'Subject').replace(/[^a-zA-Z0-9]/g, '');
+        const singlePrompt = `You are an expert cinematic visual analyst. Analyze this single reference image for a high-end architectural film.
+Reference ID: ${ref.id}
+Category: ${ref.category || 'human'}
+Name: ${ref.name || 'Subject'}
 
-Extrahiere die visuelle Erscheinung (Haar, Augen, Kleidung/Oberfläche, besondere Merkmale, Anker) und gib folgendes JSON zurück:
+CRITICAL REQUIREMENT: You MUST fill in the fields below. Every single value MUST be written in clean, professional, descriptive, cinematic ENGLISH (do NOT use German, e.g. use "grey hair", "beige blazer", "athletic build", NOT "graues Haar", "hellgrauer Blazer").
+
+Return EXACTLY the following JSON structure filled with your visual analysis of the image:
 {
   "id": "${ref.id}",
   "category": "${ref.category || 'human'}",
   "referenceIndex": ${ref.referenceIndex || idx + 1},
   "tag": "${ref.tag || `<Subject ${idx + 1}>`}",
-  "maestroLabel": "@Subject${idx + 1}_${(ref.name || 'Subject').replace(/[^a-zA-Z0-9]/g, '')}",
-  "name": "${ref.name || 'Referenz'}",
-  "roleOrAction": "${ref.roleOrAction || 'Erkundet Räume und interagiert'}",
-  "roleOrActionEn": "Explores architectural spaces and touches tactile surfaces",
-  "relationship": "${ref.relationship || 'Protagonist im Drehbuch'}",
-  "hairOrMaterial": "Haarfarbe / Frisur oder Fassadenmaterial",
-  "eyesOrGlazing": "Augenfarbe oder Verglasung",
-  "clothingOrFinish": "Kleidung / Outfit oder Oberfläche",
-  "distinguishingMarks": "Besondere Merkmale / Anker",
-  "build": "Statur",
-  "ageRange": "Alter ca"
+  "maestroLabel": "@Subject${idx + 1}_${cleanNameEng}",
+  "name": "${ref.name || 'Subject'}",
+  "roleOrAction": "${(ref.roleOrAction || 'Explores spaces').replace(/"/g, "'")}",
+  "roleOrActionEn": "${(ref.roleOrActionEn || ref.roleOrAction || 'Explores architectural spaces').replace(/"/g, "'")}",
+  "relationship": "${(ref.relationship || 'Protagonist').replace(/"/g, "'")}",
+  "hairOrMaterial": "[Describe hair style/color for human, or facade cladding material for building in ENGLISH]",
+  "eyesOrGlazing": "[Describe eye color for human, or glass facade/glazing properties for building in ENGLISH]",
+  "clothingOrFinish": "[Describe exact outfit and colors for human, or outdoor surface/finish for building in ENGLISH]",
+  "distinguishingMarks": "[Describe unique features, beard, glasses, posture, skin, or unique architectural accents in ENGLISH]",
+  "build": "[Describe physical build/stature for human, or architectural volume structure/geometry in ENGLISH]",
+  "ageRange": "[Describe age range for human, or N/A in ENGLISH]"
 }`;
 
         const userMsgContent: any[] = [{ type: 'text', text: singlePrompt }];
@@ -1414,7 +1419,7 @@ Extrahiere die visuelle Erscheinung (Haar, Augen, Kleidung/Oberfläche, besonder
           body: JSON.stringify({
             model: modelName || 'local-model',
             messages: [
-              { role: 'system', content: 'Du bist ein hochpräziser visueller Analyst. Analysiere das einzelne Bild und antworte ausschließlich in gültigem JSON-Format (z.B. {"id": "...", ...}).' },
+              { role: 'system', content: 'You are a highly precise cinematic visual analyst. Analyze the single image and respond ONLY in valid JSON. All descriptions and analysis values MUST be strictly in high-end cinematic ENGLISH. Avoid German language completely.' },
               { role: 'user', content: userMsgContent },
             ],
             temperature: 0.2,

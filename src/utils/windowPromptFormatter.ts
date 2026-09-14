@@ -26,12 +26,25 @@ export function formatTimecode(totalSeconds: number): string {
 }
 
 /**
+ * Regex-based sanitization function that escapes all internal single/double quotes
+ * within dialogue segments and character anchors to prevent JSON parsing errors in LM Studio.
+ */
+export function sanitizeQuotesForJSON(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/(?<!\\)"/g, '\\"')
+    .replace(/(?<!\\)'/g, "\\'")
+    .replace(/„|“|”|“/g, '\\"');
+}
+
+/**
  * Strict single-line cleaner: removes all carriage returns, newlines, tabs, and duplicate spaces.
  * Guarantees that the resulting string is 100% on 1 single line with no line breaks!
  */
 export function enforceSingleLine(text: string): string {
   return text
     .replace(/[\r\n]+/g, ' ')
+    .replace(/"/g, "'")
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -606,7 +619,7 @@ export function buildSingleLineWindowPrompt(params: {
   if (activeLogos.length > 0) {
     const logoDefs = activeLogos.map((l) => {
       const maestroAnchor = `@Logo1_Wasserzeichen_BottomRight`;
-      return `${l.tag} is ${l.name} (${maestroAnchor}). Permanent watermark: strictly positioned in the bottom-right corner (rechts unten), subtle and semi-transparent (25% opacity), non-intrusive CI overlay.`;
+      return `${l.tag} is ${l.name} (${maestroAnchor}). Permanent watermark: strictly positioned in the bottom-right corner, subtle and semi-transparent (25% opacity), non-intrusive CI overlay.`;
     });
     definitionsParts.push(`Logo watermark definitions: ${logoDefs.join(' ')}`);
   }
@@ -674,23 +687,27 @@ export function buildSingleLineWindowPrompt(params: {
   const speakerIdx = speakerObj.referenceIndex || 1;
   const cleanSpeakerName = cleanMaestroAnchorName(speakerObj.name, `Subject${speakerIdx}`);
   const speakerAnchorTag = `@Subject${speakerIdx}_${cleanSpeakerName}`;
-  const actualDialogue = dialogueText || 'Hier beginnt unser neues Kapitel.';
+  const sanitizedDialogue = sanitizeQuotesForJSON(dialogueText || 'Hier beginnt unser neues Kapitel.');
+  const sanitizedSpeakerAnchor = sanitizeQuotesForJSON(speakerAnchorTag);
+  const cleanClaimOrCta = sanitizeQuotesForJSON(claimOrCta || '');
+  const timePrefix = `[TIME:${startSec}s-${endSec}s]`;
 
-  timecodeSegment += `TIMECODE ${t2End}, ${speakerObj.tag} ${cleanSpeakerName} (${speakerAnchorTag}) turns toward camera/partner with active synchronized lip movement speaking: <d[${speakerObj.tag} ${speakerAnchorTag}][${dialogueLanguage}]> ${actualDialogue} </d> `;
+  // Precise time-boxed dialogue: start at t2End, end at t3End, with strict [TIME:XXs-YYs] prefix to prevent LLM hallucination!
+  timecodeSegment += `TIMECODE ${t2End}–${t3End}: ${speakerObj.tag} ${cleanSpeakerName} (${sanitizedSpeakerAnchor}) turns toward camera/partner and speaks strictly between ${t2End} and ${t3End} with synchronized lip movement: ${timePrefix} <d[${speakerObj.tag} ${sanitizedSpeakerAnchor}][${dialogueLanguage}]> ${sanitizedDialogue} </d> (dialogue strictly limited to this duration, lips stop speaking exactly at ${t3End}). `;
 
-  // Timecode 3: T2 to T3 (Reaction of other humans, e.g. Subject 3 and Subject 4)
+  // Timecode 3: T2 to T3 (Reaction of other humans, e.g. Subject 3 and Subject 4, simultaneous with dialogue)
   const otherHumans = activeHumans.filter((h) => h.id !== speakerObj.id);
   if (otherHumans.length > 0) {
     const otherNames = otherHumans.map((h) => `${h.tag} ${cleanMaestroAnchorName(h.name, 'Partner')}`).join(' and ');
-    timecodeSegment += `TIMECODE ${t2End}–${t3End}: ${otherNames} nod with evident satisfaction, taking in the generous sightlines. `;
+    timecodeSegment += `TIMECODE ${t2End}–${t3End}: Simultaneously, ${otherNames} listen attentively and nod with evident satisfaction, taking in the generous sightlines. `;
   } else {
-    timecodeSegment += `TIMECODE ${t2End}–${t3End}: The camera glides fluidly across the space, highlighting the connection between interior and garden. `;
+    timecodeSegment += `TIMECODE ${t2End}–${t3End}: Simultaneously, the camera glides fluidly across the space, highlighting the connection between interior and garden. `;
   }
 
   // Timecode 4: T3 to End (Final Call to Action or smooth transition)
-  if (isLastWindow && claimOrCta) {
+  if (isLastWindow && cleanClaimOrCta) {
     const objMention = primaryObject ? ` Featuring ${primaryObject.tag} (${cleanMaestroAnchorName(primaryObject.name, 'Object')}).` : '';
-    timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: The camera pulls back revealing the complete architectural masterwork against the sky.${objMention} Graphic Call-to-Action overlay fades in: "${claimOrCta}". Fade to soft cinematic black over the last second.`;
+    timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: The camera pulls back revealing the complete architectural masterwork against the sky.${objMention} Graphic Call-to-Action overlay fades in with text: '${cleanClaimOrCta}'. Fade to soft cinematic black over the last second.`;
   } else {
     timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: Smooth cinematic transition into the next perspective with ${enVisualFocus} gleaming in the light.`;
   }
@@ -700,10 +717,10 @@ export function buildSingleLineWindowPrompt(params: {
   const macro2 = primaryBuilding
     ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – reflections of the blue sky and trees across the floor-to-ceiling glass facade of ${primaryBuilding.tag}.`
     : `EXTREME CLOSE-UP, 100mm macro, T1.8 – reflections of the blue sky across the floor-to-ceiling panoramic glass facade.`;
-  const macro3 = isLastWindow && claimOrCta
+  const macro3 = isLastWindow && cleanClaimOrCta
     ? (primaryObject
-        ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – ${primaryObject.tag} (${primaryObject.name}) held firmly in hand, followed by the crisp typography of "${claimOrCta}".`
-        : `EXTREME CLOSE-UP, 100mm macro, T1.8 – the gleaming architectural key in hand, followed by the pristine typography of "${claimOrCta}".`)
+        ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – ${primaryObject.tag} (${primaryObject.name}) held firmly in hand, followed by the crisp typography of '${cleanClaimOrCta}'.`
+        : `EXTREME CLOSE-UP, 100mm macro, T1.8 – the gleaming architectural key in hand, followed by the pristine typography of '${cleanClaimOrCta}'.`)
     : `EXTREME CLOSE-UP, 100mm macro, T1.8 – crisp architectural shadow lines moving slowly across the natural facade surface.`;
 
   const macroSegment = `${macro1} ${macro2} ${macro3}`;
@@ -741,7 +758,7 @@ export function buildSingleLineWindowPrompt(params: {
 
   // 10. Permanent Logo Watermark Rule (Strictly bottom-right corner, subtle, semi-transparent)
   const logoWatermarkSegment = activeLogos.length > 0
-    ? `Watermark: Brand logo ${activeLogos.map((l) => l.tag).join(', ')} must appear permanently in the bottom-right corner (rechts unten, 25% opacity, subtle, non-intrusive transparent overlay).`
+    ? `Watermark: Brand logo ${activeLogos.map((l) => l.tag).join(', ')} must appear permanently in the bottom-right corner (bottom-right, 25% opacity, subtle, non-intrusive transparent overlay).`
     : '';
 
   // Combine ALL segments into one string and strictly enforce 0 line breaks!
@@ -774,7 +791,7 @@ export function buildSingleLineWindowPrompt(params: {
     summary: narrativeAction || `${visualFocus} mit ${cameraMovement}`,
     activeSubjects: activeSubjects.map((s) => s.name),
     activeReferences: activeSubjects.map((s) => `${s.tag} ${s.name}`),
-    dialogueSnippet: dialogueText ? `<d[${speakerObj.tag} ${speakerAnchorTag}][${dialogueLanguage}]> ${dialogueText} </d>` : undefined,
+    dialogueSnippet: dialogueText ? `${timePrefix} <d[${speakerObj.tag} ${sanitizedSpeakerAnchor}][${dialogueLanguage}]> ${sanitizedDialogue} </d>` : undefined,
     extremeCloseups: [macro1, macro2, macro3],
     cameraMove: cameraMovement,
     musicAudio: `${musicAcoustic} / ${soundAcoustic}`,
