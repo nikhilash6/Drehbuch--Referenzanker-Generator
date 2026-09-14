@@ -98,17 +98,17 @@ export const DEFAULT_SUBJECT_REFERENCES: ConfigReference[] = [
     category: 'human',
     referenceIndex: 1,
     tag: '<Subject 1>',
-    charTag: 'char Protagonistin',
-    name: 'Bauherrin',
-    roleOrAction: 'Erkundet die Architektur, prüft Materialien, Holzoberflächen und Lichtachsen',
-    relationship: 'Ehepaar / Lebenspartner mit Partner (Subject 2)',
+    charTag: 'char Protagonist1',
+    name: 'Protagonist 1',
+    roleOrAction: 'Erkundet die Architektur und interagiert natürlich',
+    relationship: 'Hauptdarsteller',
     gender: 'female',
-    ageRange: '30 to 38',
-    build: 'slim and natural posture',
-    hairOrMaterial: 'shoulder-length chestnut brown hair worn loose with natural soft waves',
-    eyesOrGlazing: 'warm brown almond-shaped eyes, natural defined eyebrows',
-    clothingOrFinish: 'high-quality tailored beige linen blouse and relaxed white linen trousers, leather sandals',
-    distinguishingMarks: 'no heavy jewelry, no watch, natural glowing skin, relaxed and curious expression',
+    ageRange: '',
+    build: '',
+    hairOrMaterial: '',
+    eyesOrGlazing: '',
+    clothingOrFinish: '',
+    distinguishingMarks: '',
     photoUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
     isActiveInProject: true,
   },
@@ -117,17 +117,17 @@ export const DEFAULT_SUBJECT_REFERENCES: ConfigReference[] = [
     category: 'human',
     referenceIndex: 2,
     tag: '<Subject 2>',
-    charTag: 'char Partner',
-    name: 'Partner',
-    roleOrAction: 'Begleitet die Besichtigung, testet Smarthome-Bedienfeld, geht über Parkett zur Terrasse',
-    relationship: 'Ehepaar / Lebenspartner mit Bauherrin (Subject 1)',
+    charTag: 'char Protagonist2',
+    name: 'Protagonist 2',
+    roleOrAction: 'Begleitet die Besichtigung und interagiert im Raum',
+    relationship: 'Hauptdarsteller',
     gender: 'male',
-    ageRange: '32 to 42',
-    build: 'athletic build, upright confident stance',
-    hairOrMaterial: 'short well-groomed dark brown hair with subtle silver temples, short trimmed beard',
-    eyesOrGlazing: 'calm grey-green eyes',
-    clothingOrFinish: 'open light-blue casual linen shirt rolled to the forearms, dark navy chinos, loafers',
-    distinguishingMarks: 'minimalist mechanical wristwatch, subtle smile of deep satisfaction',
+    ageRange: '',
+    build: '',
+    hairOrMaterial: '',
+    eyesOrGlazing: '',
+    clothingOrFinish: '',
+    distinguishingMarks: '',
     photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
     isActiveInProject: true,
   },
@@ -272,75 +272,13 @@ interface DistinctVisualDefaults {
  * to prevent MiniMax H3 / Maestro from cloning faces or clothing when attributes are omitted.
  */
 function getDistinctSubjectVisualDefaults(idx: number, name: string, gender?: string, roleOrAction?: string): DistinctVisualDefaults {
-  const isAgent = /makler|verkäufer|agent|berater|coach/i.test(name) || /makler|verkäufer|agent|berater|coach/i.test(roleOrAction || '');
-  const isFemale = gender === 'female' || /frau|bauherrin|partnerin|kundin|heidi/i.test(name);
-
-  if (isAgent) {
-    return {
-      hair: 'receding silver-grey hair with neat side trim',
-      eyes: 'sharp steel-blue eyes',
-      marks: 'distinguished mature facial structure, gold wire-frame glasses, clean-shaven',
-      clothing: 'dark charcoal tailored blazer over crisp white shirt',
-      age: '45 to 52',
-      build: 'upright professional poise',
-    };
-  }
-
-  // Preset distinct profiles by reference index
-  const presets: Record<number, DistinctVisualDefaults> = {
-    1: {
-      hair: isFemale ? 'shoulder-length chestnut brown hair' : 'short textured dark brown hair',
-      eyes: 'warm hazel eyes',
-      marks: 'clean-shaven, distinct sharp jawline, zero facial similarity to other actors',
-      clothing: 'slate blue linen shirt and dark trousers',
-      age: '30 to 35',
-      build: 'natural athletic posture',
-    },
-    2: {
-      hair: isFemale ? 'honey-blonde wavy hair' : 'short sandy blonde hair with side part',
-      eyes: 'emerald green eyes',
-      marks: 'delicate features, high cheekbones, zero facial similarity to other actors',
-      clothing: 'cream silk blouse and beige trousers',
-      age: '28 to 34',
-      build: 'slender natural posture',
-    },
-    3: {
-      hair: 'short dark espresso-brown hair with subtle side part',
-      eyes: 'deep brown eyes',
-      marks: 'neat short stubble beard, athletic frame, unique facial bone structure distinct from all other male actors',
-      clothing: 'navy blue casual jacket over heather grey t-shirt',
-      age: '34 to 38',
-      build: 'broad-shouldered athletic build',
-    },
-    4: {
-      hair: 'long dark brunette hair in loose natural waves',
-      eyes: 'dark almond-shaped eyes',
-      marks: 'warm expressive face, clear natural complexion, unique facial structure',
-      clothing: 'terracotta knit sweater and dark denim',
-      age: '31 to 36',
-      build: 'toned natural posture',
-    },
-    7: {
-      hair: 'distinguished silver-grey hair with neat side trim',
-      eyes: 'clear blue eyes behind gold wire-frame glasses',
-      marks: 'mature refined facial features, distinct square jaw, zero facial overlap with younger male actors',
-      clothing: 'dark charcoal tailored suit jacket over crisp white shirt',
-      age: '46 to 52',
-      build: 'tall professional posture',
-    },
-  };
-
-  if (presets[idx]) {
-    return presets[idx];
-  }
-
   return {
-    hair: isFemale ? `distinct dark auburn hair (Subject ${idx})` : `distinct short black hair (Subject ${idx})`,
-    eyes: `distinct dark brown eyes (Subject ${idx})`,
-    marks: `unique facial structure for Subject ${idx}, zero feature overlap with other cast members`,
-    clothing: `distinct casual attire in olive green (Subject ${idx})`,
-    age: `${28 + (idx * 3) % 20} to ${35 + (idx * 3) % 20}`,
-    build: 'natural posture',
+    hair: `exact hairstyle, hair color, and texture matching reference image for ${name}`,
+    eyes: `exact eye color and facial features matching reference image for ${name}`,
+    marks: `high photorealistic consistency, unique facial structure corresponding 100% to reference image @Subject${idx}_${name}, zero feature transfer from other actors`,
+    clothing: `exact wardrobe and attire corresponding to reference image for ${name}`,
+    age: 'adult age matching reference image',
+    build: 'natural posture matching reference image',
   };
 }
 
@@ -1207,17 +1145,17 @@ export function getMaestro216Bindings(references: ConfigReference[]): MaestroBin
     const fallback = cat === 'human' ? `Subject${slotIdx}` : cat === 'building' ? 'Musterhaus' : cat === 'logo' ? 'Wasserzeichen' : 'Requisite';
     const cleanName = cleanMaestroAnchorName(ref.name || '', fallback);
     let tag = ref.tag || `<Subject ${slotIdx}>`;
-    let maestroLabel = ref.charTag?.startsWith('@') ? ref.charTag : `@Subject${slotIdx}_${cleanName}`;
+    let maestroLabel = `@Subject${slotIdx}_${cleanName}`;
 
     if (cat === 'building') {
       tag = `<Building ${ref.referenceIndex || slotIdx}>`;
-      if (!ref.charTag?.startsWith('@')) maestroLabel = `@Building${ref.referenceIndex || slotIdx}_${cleanName}`;
+      maestroLabel = `@Building${ref.referenceIndex || slotIdx}_${cleanName}`;
     } else if (cat === 'object') {
       tag = `<Object ${ref.referenceIndex || slotIdx}>`;
-      if (!ref.charTag?.startsWith('@')) maestroLabel = `@Object${ref.referenceIndex || slotIdx}_${cleanName}`;
+      maestroLabel = `@Object${ref.referenceIndex || slotIdx}_${cleanName}`;
     } else if (cat === 'logo') {
       tag = `<Logo ${ref.referenceIndex || 1}>`;
-      if (!ref.charTag?.startsWith('@')) maestroLabel = `@Logo${ref.referenceIndex || 1}_Wasserzeichen_BottomRight`;
+      maestroLabel = `@Logo${ref.referenceIndex || 1}_Wasserzeichen_BottomRight`;
     }
 
     return {
