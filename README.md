@@ -147,6 +147,11 @@ npm start
 
 ---
 
+## Samples
+https://www.instagram.com/mo_ment_e/reel/DdJA7X-iwLU/
+https://www.instagram.com/mo_ment_e/reel/DdFBT2BCR8O/
+https://civitai.red/posts/31028429
+
 ## 📜 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
