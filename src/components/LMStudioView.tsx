@@ -25,6 +25,7 @@ export const LMStudioView: React.FC<LMStudioViewProps> = ({
   const [modelName, setModelName] = useState(settings.modelName || 'local-model');
   const [apiKey, setApiKey] = useState(settings.apiKey || '');
   const [useProxy, setUseProxy] = useState(settings.useProxy ?? true);
+  const [timeoutSeconds, setTimeoutSeconds] = useState<number>(settings.timeoutSeconds ?? 240);
 
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ connected: boolean; message: string; models?: any[] } | null>(null);
@@ -52,6 +53,7 @@ export const LMStudioView: React.FC<LMStudioViewProps> = ({
       modelName,
       apiKey: apiKey || undefined,
       useProxy,
+      timeoutSeconds: Number(timeoutSeconds) || 240,
     });
   };
 
@@ -107,7 +109,7 @@ export const LMStudioView: React.FC<LMStudioViewProps> = ({
           {language === 'DE' ? 'LM Studio Verbindungsparameter' : 'LM Studio Connection Parameters'}
         </h4>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="text-xs font-bold text-zinc-700 block mb-1">
               {t(language, 'lmstudio.endpoint')}
@@ -129,9 +131,34 @@ export const LMStudioView: React.FC<LMStudioViewProps> = ({
               type="text"
               value={modelName}
               onChange={(e) => setModelName(e.target.value)}
-              placeholder="z.B. gemini, omni, oder local-model"
+              placeholder="z.B. qwen2.5-vl, llama-3.2-vision, oder local-model"
               className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-lg text-xs font-mono text-zinc-900 focus:outline-none focus:border-zinc-900 focus:bg-white"
             />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-bold text-zinc-700 block">
+                {t(language, 'lmstudio.timeout')}
+              </label>
+              <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">
+                Default: 240s
+              </span>
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                min={10}
+                max={1200}
+                step={10}
+                value={timeoutSeconds}
+                onChange={(e) => setTimeoutSeconds(Math.max(10, parseInt(e.target.value, 10) || 240))}
+                className="w-full px-3 py-2 bg-zinc-50 border border-zinc-300 rounded-lg text-xs font-mono text-zinc-900 focus:outline-none focus:border-zinc-900 focus:bg-white"
+              />
+              <span className="absolute right-3 top-2 text-xs font-medium text-zinc-400 pointer-events-none">
+                Sekunden
+              </span>
+            </div>
           </div>
         </div>
 

@@ -1,15 +1,31 @@
-# 🎬 Single-Line Video Prompt Engine & Screenplay Generator
+# 🎬 Single-Line Video Prompt Engine & Screenplay Generator `v1.0.0`
 
+> **Version 1.0.0 (Release 1.0)**  
 > **Professional Dramaturgical Screenplay Studio & Single-Line Prompt Engine**  
 > Optimized for **MiniMax H3**, **Maestro 2.1.6**, **Kling AI**, and **Runway Gen-3**.
 
 ---
 
-## 🌟 Overview
+## 🌟 Overview & Reference / Video Inquiries
 
-The **Single-Line Video Prompt Engine** is a high-precision, production-grade application designed for filmmakers, real estate marketers, architects, and content creators. It turns raw bullet points, concept ideas, and reference images into dramaturgically structured video screenplays broken down into contiguous timecoded windows (e.g. **14.000 seconds per window**).
+The **Single-Line Video Prompt Engine (v1.0.0)** is a high-precision production environment designed for filmmakers, content creators, architects, and AI video producers. It transforms raw bullet points, dramaturgical concepts, and visual references into contiguous, timecoded video windows (e.g. **14.000 seconds per window**, exactly 56s across 4 windows) with zero line breaks.
 
-It features a strict **Single-Line Prompt Presser** (0 line breaks per window) to guarantee compatibility with video generation models that fail or corrupt state when receiving multi-line inputs.
+### 📸 Video Showcase & Direct Contact
+- 🎥 **Instagram Showcase & Portfolio**: [https://www.instagram.com/mo_ment_e](https://www.instagram.com/mo_ment_e) (`@mo_ment_e`)
+- 💬 **Video Inquiries & Collaborations**:  
+  *Need custom AI video productions, architectural spatial-axis walkthroughs, or prompt engineering for your projects? Feel free to send a **Direct Message (DM) on Instagram** anytime to [@mo_ment_e](https://www.instagram.com/mo_ment_e)!*
+
+---
+
+## 🏷️ Versioning
+
+- **`v1.0.0` (Current Release - 1.0)**
+  - Full Single-Line Prompt Engine featuring a strict zero-line-break presser.
+  - Multi-Task LM Studio Vision Pipeline (Port 1234) for private local reference and blueprint analysis.
+  - Floorplan & Spatial Axis Director with 4-station tour choreography ($W_1$ to $W_4$), optical lens profiles, and timecode sync.
+  - Synchronized Reference Manager with identity anchors (`<Subject 1..n>`, `<Building 1..n>`, `<Object 1..n>`, `<Logo 1>`).
+  - Multi-format timeline exports (.edl, .fcpxml, .csv, .md) for DaVinci Resolve and Final Cut Pro.
+  - Complete bilingual user interface (English & German).
 
 ---
 
@@ -37,11 +53,11 @@ It features a strict **Single-Line Prompt Presser** (0 line breaks per window) t
 
 ### 5. 👆 Interactive 1-Click Reference Chips & Bullet-Point Clicker
 - Readily extracts all active project references and offers **1-click insert chips** directly above the screenplay text editor.
-- Click to insert formatted references into bullet points (e.g. `+ Bauherrin (<Subject 1>)`, `+ Musterhaus (<Building 1>)`).
+- Click to insert formatted references into bullet points (e.g. `+ Client (<Subject 1>)`, `+ Model Home (<Building 1>)`).
 - Built-in scenario presets (e.g. *Resilience Coaching in the Mountain Forest*, *Floorplan-Guided Kitchen Walkthrough*, *Yacht & Pier Voyage*, *Penthouse Smart Home*).
 
-### 6. 🌐 Human-Readable German Prompt Breakdown ("Verständliches Deutsch")
-- Provides a **1-click German breakdown box** for every technical single-line English prompt.
+### 6. 🌐 Human-Readable Prompt Breakdown ("Plain Explanations")
+- Provides a **1-click German / English breakdown box** for every technical single-line prompt.
 - Clearly details scene action, camera motion, spoken dialogue, 100mm macro close-ups, acoustic soundscapes, and Call-to-Action claims.
 
 ### 7. 🌍 Bilingual GUI (German & English)
@@ -68,11 +84,12 @@ We proudly highlight our project supporters and vision partners:
 ├── src/
 │   ├── components/
 │   │   ├── DrehbuchKonfigurator.tsx  # Main Screenplay Studio & 1-Click Reference Clicker
+│   │   ├── FloorplanDirectorView.tsx # Floorplan & 4-Station Spatial Axis Director
 │   │   ├── ReferenceManager.tsx      # Multimodal Reference & LM Studio Task Manager
 │   │   ├── ScreenplayGenerator.tsx   # Card-Based Shot Breakdown & Prompt Exporter
 │   │   ├── Sidebar.tsx               # Navigation, Sponsor Links & Language Switcher
 │   │   ├── Header.tsx                # App Header & System Status Bar
-│   │   └── drehbuch/                 # Target Audience & Reference sub-components
+│   │   └── drehbuch/                 # Target Audience, Timeline Export & Reference sub-components
 │   ├── utils/
 │   │   ├── windowPromptFormatter.ts  # Single-Line Prompt Presser & German Prompt Translator
 │   │   ├── anchorParser.ts           # Multimodal Anchor Parser (Persons, Buildings, Floorplans)
@@ -121,36 +138,31 @@ npm start
    - Click **"Send All Tasks to LM Studio"** to extract vision anchors automatically.
 
 2. **Configure Story & Target Audience (Step 2)**:
-   - Choose your target audience (e.g., *Familien & Bauherren*, *Luxus-Architektur*, *Wellness & Resilienz*).
-   - Use the **1-Click Reference Chips** to insert your references into the Stichpunkte editor.
+   - Choose your target audience (e.g., *Families & Builders*, *Luxury Architecture*, *Wellness & Resilience*).
+   - Use the **1-Click Reference Chips** to insert your references into the bullet points editor.
 
 3. **Generate & Press Single-Line Windows (Step 3)**:
-   - Click **"In Single-Line Windows pressen"**.
-   - Review each 1-line prompt, verify line-break count (strictly 0), and expand the **"Verständliches Deutsch"** card to verify scene content.
-   - Copy prompts directly into **MiniMax H3** or **Maestro**.
+   - Click **"Press into Single-Line Windows"**.
+   - Review each 1-line prompt, verify line-break count (strictly 0), and expand the prompt breakdown card to verify scene content.
+   - Copy prompts directly into **MiniMax H3**, **Maestro**, or **Kling AI**.
 
 ---
 
-## 🗺️ Roadmap & TODOs
+## 🗺️ Roadmap & Implemented Milestones
 
 - [x] **Strict Single-Line Prompt Pressing (0 line breaks per window)**
 - [x] **LM Studio Multimodal Vision Proxy & Task Pipeline**
 - [x] **Floorplan & Architectural Sightline Analysis (`floorplan` category)**
-- [x] **1-Click Reference Insertion Chips in Stichpunkte Editor**
-- [x] **Human-Readable German Prompt Breakdown ("Verständliches Deutsch")**
+- [x] **1-Click Reference Insertion Chips in Bullet Points Editor**
+- [x] **Human-Readable Prompt Breakdown Card**
 - [x] **Bilingual GUI (German / English) with Persistent Toggle**
 - [x] **Sponsor & Supporter Integration (AI Wizards & Johannes Wobus)**
+- [x] **DaVinci Resolve / Final Cut Pro XML Export**: Export timeline markers and timecode windows (.edl, .fcpxml, .csv, .md).
+- [x] **Floorplan & Spatial Axis Director**: Interactive 2D layout with 4 room stations, camera sightlines, target audience styling, and 1-click sync to screenplay.
 - [ ] **Direct API Integration**: One-click batch submission to MiniMax H3 / Kling API endpoints.
 - [ ] **Audio & Voiceover Generator**: Automatic TTS dialogue generation per window.
-- [ ] **DaVinci Resolve / Final Cut Pro XML Export**: Export timeline markers and timecode windows.
-- [ ] **3D Floorplan Visualizer**: Interactive 2D/3D preview of room camera paths.
 
 ---
-
-## Samples
-https://www.instagram.com/mo_ment_e/reel/DdJA7X-iwLU/
-https://www.instagram.com/mo_ment_e/reel/DdFBT2BCR8O/
-https://civitai.red/posts/31028429
 
 ## 📜 License
 

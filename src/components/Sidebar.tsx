@@ -14,6 +14,9 @@ import {
   ExternalLink,
   Globe,
   Sparkles,
+  Wrench,
+  Compass,
+  Instagram,
 } from 'lucide-react';
 import { LMStudioSettings } from '../types';
 import { Language, t } from '../utils/i18n';
@@ -21,8 +24,10 @@ import { Language, t } from '../utils/i18n';
 export type NavTab =
   | 'referenzen'
   | 'anker'
+  | 'grundriss'
   | 'drehbuchkonfigurator'
   | 'drehbuch'
+  | 'tools'
   | 'lmstudio'
   | 'workflow';
 
@@ -82,12 +87,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     },
     {
+      id: 'grundriss' as NavTab,
+      label: t(language, 'nav.grundriss'),
+      description: t(language, 'nav.grundriss_desc'),
+      icon: Compass,
+      badge: language === 'DE' ? 'Kamera-Routen' : 'Camera Paths',
+      badgeColor: 'bg-cyan-50 text-cyan-800 border-cyan-200 font-semibold',
+    },
+    {
       id: 'drehbuch' as NavTab,
       label: t(language, 'nav.drehbuch'),
       description: t(language, 'nav.drehbuch_desc'),
       icon: Clapperboard,
       badge: shotsCount > 0 ? `${shotsCount} Shots` : undefined,
       badgeColor: 'bg-amber-50 text-amber-800 border-amber-200',
+    },
+    {
+      id: 'tools' as NavTab,
+      label: t(language, 'nav.tools'),
+      description: t(language, 'nav.tools_desc'),
+      icon: Wrench,
+      badge: 'Single-Line',
+      badgeColor: 'bg-amber-50 text-amber-900 border-amber-300 font-bold',
     },
     {
       id: 'lmstudio' as NavTab,
@@ -115,9 +136,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <Film className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="font-bold text-sm tracking-tight text-zinc-900">
-                {t(language, 'header.title')}
-              </h1>
+              <div className="flex items-center gap-1.5">
+                <h1 className="font-bold text-sm tracking-tight text-zinc-900">
+                  {t(language, 'header.title')}
+                </h1>
+                <span className="px-1.5 py-0.5 text-[9px] font-extrabold uppercase bg-amber-100 text-amber-900 border border-amber-300 rounded-md tracking-wider">
+                  v1.0
+                </span>
+              </div>
               <p className="text-[11px] font-medium text-zinc-500">
                 MiniMax H3 &bull; Maestro Pipeline
               </p>
@@ -249,12 +275,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {/* Sponsoren Footer */}
-        <div className="pt-1">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5 flex items-center gap-1">
+        {/* Sponsoren & Referenzen Footer */}
+        <div className="pt-1 space-y-1.5">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1">
             <Sparkles className="w-3 h-3 text-amber-500" />
-            <span>{t(language, 'sponsors.title')}</span>
+            <span>{t(language, 'sponsors.title')} &amp; {language === 'DE' ? 'Referenz' : 'Reference'}</span>
           </div>
+
+          <a
+            href="https://www.instagram.com/mo_ment_e"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-purple-50/70 to-pink-50/70 hover:from-purple-100 hover:to-pink-100 border border-purple-200/80 text-purple-950 text-[11px] font-semibold transition group shadow-2xs"
+            title={language === 'DE' ? 'Instagram Showcase & Video-Anfragen per DM' : 'Instagram Showcase & Video requests via DM'}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <Instagram className="w-3.5 h-3.5 text-pink-600 shrink-0" />
+              <span className="truncate">@mo_ment_e (Videos per DM)</span>
+            </div>
+            <ExternalLink className="w-3 h-3 text-purple-400 group-hover:text-purple-700 shrink-0 ml-1" />
+          </a>
+
           <div className="grid grid-cols-2 gap-1.5">
             <a
               href="https://ai-wizards.de/"

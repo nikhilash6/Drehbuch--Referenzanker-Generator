@@ -80,6 +80,7 @@ export interface LMStudioSettings {
   apiKey?: string;
   activeProvider: 'lmstudio' | 'gemini';
   useProxy: boolean;
+  timeoutSeconds?: number; // default 240 seconds
 }
 
 export interface ShotPrompt {
@@ -173,6 +174,18 @@ export interface SingleLineWindow {
   claimOrCta?: string;
 }
 
+export type ClaimFontStyle = 'blockschrift' | 'handschrift' | 'serif' | 'condensed_bold';
+export type ClaimAnimation = 'blur_reveal' | 'fade_in' | 'typewriter' | 'hard_cut';
+export type ClaimPlacement = 'lower_third' | 'center' | 'top_third' | 'lower_right';
+
+export interface WindowClaimTypography {
+  fontStyle: ClaimFontStyle; // 'blockschrift' (Modern Sans) | 'handschrift' (Cursive Script) | 'serif' (Editorial Serif) | 'condensed_bold' (Poster Bold)
+  animation: ClaimAnimation; // 'blur_reveal' | 'fade_in' | 'typewriter' | 'hard_cut'
+  placement: ClaimPlacement; // 'lower_third' | 'center' | 'top_third' | 'lower_right'
+  hasCursiveAccent?: boolean; // Handschriftlicher Akzent-Zusatz (z.B. geschwungener Untertitel)
+  cursiveNote?: string; // z.B. "Exklusiv reservieren" / "Handcrafted" / "Seit 1994"
+}
+
 export interface ConceptProposalWindow {
   windowNumber: number;
   title: string;
@@ -182,6 +195,7 @@ export interface ConceptProposalWindow {
   dialogueSpeaker?: string;
   focus: string;
   claimOrCta?: string;
+  claimTypography?: WindowClaimTypography;
   soundDesign?: string;
   musicStyle?: string;
 }
@@ -195,6 +209,7 @@ export interface ConceptProposal {
   toneAndStyle: string; // e.g. "Warm, emotional, hochwertig"
   dialogueLanguage: DialogueLanguage;
   callToAction: string; // e.g. "Jetzt Musterhaus besichtigen"
+  callToActionTypography?: WindowClaimTypography;
   windowBreakdown: ConceptProposalWindow[];
 }
 
@@ -220,6 +235,30 @@ export interface ExtractedClaimItem {
   text: string;
   targetWindow?: number;
   hookType?: string;
+}
+
+export interface TypographyOverlayConfig {
+  enabled: boolean;
+  // Hook / Opening (Window 1)
+  openingMainLine?: string; // Blockschrift / Geometric Sans (All-Caps or bold)
+  openingSubLine?: string; // Elegante Schreibschrift / Cursive Script / Subline
+  openingPosition?: 'upper_third' | 'center' | 'lower_third';
+  openingAccentRule?: boolean; // Fine accent line / rule
+
+  // Ausblick-Text / Teaser Claim (Middle Windows)
+  teaserClaim?: string; // Ausblick-Text / Zwischeneinblendung
+  teaserPosition?: 'lower_right' | 'lower_left' | 'center' | 'upper_third';
+  teaserStyle?: 'soft_handwritten' | 'refined_geometric' | 'italic_sans';
+
+  // Outro / Final Brand & Action (Final Window)
+  closingBrandName?: string; // Brand / Project name in geometric block
+  closingCallout?: string; // Callout in Schreibschrift / Cursive (e.g. Jetzt entdecken)
+  closingPosition?: 'exact_center' | 'lower_third';
+  closingAccentBar?: boolean; // Solid accent bar / subtle pulse
+
+  // Overall visual presentation
+  textureLook?: 'heavy_matte' | 'clean_digital' | 'cinematic_minimal';
+  muteVoiceover?: boolean; // No spoken words. Pure silent ambience and music.
 }
 
 export interface DrehbuchKonfiguratorState {
@@ -249,7 +288,12 @@ export interface DrehbuchKonfiguratorState {
   pressedWindows: SingleLineWindow[] | null;
   projectName?: string; // current active project folder name in /data/projects/{projectName}
   projectId?: string;
+  typographyOverlay?: TypographyOverlayConfig;
+  darkRetributionDisclaimerAccepted?: boolean;
+  ultraPhysicsMode?: boolean; // Ultra-Detail Kausalitätskette, Muskelkontraktion, Subsurface-Gegenlicht & Haptik
 }
+
+export type DrehbuchKonfig = DrehbuchKonfiguratorState;
 
 export interface ScreenplayProjectMetadata {
   id: string; // folder name in /data/projects/{id}
@@ -265,6 +309,38 @@ export interface ScreenplayProjectMetadata {
   targetAudienceName?: string;
   thumbnailUrl?: string;
   tags?: string[];
+}
+
+export interface FloorplanRoomStation {
+  id: string;
+  windowNumber: number; // 1 to 4
+  name: string; // e.g. "Foyer / Haupteingang"
+  nameEn: string; // e.g. "Entrance Foyer & Vestibule"
+  zoneType: 'entrance' | 'hallway' | 'kitchen' | 'living' | 'terrace' | 'bedroom' | 'bathroom' | 'exterior';
+  cameraTrajectory: string; // e.g. "Steadicam Dolly-In (1.2m/s) entlang der Hauptachse"
+  cameraTrajectoryEn: string;
+  lensType: string; // e.g. "Cooke Speed Panchro 24mm T2.0 (Wide Architectural Context)"
+  lightingAndAtmosphere: string; // e.g. "Morgensonne / Streiflicht durch bodentiefe Verglasung"
+  lightingAndAtmosphereEn: string;
+  keyMaterialsAndFeatures: string[]; // e.g. ["Eichenparkett Landhausdiele", "Aluminium-Schlankrahmen Anthrazit"]
+  actorAction: string; // e.g. "Tritt durch die Haustür, lässt die Hand über die Wandverkleidung gleiten"
+  actorActionEn: string;
+  soundAndAcoustics: string; // e.g. "Leises Schließen der Haustür, samtiges Hallen im Foyer, dezent warmer Kontrabass"
+  dialogueSnippet?: string;
+  claimOrOverlay?: string;
+  mapCoords: { x: number; y: number }; // Percentage (0 - 100%) on 2D floorplan image
+  directionAngle?: number; // 0-360 degrees for sightline arrow
+  activeSubjects?: string[]; // Project references active in this room station (e.g. ['<Subject 1> Bauherrin'])
+}
+
+export interface FloorplanRouteConfig {
+  floorplanReferenceId?: string;
+  floorplanName: string;
+  floorplanImageUrl?: string;
+  buildingStyle: string; // e.g. "Modernes Flachdach-Musterhaus (Bauhaus-Stil)"
+  buildingStyleEn: string;
+  totalFloors: string;
+  stations: FloorplanRoomStation[];
 }
 
 

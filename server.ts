@@ -205,6 +205,224 @@ Vermeide Spekulationen oder Halluzinationen. Halte dich strikt an die vorgegeben
   }
 });
 
+// 3b. Dedicated Vision analysis for architectural floorplans (100% Local LM Studio Port 1234 Inference)
+app.post('/api/floorplan/analyze-vision', async (req: Request, res: Response) => {
+  try {
+    const {
+      image,
+      endpoint = 'http://localhost:1234/v1',
+      modelName = 'local-model',
+      apiKey,
+      targetAudience,
+      availableReferences = [],
+      promptMode = 'standard',
+    } = req.body;
+
+    if (!image || !image.dataUrl) {
+      res.status(400).json({ error: 'Grundriss-Bild oder SVG-Daten erforderlich.' });
+      return;
+    }
+
+    const subjectsSummary = Array.isArray(availableReferences) && availableReferences.length > 0
+      ? availableReferences.map((r: any) => `${r.tag || '<Subject>'} (${r.name || 'Referenz'}, ${r.category || 'person'})`).join(', ')
+      : '<Subject 1> Bauherrin, <Building 1> Musterhaus Avantgarde';
+
+    const systemPrompt = `Du bist ein hochpräziser Architektur- und Kamera-Director für kinematografische 4-Shot-Rundgänge nach 2D-Grundrissen.
+Deine Aufgabe ist es, aus dem vorliegenden 2D-Grundriss genau 4 logisch aufeinanderfolgende Raumstationen (Window 1 bis 4) zu planen.
+Jede Station umfasst genau 14 Sekunden Filmzeit (insgesamt 56 Sekunden).
+
+Format-Vorgabe: Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt ohne Markdown-Backticks oder zusätzliche Texte.
+JSON-Schema:
+{
+  "buildingTitle": "Kurzer Name des Gebäudes/Grundrisses",
+  "buildingStyle": "z.B. Zeitgenössische Bauhaus-Architektur mit Flachdach",
+  "totalFloors": "z.B. Erdgeschoss mit offener Galerie",
+  "analysisNotes": "Erkannte Raumaufteilung, Sichtachsen und Fensterachsen in 2-3 Sätzen",
+  "stations": [
+    {
+      "windowNumber": 1,
+      "name": "Deutscher Raumname (z.B. Foyer / Haupteingang & Windfang)",
+      "nameEn": "Englischer Raumname (z.B. Entrance Foyer & Vestibule)",
+      "zoneType": "entrance",
+      "cameraTrajectory": "Genaue Beschreibung der fließenden Kamerafahrt auf Deutsch",
+      "cameraTrajectoryEn": "Precise English camera trajectory (e.g. Steadicam slow forward dolly-in...)",
+      "lensType": "z.B. Cooke Speed Panchro 24mm T2.0 oder ARRI Master Prime 35mm",
+      "lightingAndAtmosphere": "Lichtverhältnisse und Sonnenstand auf Deutsch",
+      "lightingAndAtmosphereEn": "Lighting and daylight conditions in English",
+      "keyMaterialsAndFeatures": ["Material 1", "Material 2", "Material 3"],
+      "actorAction": "Handlung des Darstellers auf Deutsch",
+      "actorActionEn": "Actor action and subtle gesture in English",
+      "soundAndAcoustics": "Geräuschkulisse, Hall und Musikstil",
+      "dialogueSnippet": "Kurzer deutscher Voiceover- oder O-Ton-Satz (max 12 Wörter)",
+      "claimOrOverlay": "Kurzer Text-Overlay-Claim (z.B. RAUM FÜR ANKUNFT)",
+      "mapCoords": { "x": 22, "y": 78 },
+      "directionAngle": 45,
+      "activeSubjects": ["<Subject 1> Bauherrin"]
+    },
+    {
+      "windowNumber": 2,
+      "name": "Flur-Sichtachse & Treppenaufgang",
+      "nameEn": "Hallway Sightline & Architectural Staircase",
+      "zoneType": "hallway",
+      "cameraTrajectory": "Gleitender Tracking-Shot auf Augenhöhe",
+      "cameraTrajectoryEn": "Continuous eye-level tracking passing the staircase",
+      "lensType": "ARRI Master Prime 35mm T1.3",
+      "lightingAndAtmosphere": "Diffuses Tageslicht von oben durch Oberlicht-Luftraum",
+      "lightingAndAtmosphereEn": "Soft daylight wash from overhead skylight",
+      "keyMaterialsAndFeatures": ["Freitragende Eichentreppe", "Sichtbeton"],
+      "actorAction": "Gleitet mit der Hand sanft über das Geländer",
+      "actorActionEn": "Fingertips gently brush along balustrade",
+      "soundAndAcoustics": "Warme Klavierakkorde setzen ein",
+      "dialogueSnippet": "Offene Sichtachsen verbinden die Ebenen.",
+      "claimOrOverlay": "FLIESSENDE SICHTACHSEN",
+      "mapCoords": { "x": 42, "y": 56 },
+      "directionAngle": 30,
+      "activeSubjects": ["<Subject 1> Bauherrin"]
+    },
+    {
+      "windowNumber": 3,
+      "name": "Showküche & Essbereich mit Kochinsel",
+      "nameEn": "Designer Open Kitchen Island & Dining",
+      "zoneType": "kitchen",
+      "cameraTrajectory": "Sanfter 180°-Halborbit um die freistehende Kochinsel",
+      "cameraTrajectoryEn": "Gentle 180-degree semi-orbit around monolithic kitchen island",
+      "lensType": "Leica Summilux-C 35mm T1.4",
+      "lightingAndAtmosphere": "Warmes Tageslicht von Südseite",
+      "lightingAndAtmosphereEn": "Warm Southern daylight glancing off stone surfaces",
+      "keyMaterialsAndFeatures": ["Nero Assoluto Naturstein", "Räuchereiche"],
+      "actorAction": "Stellt eine Keramikschale auf den Tresen",
+      "actorActionEn": "Places a designer ceramic bowl on the countertop",
+      "soundAndAcoustics": "Subtiles Klirren von Porzellan, leises Brutzeln",
+      "dialogueSnippet": "Das Herzstück des Hauses ist ein Treffpunkt der Sinne.",
+      "claimOrOverlay": "KULINARISCHER LEBENSMITTELPUNKT",
+      "mapCoords": { "x": 60, "y": 38 },
+      "directionAngle": 15,
+      "activeSubjects": ["<Subject 1> Bauherrin"]
+    },
+    {
+      "windowNumber": 4,
+      "name": "Kamin-Salon & Panorama-Terrassenaustritt",
+      "nameEn": "Fireplace Living Lounge & Panoramic Terrace Exit",
+      "zoneType": "living",
+      "cameraTrajectory": "Langsamer Crane-Down vom Kaminfeuer hin zur bodentiefen Schiebetür",
+      "cameraTrajectoryEn": "Slow pedestal crane-down starting from fireplace towards open terrace",
+      "lensType": "ARRI Master Prime 28mm T1.3",
+      "lightingAndAtmosphere": "Goldene Stunde / Spätnachmittagssonne",
+      "lightingAndAtmosphereEn": "Golden hour late afternoon sunbeams through frameless sliding glass facade",
+      "keyMaterialsAndFeatures": ["Bodentiefe Schiebefassade", "Feuerstelle"],
+      "actorAction": "Öffnet die Schiebetür mit einer Handbewegung und blickt in den Garten.",
+      "actorActionEn": "Slides open panoramic glass door and steps onto exterior timber deck",
+      "soundAndAcoustics": "Sanftes Knistern des Kamins geht über in sommerliches Vogelgezwitscher",
+      "dialogueSnippet": "Grenzenlose Weite. Innen und Außen verschmelzen zur Einheit.",
+      "claimOrOverlay": "LEBEN OHNE GRENZEN",
+      "mapCoords": { "x": 78, "y": 25 },
+      "directionAngle": 0,
+      "activeSubjects": ["<Subject 1> Bauherrin", "<Building 1> Musterhaus Avantgarde"]
+    }
+  ]
+}`;
+
+    const userPrompt = `Analysiere diesen Grundriss und plane den 4-Window-Rundgang (je 14s).
+Zielgruppe: ${typeof targetAudience === 'string' ? targetAudience : targetAudience?.name || 'Architektur & Lifestyle'}.
+Verfügbare Referenz-Subjekte aus dem Projekt: ${subjectsSummary}.
+Verteile die passenden Referenz-Subjekte auf die Stationen.
+Modus: ${promptMode === 'sunlight' ? 'Fokus auf Sonnenachsen & Tageslichtverlauf' : promptMode === 'materials' ? 'Fokus auf Premium-Materialien & Haptik' : 'Gleichmäßiger 4-Raum Durchgang'}.
+Erstelle ein valides JSON nach dem vorgegebenen Schema.`;
+
+    const baseUrl = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint;
+    const targetUrl = `${baseUrl}/chat/completions`;
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`;
+    }
+
+    const payload = {
+      model: modelName || 'local-model',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: userPrompt },
+            {
+              type: 'image_url',
+              image_url: {
+                url: image.dataUrl,
+              },
+            },
+          ],
+        },
+      ],
+      temperature: 0.2,
+      max_tokens: 3000,
+    };
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000);
+
+    let responseText = '';
+    try {
+      const response = await fetch(targetUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timeout));
+
+      if (!response.ok) {
+        const errBody = await response.text();
+        throw new Error(`LM Studio HTTP ${response.status}: ${errBody}`);
+      }
+
+      const data = await response.json();
+      responseText = data.choices?.[0]?.message?.content || '';
+    } catch (lmErr: any) {
+      return res.status(502).json({
+        error: `Verbindung zu lokalem LM Studio (${endpoint}) fehlgeschlagen: ${lmErr.message}. Bitte überprüfe, ob dein LM Studio Server auf Port 1234 gestartet wurde und ein Vision-Modell geladen ist.`,
+        provider: 'lmstudio',
+      });
+    }
+
+    let parsedData: any = null;
+    try {
+      const clean = responseText.replace(/```json\s*/gi, '').replace(/```\s*$/gi, '').trim();
+      parsedData = JSON.parse(clean);
+    } catch {
+      const match = responseText.match(/\{[\s\S]*\}/);
+      if (match) {
+        try {
+          parsedData = JSON.parse(match[0]);
+        } catch {}
+      }
+    }
+
+    if (!parsedData || !Array.isArray(parsedData.stations)) {
+      return res.json({
+        success: true,
+        provider: 'lmstudio',
+        modelUsed: modelName,
+        rawResponse: responseText,
+        parsed: false,
+        message: 'Antwort von lokalem LM Studio erhalten, konnte jedoch nicht als vollständiges JSON geparst werden.',
+      });
+    }
+
+    return res.json({
+      success: true,
+      provider: 'lmstudio',
+      modelUsed: modelName,
+      data: parsedData,
+      rawResponse: responseText,
+    });
+  } catch (err: any) {
+    console.error('Floorplan vision analysis error:', err);
+    res.status(500).json({ error: `Analysefehler: ${err.message}` });
+  }
+});
+
 app.post('/api/analyze-references', async (req: Request, res: Response) => {
   try {
     const { images, customPrompt } = req.body;
@@ -300,6 +518,7 @@ app.post('/api/generate-screenplay', async (req: Request, res: Response) => {
       endpoint = 'http://localhost:1234/v1',
       modelName = 'local-model',
       apiKey,
+      timeoutSeconds = 240,
       title,
       sceneGoal,
       genre,
@@ -400,7 +619,8 @@ Antworte AUSSCHLIESSLICH im gültigen JSON-Format (kein vorangestellter oder nac
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout for local LLM generation
+    const effectiveTimeoutMs = Math.max(10, Number(timeoutSeconds) || 240) * 1000;
+    const timeout = setTimeout(() => controller.abort(), effectiveTimeoutMs);
 
     const lmResponse = await fetch(targetUrl, {
       method: 'POST',
@@ -481,6 +701,7 @@ app.post('/api/screenplay/generate-proposals', async (req: Request, res: Respons
       endpoint = 'http://localhost:1234/v1',
       modelName = 'local-model',
       apiKey,
+      timeoutSeconds = 240,
       stichpunkte = '',
       windowCount = 4,
       windowDurationSeconds = 14,
@@ -493,6 +714,9 @@ app.post('/api/screenplay/generate-proposals', async (req: Request, res: Respons
       globalBackground = 'Neubausiedlung / Grüne Wohnsiedlung',
       globalCam = 'Drohnenflug Orbit 360°',
       genre = 'Architektur & Lifestyle (Immobilien)',
+      ultraPhysicsMode = false,
+      lensOpticsMode = false,
+      selectedLens = 'auto',
     } = req.body;
 
     // Use references array if provided, or fallback to subjects
@@ -548,7 +772,41 @@ In den Referenzen ist ein Logo / Brand-Mark hinterlegt. Das Logo muss in ALLEN V
 `;
     }
 
-    const systemPrompt = `Du bist ein hochdotierter internationaler Regisseur und Prompt-Ingenieur für High-End Videos auf Video-KIs (MiniMax H3 / Maestro 2.1.6). Du bist extrem flexibel bezüglich Genres und Themen (z.B. Comedy, Horror, Erotik, Drama, Reise, Kunst, Lifestyle oder Architektur) und passt die Handlung, die Atmosphäre, die Tonalität und alle Beschreibungen exakt an die Vorgaben des Nutzers an.
+    // Specific genre directives
+    let genreDirective = '';
+    const lowerGenreStr = (genre || '').toLowerCase();
+    const lowerStichStr = (stichpunkte || '').toLowerCase();
+    if (
+      lowerGenreStr.includes('reiseführung') ||
+      lowerGenreStr.includes('tourismus') ||
+      lowerStichStr.includes('reiseführung') ||
+      lowerStichStr.includes('tourismus') ||
+      (lowerStichStr.includes('avatar') && (lowerStichStr.includes('denkmal') || lowerStichStr.includes('kultur')))
+    ) {
+      genreDirective = `
+GENRE-SPEZIALANWEISUNG: REISEFÜHRUNG (REISEVIDEOS & TOURISMUS - AVATAR + KULTUR-DENKMAL):
+Dieses Video ist eine lebendige, fesselnde Reiseführung / Tourismus-Präsentation!
+- Protagonist/Host (<Subject 1>): Ein sympathischer, charismatischer Avatar oder Reiseleiter. Er moderiert direkt in die Kamera, bewegt sich vor dem Denkmal/Bauwerk (<Building 1> oder <Object 1>), zeigt begeistert auf architektonische Details, historische Inschriften oder Statuen und erzählt fesselnde Geschichten.
+- "dialogueSnippet": Formulierte, packende gesprochene Moderation ("das Gelabere" / die Tour-Erklärung) auf ${dialogueLanguage}, z.B. spannende Geheimnisse, Jahreszahlen, Mythen und Einladungen.
+- Kamera: Wechsel zwischen nahen Einstellungen auf den sprechenden Avatar und atemberaubenden Drohnenflügen / Weitwinkelschwenks über das Denkmal.
+- "claimOrCta": Markante historische Fakten, UNESCO-Titel, Meilensteine oder Einladungen zu geführten Touren (z.B. "UNESCO Welterbe", "Erbaut 1791", "Jetzt VIP-Tour buchen").
+`;
+    }
+
+    // Ultra-Physics & Causal Kinetic Chain Directive
+    let ultraPhysicsDirective = '';
+    if (ultraPhysicsMode !== false) {
+      ultraPhysicsDirective = `
+ULTRA-PHYSICS, SPECULAR LIGHTING & CAUSAL REACTION CHAIN (HIGH-END MINIMAX H3 REQUIREMENT):
+For all "actionDescription" and "focus" fields, you MUST enforce physical realism through 4 mandatory mechanisms:
+1. CAUSAL REACTION CHAIN (Kinetic Coupling): Every physical action MUST trigger an involuntary biological/physical counter-reaction. Coupling formula: [Physical Movement / Contact] -> [Immediate muscle/tendon tension or breathing intake] -> [Sensory / tactile feedback]. Never describe static mannequin poses; describe skin flexing, chests heaving with deep respiration, hands gripping with visible knuckle pressure, or materials deforming under touch.
+2. SPECULAR STREAK LIGHTING & MICRO-TEXTURES: Emphasize dynamic specular highlights and physical textures (sweat glinting on toned skin, wet dew on moss, backlight catching drifting dust motes or fine strands of hair, subsurface scattering through fingertips and ears).
+3. 4-STAGE CONTIGUOUS PACING: In each window's action, structure the dynamic progression into seamless beats (0-4s initial movement & atmosphere, 4-9s deep physical engagement/interaction, 9-13s climax/dialogue delivery, 13-15s resolving glide/CTA).
+4. ANCHORED POV & HAPTIC CONTACT: Treat the camera as an authentic physical presence with tangible distance, consistent eye-lines, and tangible interaction with props/surroundings.
+`;
+    }
+
+    const systemPrompt = `Du bist ein hochdotierter internationaler Regisseur und Prompt-Ingenieur für High-End Videos auf Video-KIs (MiniMax H3 / Maestro 2.1.6). Du bist extrem flexibel bezüglich Genres und Themen (z.B. Reiseführung mit Avatar & Kultur-Denkmal, Restaurant & Fine Dining, Comedy, Horror, Erotik, Drama, Reise, Kunst, Lifestyle oder Architektur) und passt die Handlung, die Atmosphäre, die Tonalität und alle Beschreibungen exakt an die Vorgaben des Nutzers an.
 Deine Aufgabe: Entwickle genau 1 KREATIVES, HOCHWERTIGES DREHBUCH-KONZEPT für ein Video bestehend aus ${windowCount} Szenenfenstern (Windows) mit je ${windowDurationSeconds} Sekunden Dauer.
 
 CRITICAL HARD CONSTRAINT (STRIKTES ENGLISCH-GEBOT FÜR MINIMAX H3 PROMPTS):
@@ -560,6 +818,12 @@ Daher gilt folgende eiserne Regel:
 - "dialogueSpeaker": Name des Sprechers (z.B. "Bauherrin")
 - "dialogueSnippet": Gesprochener Dialog-Satz in der vorgegebenen Zielsprache "${dialogueLanguage}"
 - "claimOrCta": Claim / Call-to-Action (z.B. "${finalCallToAction}")
+- "claimTypography": Exakte typografische Gestaltung für On-Screen Einblendungen im Window (Definiere bewusst Handschrift vs. Blockschrift vs. Serif, Animation und Platzierung passend zum Genre):
+  - "fontStyle": "blockschrift" (Moderne Sans-Serif) | "handschrift" (Elegante Schreibschrift / Cursive) | "serif" (Editorial Serif) | "condensed_bold" (Kino-Plakat)
+  - "animation": "blur_reveal" (Cinematic Blur-Reveal) | "fade_in" (Sanfter Opacity-Fade) | "typewriter" (Typewriter-Effekt) | "hard_cut" (Direkter Schnitt)
+  - "placement": "lower_third" (Unteres Drittel) | "center" (Bildmitte) | "top_third" (Oben) | "lower_right" (Dezent unten rechts)
+  - "hasCursiveAccent": true | false (Optional handschriftlicher Akzent-Untertitel)
+  - "cursiveNote": Kurzer Text für Akzent (z.B. "Haute Cuisine", "Seit 1994", "Unikat", "Schlüsselfertig")
 - "soundDesign": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "Foley sound of quiet sniffling, birds chirping, soft footsteps, or wind through leaves")
 - "musicStyle": MUST BE 100% IN HIGH-END CINEMATIC ENGLISH (e.g. "Soft cinematic warm piano keys, suspenseful horror soundscapes, light-hearted comedic acoustic guitar, or upbeat electronic beats")
 - "title", "tagline", "descriptionForLayperson", "dramaturgyHighlights", "toneAndStyle": Können auf Deutsch für die verständliche Präsentation in der UI formuliert sein.
@@ -574,6 +838,7 @@ WICHTIGE ANFORDERUNGEN:
    - toneAndStyle: z.B. "Warm, emotional, inviting" oder "Modern, dynamic, technology-focused"
    - dialogueLanguage: "${dialogueLanguage}"
    - callToAction: Konkreter Aufruf zum Handeln am Ende (z.B. "${finalCallToAction}")
+   - callToActionTypography: Typografische Regie für den Outro Call-to-Action (fontStyle, animation, placement, hasCursiveAccent, cursiveNote)
    - windowBreakdown: Array von genau ${windowCount} Windows mit:
      - windowNumber (1 bis ${windowCount})
      - title: Verständlicher Titel für das Window
@@ -585,9 +850,12 @@ WICHTIGE ANFORDERUNGEN:
      - soundDesign: EXCLUSIVELY IN HIGH-END CINEMATIC ENGLISH
      - musicStyle: EXCLUSIVELY IN HIGH-END CINEMATIC ENGLISH
      - claimOrCta: Call-to-Action Text
+     - claimTypography: { fontStyle, animation, placement, hasCursiveAccent, cursiveNote }
 
 ${audienceDirective}
 ${logoDirective}
+${genreDirective}
+${ultraPhysicsDirective}
 
 VERPFLICHTENDE REFERENZEN (Objekte, Gebäude, Personen, Tiere):
 Die folgenden Referenzen sind Gegenstand des kreativen Gesamtkonzepts. Definiere genau, WER WAS MACHT und WER MIT WEM WIE ZUSAMMEN GEHÖRT:
@@ -609,6 +877,13 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
       "toneAndStyle": "...",
       "dialogueLanguage": "${dialogueLanguage}",
       "callToAction": "${finalCallToAction}",
+      "callToActionTypography": {
+        "fontStyle": "blockschrift",
+        "animation": "blur_reveal",
+        "placement": "center",
+        "hasCursiveAccent": true,
+        "cursiveNote": "Exklusiv"
+      },
       "windowBreakdown": [
         {
           "windowNumber": 1,
@@ -620,7 +895,14 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
           "focus": "Cinematic English focus...",
           "soundDesign": "Cinematic English sound design...",
           "musicStyle": "Cinematic English music style...",
-          "claimOrCta": "..."
+          "claimOrCta": "...",
+          "claimTypography": {
+            "fontStyle": "blockschrift",
+            "animation": "blur_reveal",
+            "placement": "lower_third",
+            "hasCursiveAccent": false,
+            "cursiveNote": ""
+          }
         }
       ]
     }
@@ -638,7 +920,8 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 240000); // 240s timeout (much safer for slow local models)
+    const effectiveTimeoutMs = Math.max(10, Number(timeoutSeconds) || 240) * 1000;
+    const timeout = setTimeout(() => controller.abort(), effectiveTimeoutMs);
 
     let rawOutput = '';
     let fetchErrorMsg = '';
@@ -666,7 +949,7 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
       }
     } catch (fetchErr: any) {
       if (fetchErr.name === 'AbortError') {
-        fetchErrorMsg = 'Zeitüberschreitung (Timeout): LM Studio antwortete nicht innerhalb von 240 Sekunden. Eventuell läuft die Generierung auf Ihrem System zu langsam oder blockiert.';
+        fetchErrorMsg = `Zeitüberschreitung (Timeout): LM Studio antwortete nicht innerhalb von ${Math.round(effectiveTimeoutMs / 1000)} Sekunden. Eventuell läuft die Generierung auf Ihrem System zu langsam oder blockiert.`;
       } else {
         fetchErrorMsg = `Verbindung zu LM Studio fehlgeschlagen: ${fetchErr.message || fetchErr}. Bitte stelle sicher, dass LM Studio gestartet, der Server aktiv und das Modell geladen ist.`;
       }
@@ -680,6 +963,31 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
         if (parsed.proposals && Array.isArray(parsed.proposals) && parsed.proposals.length > 0) {
           // Exclusively return exactly 1 proposal to the frontend
           const singleProposal = parsed.proposals.slice(0, 1);
+          if (singleProposal[0] && Array.isArray(singleProposal[0].windowBreakdown)) {
+            singleProposal[0].windowBreakdown = singleProposal[0].windowBreakdown.map((win: any, idx: number) => {
+              const isLast = idx === singleProposal[0].windowBreakdown.length - 1;
+              const rawTypo = win.claimTypography || {};
+              return {
+                ...win,
+                claimTypography: {
+                  fontStyle: rawTypo.fontStyle || (idx % 2 === 0 ? 'blockschrift' : 'serif'),
+                  animation: rawTypo.animation || 'blur_reveal',
+                  placement: rawTypo.placement || (isLast ? 'center' : 'lower_third'),
+                  hasCursiveAccent: Boolean(rawTypo.hasCursiveAccent),
+                  cursiveNote: rawTypo.cursiveNote || '',
+                }
+              };
+            });
+            if (!singleProposal[0].callToActionTypography) {
+              singleProposal[0].callToActionTypography = {
+                fontStyle: 'blockschrift',
+                animation: 'blur_reveal',
+                placement: 'center',
+                hasCursiveAccent: true,
+                cursiveNote: 'Exklusiv reservieren',
+              };
+            }
+          }
           res.json({ success: true, proposals: singleProposal, source: 'lmstudio' });
           return;
         } else {
@@ -748,11 +1056,24 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
       }
     }
 
-    // Determine the main theme of the stichpunkte
+    // Determine the main theme of the stichpunkte and genre
     const lowerStich = stichpunkte.toLowerCase();
+    const lowerGenre = (genre || '').toLowerCase();
     let themeKey = 'architecture'; // default
 
-    if (lowerStich.includes('resilienz') || lowerStich.includes('coaching') || lowerStich.includes('berater') || lowerStich.includes('therapie') || lowerStich.includes('mental') || lowerStich.includes('wald') || lowerStich.includes('geist') || lowerStich.includes('psycholog')) {
+    if (lowerStich.includes('rache') || lowerStich.includes('vergeltung') || lowerStich.includes('ghostrider') || lowerGenre.includes('rache') || lowerGenre.includes('retribution') || lowerGenre.includes('ghostrider')) {
+      themeKey = 'retribution';
+    } else if (
+      lowerStich.includes('reiseführung') ||
+      lowerStich.includes('tourismus') ||
+      lowerGenre.includes('reiseführung') ||
+      lowerGenre.includes('tourismus') ||
+      (lowerStich.includes('avatar') && (lowerStich.includes('denkmal') || lowerStich.includes('kultur') || lowerStich.includes('monument')))
+    ) {
+      themeKey = 'tourguide';
+    } else if (lowerStich.includes('restaurant') || lowerStich.includes('kulinarik') || lowerStich.includes('dining') || lowerStich.includes('gastronomie') || lowerStich.includes('gourmet') || lowerStich.includes('chefkoch') || lowerStich.includes('koch') || lowerGenre.includes('restaurant') || lowerGenre.includes('dining') || lowerGenre.includes('kulinarik')) {
+      themeKey = 'restaurant';
+    } else if (lowerStich.includes('resilienz') || lowerStich.includes('coaching') || lowerStich.includes('berater') || lowerStich.includes('therapie') || lowerStich.includes('mental') || lowerStich.includes('wald') || lowerStich.includes('geist') || lowerStich.includes('psycholog')) {
       themeKey = 'coaching';
     } else if (lowerStich.includes('horror') || lowerStich.includes('grusel') || lowerStich.includes('unheimlich') || lowerStich.includes('angst') || lowerStich.includes('thriller') || lowerStich.includes('schatten')) {
       themeKey = 'horror';
@@ -783,6 +1104,19 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
         [/\bTür\b/gi, 'door'],
         [/\blächelnd\b/gi, 'smilingly'],
         [/\bentspannt\b/gi, 'relaxed'],
+        [/\bReiseführung\b/gi, 'guided tour'],
+        [/\bReiseleiter\b/gi, 'tour guide'],
+        [/\bReiseleiterin\b/gi, 'tour guide'],
+        [/\bAvatar\b/gi, 'avatar host'],
+        [/\bDenkmal\b/gi, 'monument'],
+        [/\bSehenswürdigkeit\b/gi, 'historic landmark'],
+        [/\bBauwerk\b/gi, 'architectural monument'],
+        [/\bKathedrale\b/gi, 'cathedral'],
+        [/\bSchloss\b/gi, 'castle'],
+        [/\bSäulen\b/gi, 'colossal stone columns'],
+        [/\bInschrift\b/gi, 'ancient engraved inscription'],
+        [/\bRelief\b/gi, 'sculptured stone relief'],
+        [/\bAnmoderation\b/gi, 'opening host presentation'],
       ];
       for (const [reg, rep] of replacements) {
         en = en.replace(reg, rep as string);
@@ -898,6 +1232,50 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
           'Lock the door! Faster!'
         ]
       },
+      tourguide: {
+        p1Title: 'Reiseführung mit Avatar: Geheimnisse des Denkmals',
+        p1Tagline: 'Faszinierende Geschichten & lebendige Geschichte vor historischer Kulisse',
+        p1Desc: `Ein mitreißender Tourismus- & Kulturfilm. Der sympathische Avatar/Host (${firstHuman}) führt die Zuschauer durch die bewegte Geschichte des Denkmals (${buildingRef}), erklärt verborgene Details und lädt zum Entdecken ein.`,
+        p2Title: 'Kultur & Faszination: Die Entdeckertour',
+        p2Tagline: 'Lebendige Reiseführung mit fundiertem Insider-Wissen',
+        p2Desc: `Dynamischer Wechsel zwischen dem sprechenden Avatar (${firstHuman}), monumentalen Drohnen-Perspektiven über ${buildingRef} und packenden historischen Fakten als On-Screen Claims.`,
+        p3Title: 'Zeitreise hautnah: Das Denkmal erwacht',
+        p3Tagline: 'Cineastischer Kulturführer im Doku-Stil',
+        p3Desc: `Atmosphärische Lichtstimmungen im Gegenlicht des Monuments (${buildingRef}), Nahaufnahmen der Reliefs und ein inspirierender Call-to-Action für Städtereisen und Führungen.`,
+        p1Tone: 'Engaging, welcoming, charismatic, educational and high-end cinematic tourism aesthetics',
+        p2Tone: 'Dynamic, insightful, awe-inspiring, vibrant cultural exploration',
+        p3Tone: 'Epic, historic, atmospheric, majestic golden hour documentary cinema',
+        defaultDeWindows: [
+          `Anmoderation: Avatar (${firstHuman}) begrüßt die Zuschauer vor der Kulisse des Denkmals (${buildingRef})`,
+          `Monumentaler Drohnenflug & architektonische Details von ${buildingRef} mit Fakten-Claim`,
+          `Avatar (${firstHuman}) erklärt spannende historische Hintergründe & zeigt auf Inschriften`,
+          `Goldene Stunde, Panorama-Schwenk & Einladung zur geführten VIP-Tour`
+        ],
+        defaultEnActions: [
+          `The digital avatar host ${firstHuman} stands confidently in front of the magnificent monument ${buildingRef}, speaking engagingly to camera with welcoming natural gestures in clear daylight.`,
+          `Sweeping orbital drone flight ascending smoothly above the grand historical monument ${buildingRef}, capturing the intricate stone architecture, towering columns, and vibrant city backdrop.`,
+          `Close-up on ${firstHuman} gesturing enthusiastically towards the weathered stone relief of ${buildingRef}, explaining captivating cultural secrets with expressive hand movements.`,
+          `The camera pulls back smoothly in the golden hour twilight as ${firstHuman} smiles warmly to the lens, the grand landmark glowing behind them as a refined on-screen CTA fades in.`
+        ],
+        defaultFocus: [
+          `Engaging facial expressions of avatar ${firstHuman}, grand architectural backdrop of ${buildingRef}`,
+          'Intricate stone masonry, towering arches, expansive sky and subtle historical typography',
+          `Expressive gestures of ${firstHuman}, tactile historical engravings and antique textures`,
+          `Warm golden hour rim light on avatar ${firstHuman}, monument silhouette and elegant CTA`
+        ],
+        defaultDialoguesDe: [
+          'Willkommen! Hinter diesen steinernen Mauern verbirgt sich ein Geheimnis, das Jahrhunderte überdauert hat.',
+          'Schaut euch diese gewaltigen Säulen an – erbaut vor über dreihundert Jahren.',
+          'Kaum jemand weiß: Genau hier fand damals die geheime Zusammenkunft statt.',
+          'Erlebt die Magie selbst – bucht jetzt eure persönliche VIP-Tour!'
+        ],
+        defaultDialoguesEn: [
+          'Welcome! Behind these stone walls lies a secret that has survived for centuries.',
+          'Look at these colossal pillars – engineered over three hundred years ago.',
+          'Hardly anyone knows: It was right here that the historic secret summit took place.',
+          'Experience the magic yourself – reserve your exclusive guided tour today!'
+        ]
+      },
       travel: {
         p1Title: 'Grenzenlose Freiheit: Das Abenteuer',
         p1Tagline: 'Neue Horizonte spüren und das Leben intensiv erfahren',
@@ -986,6 +1364,94 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
           'This is exactly how it should be.'
         ]
       },
+      retribution: {
+        p1Title: 'Die Rückkehr der Rächerin: Flammendes Erwachen',
+        p1Tagline: 'Übernatürliche Dark-Action im Ghostrider-Stil mit brennendem Reittier',
+        p1Desc: `Eine spektakuläre, bildgewaltige Vergeltungs-Sequenz. Die Protagonistin reitet auf einem von Flammen umhüllten Pferd herab, schlägt auf dem nächtlichen Asphalt ein und hinterlässt eine Spur aus glühender Zerstörung.`,
+        p2Title: 'Asphalt-Inferno: Der Zerstörungs-Ritt',
+        p2Tagline: 'Hochenergetische Zerstörungs-Action mit glühendem Krater & Schockwellen',
+        p2Desc: `Dynamische, schnelle Kamerafahrten mit Fokus auf berstenden Asphalt, fliegende Trümmer und den unaufhaltsamen Zorn der Reiterin auf dem flammenden Pferd.`,
+        p3Title: 'Asche & Vergeltung: Die finale Abrechnung',
+        p3Tagline: 'Düsteres, episches Action-Kino mit loderndem Feuermeer und starkem Hook',
+        p3Desc: `Ruhige, furchteinflößende Einstellungen, Nahaufnahmen der brennenden Hufe, glühender Rauch und der finale Blick in die Kamera.`,
+        p1Tone: 'Supernatural dark action, fiery cinematic glow, devastating power, Ghostrider aesthetic',
+        p2Tone: 'High-octane destructive action, blistering heat, shattering concrete, hyper-dynamic camera sweeps',
+        p3Tone: 'Epic apocalyptic aftermath, smoldering embers, heavy cinematic bass, commanding vengeance',
+        defaultDeWindows: [
+          'Herabsturz aus dem Nachthimmel auf einem brennenden Reittier',
+          'Aufschlag auf den Asphalt, gewaltige Schockwelle & berstende Straße',
+          'Vorstoß durch das Trümmerfeld mit flammender Mähne & glühenden Hufen',
+          'Stillstand im Flammenmeer & finale Vergeltungs-Botschaft'
+        ],
+        defaultEnActions: [
+          `A supernatural rider in dark leather descends from the fiery night sky on a demonic steed engulfed in blazing embers and roaring flames.`,
+          `High-speed violent touchdown on the city asphalt, fracturing the road into jagged glowing fissures with a shockwave sending dust flying.`,
+          `The flaming horse gallops powerfully forward, its fiery hooves tearing up asphalt blocks as fiery sparks trail through the smoky street.`,
+          `Epic cinematic low-angle portrait: The rider halts amidst smoking craters and glowing rubble, glancing directly at the lens as flames reflect in the eyes.`
+        ],
+        defaultFocus: [
+          'Fiery mane of the steed, glowing eyes and night sky smoke plume',
+          'Fracturing asphalt cracks, glowing orange embers and explosive shockwave',
+          'Hooves striking pavement with firebursts and flying debris',
+          'Intense glare of the rider, smoldering wreckage and on-screen CTA typography'
+        ],
+        defaultDialoguesDe: [
+          'Die Zeit der Abrechnung ist gekommen.',
+          'Niemand kann diesen Zorn aufhalten.',
+          'Aus der Asche erwächst die Vergeltung.',
+          'Es ist vollbracht. Kein Zurück mehr.'
+        ],
+        defaultDialoguesEn: [
+          'The hour of reckoning has arrived.',
+          'Nothing can stop this fury.',
+          'From the ashes, vengeance rises.',
+          'It is done. No turning back.'
+        ]
+      },
+      restaurant: {
+        p1Title: 'Die Kunst des Genusses: Haute Cuisine im Fokus',
+        p1Tagline: 'Vom knisternden Flammen-Herd bis zur kunstvollen Teller-Kreation',
+        p1Desc: `Ein eleganter, sinnlicher Imagefilm über exzellente Gastronomie und kulinarische Meisterschaft. Von der sorgfältigen Zubereitung in der offenen Küche bis zum vollendeten Genuss im stimmungsvollen Ambiente.`,
+        p2Title: 'Leidenschaft & Handwerk: Der Blick in die Küche',
+        p2Tagline: 'Dynamischer Einblick hinter die Kulissen der Spitzen-Gastronomie',
+        p2Desc: `Fokussiert auf Tempo, feurige Pfannen, edle Weine und das meisterhafte Handwerk der Köche. Dynamische Makro-Shots zelebrieren Frische, Textur und Perfektion.`,
+        p3Title: 'Ein Abend voller Geschmack: Atmosphäre & Geselligkeit',
+        p3Tagline: 'Warmes Kerzenlicht, erlesener Wein und unvergessliche Momente',
+        p3Desc: `Atmosphärische Bilder im eleganten Gastraum, glückliche Gäste beim Anstoßen mit edlen Kristallgläsern und ein einladender Call-to-Action für Tischreservierungen.`,
+        p1Tone: 'Sensory fine-dining aesthetic, warm dramatic overhead lighting, sizzling steam, gourmet textures',
+        p2Tone: 'High-energy culinary craftsmanship, flaring saute pans, crisp macro details, passionate teamwork',
+        p3Tone: 'Sophisticated hospitality, ambient candlelight, glowing crystal glassware, welcoming warmth',
+        defaultDeWindows: [
+          'Meisterhaftes Anrichten: Chefkoch vollendet die Teller-Kreation mit Pinzette und Kräutern',
+          'Flammen & Handwerk: Zischen der Pfanne auf dem Gasherd & Leidenschaft in der offenen Küche',
+          'Eleganter Service: Einschenken von samtigem Rotwein am Tisch im warmen Kerzenlicht',
+          'Genuss & Ambiente: Gäste stoßen lächelnd an, Schwenk über den edlen Gastraum & Call-to-Action'
+        ],
+        defaultEnActions: [
+          `Extreme macro close-up of a master chef delicately placing fresh micro-herbs with silver tweezers onto an exquisite fine-dining plate under warm dramatic spotlighting.`,
+          `Dynamic medium shot in a high-end open restaurant kitchen: A flaming saute pan flares up on a stainless steel stove with aromatic embers and steam rising.`,
+          `Steadicam glide at a candle-lit dining table: An elegant waiter in a crisp black apron gracefully pours rich ruby-red wine into a crystal goblet.`,
+          `Slow cinematic panoramic tracking shot through the warm, elegant restaurant dining room: Smiling guests toast with crystal glasses as on-screen CTA appears.`
+        ],
+        defaultFocus: [
+          'Gourmet plate texture, fresh micro-herbs, glossy reduction drizzle and chef hands',
+          'Golden flames, searing steam, gleaming stainless steel and focused chef eyes',
+          'Crystal glass clarity, swirling red wine, glowing candle flame and linen tablecloth',
+          'Warm ambient dining hall, smiling guest expressions and final Call-to-Action typography'
+        ],
+        defaultDialoguesDe: [
+          'Jedes Gericht erzählt seine eigene Geschichte.',
+          'Perfektion entsteht aus Leidenschaft und den besten Zutaten.',
+          'Ein außergewöhnlicher Wein für einen besonderen Moment.',
+          'Willkommen zu einem unvergesslichen Abend voller Geschmack.'
+        ],
+        defaultDialoguesEn: [
+          'Every single dish tells its own distinct story.',
+          'True culinary perfection is born from passion and the finest ingredients.',
+          'An extraordinary vintage for a very special evening.',
+          'Welcome to an unforgettable evening of taste and elegance.'
+        ]
+      },
       architecture: {
         p1Title: 'Die Entdeckung: Emotionale Ankunft & Raumgefühl',
         p1Tagline: `Vom spektakulären Drohnenflug über ${buildingRef} bis zur Übergabe`,
@@ -1053,6 +1519,125 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
         const dialogueDe = activeTheme.defaultDialoguesDe[i] || 'Genau so habe ich mir das vorgestellt.';
         const dialogueEn = activeTheme.defaultDialoguesEn[i] || 'Exactly as I envisioned it.';
 
+        const isLast = i === windowCount - 1;
+        let claimText = '';
+        let typoStyle: 'blockschrift' | 'handschrift' | 'serif' | 'condensed_bold' = 'blockschrift';
+        let typoAnim: 'blur_reveal' | 'fade_in' | 'typewriter' | 'hard_cut' = 'blur_reveal';
+        let typoPlace: 'lower_third' | 'center' | 'top_third' | 'lower_right' = isLast ? 'center' : 'lower_third';
+        let typoCursiveAccent = false;
+        let typoCursiveNote = '';
+
+        if (themeKey === 'restaurant') {
+          if (i === 0) {
+            claimText = 'Frische Zutaten & Meisterhaftes Handwerk';
+            typoStyle = 'serif';
+            typoAnim = 'blur_reveal';
+            typoCursiveAccent = true;
+            typoCursiveNote = 'Haute Cuisine';
+          } else if (i === 1) {
+            claimText = 'Leidenschaft in jedem Gericht';
+            typoStyle = 'blockschrift';
+            typoAnim = 'fade_in';
+          } else if (i === 2) {
+            claimText = 'Ein Fest für alle Sinne';
+            typoStyle = 'handschrift';
+            typoAnim = 'blur_reveal';
+          } else {
+            claimText = customCta || 'Jetzt Tisch reservieren & Genuss erleben';
+            typoStyle = 'serif';
+            typoAnim = 'blur_reveal';
+            typoPlace = 'center';
+            typoCursiveAccent = true;
+            typoCursiveNote = 'Online Reservierung';
+          }
+        } else if (themeKey === 'retribution') {
+          typoStyle = 'condensed_bold';
+          if (i === 0) {
+            claimText = 'Die Abrechnung hat begonnen';
+            typoAnim = 'hard_cut';
+            typoPlace = 'center';
+          } else if (i === 1) {
+            claimText = 'Kein Erbarmen. Keine Gnade.';
+            typoAnim = 'typewriter';
+            typoPlace = 'lower_third';
+          } else if (i === 2) {
+            claimText = 'Auge um Auge';
+            typoAnim = 'hard_cut';
+            typoPlace = 'center';
+          } else {
+            claimText = customCta || 'Gerechtigkeit fordert ihren Preis';
+            typoAnim = 'blur_reveal';
+            typoPlace = 'center';
+          }
+        } else if (themeKey === 'coaching') {
+          if (i === 0) {
+            claimText = 'Finde deinen inneren Ruhepol';
+            typoStyle = 'handschrift';
+            typoAnim = 'fade_in';
+          } else if (i === 1) {
+            claimText = 'Achtsamkeit im Alltag';
+            typoStyle = 'serif';
+            typoAnim = 'blur_reveal';
+          } else if (i === 2) {
+            claimText = 'Klarheit für neue Perspektiven';
+            typoStyle = 'serif';
+            typoAnim = 'fade_in';
+            typoPlace = 'center';
+          } else {
+            claimText = customCta || 'Jetzt Erstgespräch vereinbaren';
+            typoStyle = 'handschrift';
+            typoAnim = 'blur_reveal';
+            typoPlace = 'center';
+            typoCursiveAccent = true;
+            typoCursiveNote = 'Dein neuer Weg';
+          }
+        } else if (themeKey === 'tourguide') {
+          if (i === 0) {
+            claimText = 'Geheimnisse & Geschichte hautnah';
+            typoStyle = 'serif';
+            typoAnim = 'blur_reveal';
+            typoCursiveAccent = true;
+            typoCursiveNote = 'Historischer Guide';
+          } else if (i === 1) {
+            claimText = 'Meisterwerke der Baukunst';
+            typoStyle = 'blockschrift';
+            typoAnim = 'blur_reveal';
+          } else if (i === 2) {
+            claimText = 'Verborgene Schätze entdecken';
+            typoStyle = 'serif';
+            typoAnim = 'fade_in';
+          } else {
+            claimText = customCta || 'Jetzt geführte Kultur-Tour buchen';
+            typoStyle = 'serif';
+            typoAnim = 'blur_reveal';
+            typoPlace = 'center';
+            typoCursiveAccent = true;
+            typoCursiveNote = 'Exklusive Führung';
+          }
+        } else {
+          // architecture or default
+          if (i === 0) {
+            claimText = 'Architektur, die begeistert';
+            typoStyle = 'blockschrift';
+            typoAnim = 'blur_reveal';
+          } else if (i === 1) {
+            claimText = 'Präzision bis ins letzte Detail';
+            typoStyle = 'serif';
+            typoAnim = 'blur_reveal';
+          } else if (i === 2) {
+            claimText = 'Lichtdurchflutete Lebensräume';
+            typoStyle = 'handschrift';
+            typoAnim = 'fade_in';
+          } else {
+            claimText = customCta || 'Jetzt Musterhaus besichtigen';
+            typoStyle = 'blockschrift';
+            typoAnim = 'blur_reveal';
+            typoPlace = 'center';
+            typoCursiveAccent = true;
+            typoCursiveNote = 'Schlüsselfertig zum Festpreis';
+          }
+        }
+
         return {
           windowNumber: i + 1,
           title: customDeContent ? `Szene ${i + 1}: ${customDeContent.slice(0, 30)}...` : title,
@@ -1067,7 +1652,14 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
           focus: activeTheme.defaultFocus[i] || 'Atmospheric natural lighting and expressive spatial details',
           soundDesign: targetAudience ? targetAudience.soundAesthetic : 'Natural environmental ambient sounds with high acoustic fidelity',
           musicStyle: targetAudience ? targetAudience.soundAesthetic : 'Warm cinematic soundtrack matching the emotional tone of the scene',
-          claimOrCta: i === windowCount - 1 ? customCta : `Detail-Highlight (Szene ${i + 1})`
+          claimOrCta: claimText,
+          claimTypography: {
+            fontStyle: typoStyle,
+            animation: typoAnim,
+            placement: typoPlace,
+            hasCursiveAccent: typoCursiveAccent,
+            cursiveNote: typoCursiveNote,
+          },
         };
       });
     };
@@ -1085,6 +1677,13 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
         toneAndStyle: activeTheme.p1Tone,
         dialogueLanguage,
         callToAction: customCta,
+        callToActionTypography: {
+          fontStyle: themeKey === 'retribution' ? 'condensed_bold' : themeKey === 'coaching' ? 'handschrift' : themeKey === 'restaurant' ? 'serif' : 'blockschrift',
+          animation: 'blur_reveal',
+          placement: 'center',
+          hasCursiveAccent: themeKey !== 'retribution',
+          cursiveNote: themeKey === 'restaurant' ? 'Online Reservierung' : themeKey === 'coaching' ? 'Dein neuer Weg' : 'Schlüsselfertig',
+        },
         windowBreakdown: makeWindowBreakdown(1),
       },
       {
@@ -1098,6 +1697,13 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
         toneAndStyle: activeTheme.p2Tone,
         dialogueLanguage,
         callToAction: customCta,
+        callToActionTypography: {
+          fontStyle: 'blockschrift',
+          animation: 'blur_reveal',
+          placement: 'center',
+          hasCursiveAccent: true,
+          cursiveNote: 'Exklusiv sichern',
+        },
         windowBreakdown: makeWindowBreakdown(2),
       },
       {
@@ -1111,6 +1717,13 @@ Antworte AUSSCHLIESSLICH im validen JSON-Format:
         toneAndStyle: activeTheme.p3Tone,
         dialogueLanguage,
         callToAction: customCta,
+        callToActionTypography: {
+          fontStyle: 'serif',
+          animation: 'fade_in',
+          placement: 'center',
+          hasCursiveAccent: true,
+          cursiveNote: 'Zeitlose Ästhetik',
+        },
         windowBreakdown: makeWindowBreakdown(3),
       },
     ];

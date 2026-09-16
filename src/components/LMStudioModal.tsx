@@ -111,7 +111,7 @@ export const LMStudioModal: React.FC<LMStudioModalProps> = ({
               type="text"
               value={modelName}
               onChange={(e) => setModelName(e.target.value)}
-              placeholder="z.B. gemini, omni, oder local-model"
+              placeholder="z.B. qwen2.5-vl, llama-3.2-vision, oder local-model"
               className="w-full px-3 py-2 bg-white border border-zinc-300 rounded-lg text-xs font-mono text-zinc-900 focus:outline-none focus:border-zinc-900"
             />
             <p className="text-[11px] text-zinc-500 mt-1">

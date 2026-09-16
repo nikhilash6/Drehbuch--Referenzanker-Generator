@@ -8,6 +8,8 @@ import { DrehbuchKonfigurator } from './components/DrehbuchKonfigurator';
 import { ScreenplayGenerator } from './components/ScreenplayGenerator';
 import { LMStudioView } from './components/LMStudioView';
 import { WorkflowDebateView } from './components/WorkflowDebateView';
+import { ToolsView } from './components/ToolsView';
+import { FloorplanDirectorView } from './components/FloorplanDirectorView';
 import { LMStudioModal } from './components/LMStudioModal';
 import {
   ReferenceImage,
@@ -60,6 +62,7 @@ export default function App() {
       modelName: 'local-model',
       activeProvider: 'lmstudio',
       useProxy: true,
+      timeoutSeconds: 240,
     };
   });
 
@@ -391,6 +394,7 @@ export default function App() {
           endpoint: settings.endpoint,
           modelName: settings.modelName,
           apiKey: settings.apiKey,
+          timeoutSeconds: settings.timeoutSeconds || 240,
         }),
       });
 
@@ -561,6 +565,59 @@ export default function App() {
             />
           )}
 
+          {currentTab === 'grundriss' && (
+            <FloorplanDirectorView
+              references={references}
+              drehbuchKonfig={drehbuchKonfig}
+              onChangeDrehbuchKonfig={(newCfg) => {
+                setDrehbuchKonfig(newCfg);
+                localStorage.setItem('drehbuch_konfig_state', JSON.stringify(newCfg));
+              }}
+              onApplyToDrehbuch={(appliedCfg) => {
+                setDrehbuchKonfig(appliedCfg);
+                localStorage.setItem('drehbuch_konfig_state', JSON.stringify(appliedCfg));
+
+                if (appliedCfg.pressedWindows && appliedCfg.pressedWindows.length > 0) {
+                  const generatedShots = appliedCfg.pressedWindows.map((win) => ({
+                    shotNumber: win.windowNumber,
+                    durationSeconds: win.durationSeconds || 14,
+                    shotType: 'Widescreen 16:9 Architectural',
+                    cameraMove: win.cameraMove || 'Steadicam Dolly-In',
+                    sceneDescription: win.summary,
+                    charactersInShot: win.activeSubjects,
+                    injectedAnchors: win.activeSubjects.map((name) => `<Subject> ${name}`).join(', '),
+                    dialogue: win.dialogueSnippet || '',
+                    audioCues: win.musicAudio || 'Atmo & Sounddesign',
+                    minimaxPrompt: win.singleLinePrompt,
+                  }));
+
+                  setProject({
+                    title: appliedCfg.title || 'Musterhaus Avantgarde – Grundriss-Tour',
+                    sceneGoal: 'Architektur- und Raumachsen-Rundgang nach 2D-Grundriss',
+                    genre: appliedCfg.genre || 'Architektur & Lifestyle (Immobilien)',
+                    settingLocation: appliedCfg.globalBackground || 'Musterhaus Avantgarde',
+                    targetEngine: 'minimax-h3',
+                    cameraStyle: 'Fließende Steadicam- & Orbit-Fahrten nach Grundriss-Pfad',
+                    lightingMood: appliedCfg.globalWeather || 'Natürliches Tageslicht mit Sonnenachsen',
+                    aspectRatio: appliedCfg.aspectRatio || '16:9',
+                    rawScript: appliedCfg.pressedWindows.map((w) => w.singleLinePrompt).join('\n\n'),
+                    shots: generatedShots,
+                  });
+                }
+                setCurrentTab('drehbuchkonfigurator');
+              }}
+              onAddReference={(newRef) => {
+                setReferences((prev) => [newRef, ...prev]);
+              }}
+              settings={settings}
+              connectionStatus={connectionStatus}
+              onTestConnection={handleTestConnection}
+              onSaveSettings={handleSaveSettings}
+              language={language}
+              onShowToast={showToast}
+            />
+          )}
+
           {currentTab === 'drehbuch' && (
             <ScreenplayGenerator
               anchors={anchors}
@@ -570,6 +627,10 @@ export default function App() {
               project={project}
               language={language}
             />
+          )}
+
+          {currentTab === 'tools' && (
+            <ToolsView language={language} onShowToast={showToast} />
           )}
 
           {currentTab === 'lmstudio' && (

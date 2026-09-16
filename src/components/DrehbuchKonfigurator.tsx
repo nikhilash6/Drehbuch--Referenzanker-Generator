@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   Layers,
   Sparkles,
@@ -17,6 +17,7 @@ import {
   Sliders,
   FileText,
   Camera,
+  Film,
   CheckCircle2,
   AlertCircle,
   Clock,
@@ -30,6 +31,8 @@ import {
   Settings2,
   Home,
   Box,
+  Type,
+  Edit2,
 } from 'lucide-react';
 import {
   DrehbuchKonfiguratorState,
@@ -41,6 +44,7 @@ import {
   SingleLineWindow,
   ReferenceImage,
   TargetAudience,
+  WindowClaimTypography,
 } from '../types';
 import { Language, t } from '../utils/i18n';
 import {
@@ -64,7 +68,15 @@ import { CameraDirectorModal } from './drehbuch/CameraDirectorModal';
 import { DesignConceptModal } from './drehbuch/DesignConceptModal';
 import { ProjectManagerModal } from './drehbuch/ProjectManagerModal';
 import { MaestroWindowsBindingList } from './drehbuch/MaestroWindowsBindingList';
-import { FolderOpen, FileJson, Video, Palette, HardDrive, FolderPlus, Save } from 'lucide-react';
+import { TypographyOverlayCard } from './drehbuch/TypographyOverlayCard';
+import { UltraPhysicsCard } from './drehbuch/UltraPhysicsCard';
+import { LensSelectorCard } from './drehbuch/LensSelectorCard';
+import { RetributionDisclaimerCard } from './drehbuch/RetributionDisclaimerCard';
+import { ProposalClaimsEditor } from './drehbuch/ProposalClaimsEditor';
+import { ReferenceUsageGuideCard } from './drehbuch/ReferenceUsageGuideCard';
+import { TimelineExportModal } from './drehbuch/TimelineExportModal';
+import { TypographyOverlayConfig } from '../types';
+import { FolderOpen, FileJson, Video, Palette, HardDrive, FolderPlus, Save, Flame, AlertTriangle, UtensilsCrossed } from 'lucide-react';
 
 interface DrehbuchKonfiguratorProps {
   config: DrehbuchKonfiguratorState;
@@ -105,7 +117,26 @@ const BACKGROUND_PRESETS = [
   'Moderner minimalistischer Designergarten mit Pool & Sonnendeck',
 ];
 
+export const isDarkRetributionGenre = (genre?: string): boolean => {
+  if (!genre) return false;
+  const g = genre.toLowerCase();
+  return g.includes('rache') || g.includes('retribution') || g.includes('ghostrider');
+};
+
+export const isTourGuideGenre = (genre?: string): boolean => {
+  if (!genre) return false;
+  const g = genre.toLowerCase();
+  return g.includes('reiseführung') || g.includes('tourismus') || g.includes('reisevideo') || g.includes('tourguide');
+};
+
 const GENRE_PRESETS = [
+  'Reiseführung (Reisevideos & Tourismus)',
+  'Imagevideo / Brand Film (Kino & Ästhetik)',
+  'Imagevideo -> Restaurant (Gastronomie, Fine Dining & Kulinarik)',
+  'Imagevideo / Cinematic Showcase',
+  'Imagevideo / Atmosphäre & Storytelling',
+  'Musikvideo / Artist & Mood Film',
+  'Rache & Vergeltung / Dark Retribution (Ghostrider Action & Chaos)',
   'Werbung / Commercial',
   'Architektur & Lifestyle (Immobilien)',
   'Comedy / Humor',
@@ -120,6 +151,8 @@ const GENRE_PRESETS = [
 ];
 
 const CALL_TO_ACTION_PRESETS = [
+  'Entdecke die verborgenen Geschichten der Stadt – Jetzt VIP-Führung buchen',
+  'Erlebe die Magie historischer Orte hautnah. Jetzt geführte Tour sichern.',
   'Jetzt Musterhaus besichtigen & Ihr Traumhaus planen',
   'Einzugsbereit in nur 4 Monaten – Jetzt unverbindlich anfragen',
   'Bauen ohne Kompromisse. Fordern Sie jetzt den kostenlosen Katalog an.',
@@ -128,6 +161,40 @@ const CALL_TO_ACTION_PRESETS = [
 ];
 
 const SAMPLE_STICHPUNKTE_LIST = [
+  {
+    label: 'Reiseführung: Avatar moderiert Denkmal & Kultur-Highlight',
+    text: `- Genre: Reiseführung (Reisevideos & Tourismus)
+- Avatar / Guide: <Subject 1> Charismatische Reiseleiterin / Avatar (moderiert direkt in die Kamera, lebendig & begeisternd)
+- Denkmal / Sehenswürdigkeit: <Building 1> Historisches Monument / Kathedrale / Wahrzeichen vor blauem Himmel
+- Location: <Building 1> Historischer Vorplatz & monumentales Bauwerk
+- Fenster 1: Anmoderation: Avatar <Subject 1> steht vor dem imposanten Portal von <Building 1>, begrüßt die Zuschauer und kündigt das historische Geheimnis an
+- Fenster 2: Spektakulärer Drohnenflug: Kamera steigt über das Denkmal auf, kreist majestätisch und fängt die kunstvollen Verzierungen im Sonnenlicht ein
+- Fenster 3: Detailführung: <Subject 1> steht am Relief von <Building 1>, zeigt mit der Hand auf antike Inschriften und teilt eine verblüffende historische Anekdote
+- Fenster 4: Goldene Stunde & Outro: Kamera fährt zurück, <Subject 1> lächelt und lädt zur geführten VIP-Tour ein
+- Call to Action: "Entdecke die verborgenen Geschichten der Stadt – Jetzt VIP-Führung buchen"`,
+  },
+  {
+    label: 'Imagevideo -> Restaurant: Fine Dining & Gourmet-Genuss',
+    text: `- Setting: Exklusives Restaurant mit offener Showküche & stimmungsvollem Kerzenlicht
+- Personen / Rollen: <Subject 1> Chefkoch (meisterhaftes Anrichten), <Subject 2> Sommelier/Service (edler Weinservice), Gäste (Genussmoment)
+- Location: <Building 1> Restaurant & stilvoller Gastraum
+- Fenster 1: Makro-Nahaufnahme: <Subject 1> vollendet kunstvoll ein Gourmet-Gericht mit Pinzette und Kräutern
+- Fenster 2: Leidenschaft in der Küche: Pfanne flammt auf dem Gasherd auf, duftender Dampf steigt empor
+- Fenster 3: Eleganter Tischservice: <Subject 2> schenkt rubinroten Wein in bauchige Kristallgläser im Kerzenlicht ein
+- Fenster 4: Genuss & Schwenk über den edlen Gastraum: Zufriedene Gäste stoßen lächelnd an, Übergang zum Outro
+- Call to Action: "Geschmack erleben, der in Erinnerung bleibt – Jetzt Ihren Tisch reservieren"`,
+  },
+  {
+    label: 'Ghostrider-Stil: Brennendes Pferd & Vergeltung (Dark Action)',
+    text: `- Protagonistin: Rächerin in schwarzer Lederkluft, glühende Augen & feurige Aura (Ghostrider-Ästhetik)
+- Wesen / Requisit: Ein brennendes dämonisches Pferd mit flammender Mähne und glühenden Hufen
+- Setting: Nächtliche Großstadtstraße, glühender Asphalt, Rauchschwaden & berstende Straßenkulisse
+- Fenster 1: Die Rächerin stürmt auf dem brennenden Pferd aus dem Nachthimmel herab und schlägt mit gewaltigem Krater auf dem Asphalt ein
+- Fenster 2: Zeitlupen-Landung: Gewaltige Schockwelle fegt über die Straße, Flammen spiegeln sich in den Augen der Reiterin
+- Fenster 3: Vergeltungs-Vorstoß: Das flammende Pferd prescht vorwärts, der Asphalt bricht auf und Trümmer fliegen durch die Luft
+- Fenster 4: Epischer Stillstand im Flammenmeer: Die Rächerin wendet sich zur Kamera, während im Hintergrund das Chaos lodert
+- Call to Action: "Revenge Unleashed – Aus der Asche erwächst die Vergeltung"`,
+  },
   {
     label: 'Mental- & Resilienzcoaching im Bergwald',
     text: `- Person: Die Resilienz-Beraterin (Coaching-Spezialistin) mit ihren 2 Hunden (Golden Retriever & Border Collie)
@@ -199,6 +266,37 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
   const [isDesignModalOpen, setIsDesignModalOpen] = useState(false);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [isTimelineExportOpen, setIsTimelineExportOpen] = useState(false);
+  const [editingClaimsProposal, setEditingClaimsProposal] = useState<ConceptProposal | null>(null);
+
+  // Textarea Ref for precise cursor tag injection
+  const stichpunkteTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Helper: Insert text/tag at cursor position or append cleanly
+  const handleInsertTextIntoStichpunkte = (textToInsert: string) => {
+    const textarea = stichpunkteTextareaRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart ?? textarea.value.length;
+      const end = textarea.selectionEnd ?? textarea.value.length;
+      const current = config.stichpunkte || '';
+      const before = current.substring(0, start);
+      const after = current.substring(end);
+      const prefix = before.length > 0 && !before.endsWith(' ') && !before.endsWith('\n') ? ' ' : '';
+      const suffix = after.startsWith(' ') || after.startsWith('\n') || after.length === 0 ? '' : ' ';
+      const updated = before + prefix + textToInsert + suffix + after;
+      onChangeConfig({ ...config, stichpunkte: updated });
+      setTimeout(() => {
+        textarea.focus();
+        const newPos = start + prefix.length + textToInsert.length + suffix.length;
+        textarea.setSelectionRange(newPos, newPos);
+      }, 50);
+    } else {
+      const current = config.stichpunkte || '';
+      const updated = current.trim() ? `${current.trim()} ${textToInsert}` : textToInsert;
+      onChangeConfig({ ...config, stichpunkte: updated });
+    }
+    onShowToast('info', `"${textToInsert}" eingefügt`);
+  };
 
   // Active References derived (synced with config.references or config.subjects)
   const currentReferences = useMemo(() => {
@@ -486,12 +584,21 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
 
   // Handler: Generate 3 Proposals via LM Studio
   const handleGenerateProposalsWithLMStudio = async () => {
+    if (isDarkRetributionGenre(config.genre) && !config.darkRetributionDisclaimerAccepted) {
+      onShowToast(
+        'error',
+        'Pflicht-Disclaimer erforderlich: Bitte bestätige zuerst den Rache- & Vergeltungs-Disclaimer mit dem Häkchen.'
+      );
+      return;
+    }
+
     setIsGeneratingProposals(true);
     try {
       const payload = {
         endpoint: settings.endpoint,
         modelName: settings.modelName,
         apiKey: settings.apiKey,
+        timeoutSeconds: settings.timeoutSeconds || 240,
         stichpunkte: config.stichpunkte || '',
         windowCount: config.windowCount || 4,
         windowDurationSeconds: windowDuration,
@@ -504,6 +611,9 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         globalBackground: config.globalBackground || BACKGROUND_PRESETS[0],
         globalCam: config.windows?.[0]?.cameraMovement || CAMERA_PRESETS[0],
         genre: config.genre || 'Architektur & Lifestyle (Immobilien)',
+        ultraPhysicsMode: config.ultraPhysicsMode === true,
+        lensOpticsMode: config.lensOpticsMode === true,
+        selectedLens: config.selectedLens || 'auto',
       };
 
       const res = await fetch('/api/screenplay/generate-proposals', {
@@ -539,8 +649,178 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
     }
   };
 
+  // Handler: Update CTA with instant live re-pressing of single-line windows
+  const handleUpdateCta = (newCta: string) => {
+    const activeProposal = selectedProposal || proposals[0];
+    const updatedConfig: DrehbuchKonfiguratorState = {
+      ...config,
+      finalCallToAction: newCta,
+    };
+    if (activeProposal && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressProposalToSingleLineWindows({
+        proposal: activeProposal,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: newCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    }
+    onChangeConfig(updatedConfig);
+  };
+
+  // Handler: Update Typography Overlay with instant live re-pressing of single-line windows
+  const handleUpdateTypographyOverlay = (newOverlay: TypographyOverlayConfig) => {
+    const activeProposal = selectedProposal || proposals[0];
+    const updatedConfig: DrehbuchKonfiguratorState = {
+      ...config,
+      typographyOverlay: newOverlay,
+    };
+    if (activeProposal && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressProposalToSingleLineWindows({
+        proposal: activeProposal,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: newOverlay,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    } else if (config.windows && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressConfigToSingleLineWindows({
+        windows: config.windows,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: newOverlay,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    }
+    onChangeConfig(updatedConfig);
+  };
+
+  // Handler: Update an individual window's claim & typography in a proposal with live re-pressing
+  const handleUpdateProposalWindowClaim = (
+    proposalId: string,
+    windowNumber: number,
+    newClaim: string,
+    newTypography?: WindowClaimTypography
+  ) => {
+    const updatedProposals = (config.proposals || []).map((p) => {
+      if (p.id !== proposalId) return p;
+      const updatedWindows = p.windowBreakdown.map((w) => {
+        if (w.windowNumber !== windowNumber) return w;
+        return {
+          ...w,
+          claimOrCta: newClaim,
+          claimTypography: newTypography !== undefined ? newTypography : w.claimTypography,
+        };
+      });
+      return { ...p, windowBreakdown: updatedWindows };
+    });
+
+    const activeProp =
+      updatedProposals.find((p) => p.id === (config.selectedProposalId || selectedProposal.id)) ||
+      updatedProposals[0];
+
+    let newPressed = config.pressedWindows;
+    if (activeProp && activeProp.id === proposalId && config.pressedWindows && config.pressedWindows.length > 0) {
+      newPressed = pressProposalToSingleLineWindows({
+        proposal: activeProp,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: activeProp.callToAction || config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+      });
+    }
+
+    onChangeConfig({
+      ...config,
+      proposals: updatedProposals,
+      pressedWindows: newPressed,
+    });
+    onShowToast('info', `Claim & Typografie für Window ${windowNumber} aktualisiert`);
+  };
+
+  // Handler: Update a proposal's final call to action & typography with live re-pressing
+  const handleUpdateProposalCta = (
+    proposalId: string,
+    newCta: string,
+    newTypography?: WindowClaimTypography
+  ) => {
+    const updatedProposals = (config.proposals || []).map((p) => {
+      if (p.id !== proposalId) return p;
+      return {
+        ...p,
+        callToAction: newCta,
+        callToActionTypography: newTypography !== undefined ? newTypography : p.callToActionTypography,
+      };
+    });
+
+    const activeProp =
+      updatedProposals.find((p) => p.id === (config.selectedProposalId || selectedProposal.id)) ||
+      updatedProposals[0];
+
+    let newPressed = config.pressedWindows;
+    if (activeProp && activeProp.id === proposalId && config.pressedWindows && config.pressedWindows.length > 0) {
+      newPressed = pressProposalToSingleLineWindows({
+        proposal: activeProp,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: newCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+      });
+    }
+
+    onChangeConfig({
+      ...config,
+      proposals: updatedProposals,
+      finalCallToAction: newCta,
+      pressedWindows: newPressed,
+    });
+    onShowToast('info', `Call-to-Action & Typografie aktualisiert`);
+  };
+
   // Handler: Press Proposal into Single-Line Windows format!
   const handlePressProposalToSingleLine = (proposal: ConceptProposal) => {
+    if (isDarkRetributionGenre(config.genre) && !config.darkRetributionDisclaimerAccepted) {
+      onShowToast(
+        'error',
+        'Pflicht-Disclaimer erforderlich: Bitte bestätige zuerst den Rache- & Vergeltungs-Disclaimer mit dem Häkchen.'
+      );
+      return;
+    }
+
+    const activeCta = config.finalCallToAction || proposal.callToAction || finalCta;
     const pressed = pressProposalToSingleLineWindows({
       proposal,
       allSubjects: currentReferences,
@@ -550,13 +830,15 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
       aspectRatio: config.aspectRatio || '16:9',
       globalWeather: config.globalWeather,
       globalBackground: config.globalBackground,
-      finalCallToAction: finalCta,
+      finalCallToAction: activeCta,
       targetAudience: currentTargetAudience,
+      typographyOverlay: config.typographyOverlay,
     });
 
     onChangeConfig({
       ...config,
       selectedProposalId: proposal.id,
+      finalCallToAction: activeCta,
       pressedWindows: pressed,
     });
 
@@ -569,6 +851,14 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
 
   // Handler: Press Current Manual Windows to Single-Line Windows format!
   const handlePressCurrentConfigToSingleLine = () => {
+    if (isDarkRetributionGenre(config.genre) && !config.darkRetributionDisclaimerAccepted) {
+      onShowToast(
+        'error',
+        'Pflicht-Disclaimer erforderlich: Bitte bestätige zuerst den Rache- & Vergeltungs-Disclaimer mit dem Häkchen.'
+      );
+      return;
+    }
+
     const pressed = pressConfigToSingleLineWindows({
       windows: config.windows,
       allSubjects: currentReferences,
@@ -580,6 +870,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
       globalBackground: config.globalBackground,
       finalCallToAction: finalCta,
       targetAudience: currentTargetAudience,
+      typographyOverlay: config.typographyOverlay,
     });
 
     onChangeConfig({
@@ -907,6 +1198,39 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
                 </select>
               </div>
             </div>
+
+            {/* Reiseführung Info & Workflow Box */}
+            {isTourGuideGenre(config.genre) && (
+              <div className="mt-3 p-3.5 bg-gradient-to-r from-sky-50 via-blue-50/50 to-indigo-50/30 border border-sky-200 rounded-xl text-xs text-sky-950 flex items-start gap-3 shadow-2xs">
+                <Compass className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-sky-900">
+                      Genre Reiseführung aktiviert
+                    </span>
+                    <span className="text-[10px] bg-sky-100/90 text-sky-800 font-bold px-2 py-0.5 rounded border border-sky-300">
+                      Avatar + Kultur-/Denkmal-Referenz
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-sky-800 leading-relaxed">
+                    <strong>Workflow:</strong> Klinke unter <em>&bdquo;2. Referenzen &amp; Objekte&ldquo;</em> deinen Avatar als <code className="font-mono bg-white text-sky-950 px-1.5 py-0.5 rounded border border-sky-200 font-bold">&lt;Subject 1&gt;</code> und dein Denkmal / Monument / Sehenswürdigkeit als <code className="font-mono bg-white text-sky-950 px-1.5 py-0.5 rounded border border-sky-200 font-bold">&lt;Building 1&gt;</code> oder <code className="font-mono bg-white text-sky-950 px-1.5 py-0.5 rounded border border-sky-200 font-bold">&lt;Object 1&gt;</code> ein. LM Studio generiert daraus die lebendige Moderation des Avatars (gesprochene Dialoge &amp; Anekdoten), epische Drohnen- &amp; Detailflüge um das Bauwerk sowie informative On-Screen Fakten-Claims.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Retribution Disclaimer (Mandatory Checkbox when Rache genre is selected) */}
+            {isDarkRetributionGenre(config.genre) && (
+              <div className="mt-4 pt-4 border-t border-rose-100">
+                <RetributionDisclaimerCard
+                  isAccepted={Boolean(config.darkRetributionDisclaimerAccepted)}
+                  onToggleAccept={(accepted) =>
+                    onChangeConfig({ ...config, darkRetributionDisclaimerAccepted: accepted })
+                  }
+                  genreTitle={config.genre}
+                />
+              </div>
+            )}
           </div>
 
           {/* Target Audience Component: Colors, Sound, Psychology */}
@@ -965,13 +1289,19 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
             </div>
 
             {inputMode === 'stichpunkte' ? (
-              <div className="space-y-3">
+              <div className="space-y-3.5">
+                {/* Reference Usage Guide & Infotext: How LM Studio processes references & why tags prevent confusion */}
+                <ReferenceUsageGuideCard
+                  currentReferences={currentReferences}
+                  onInsertTag={(sample) => handleInsertTextIntoStichpunkte(sample)}
+                />
+
                 {/* Interactive 1-Click Reference Chips Bar */}
                 <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold text-amber-950 flex items-center gap-1.5 uppercase tracking-wide">
                       <Users className="w-3.5 h-3.5 text-amber-700" />
-                      <span>Hinterlegte Referenzen per Klick in Stichpunkte einfügen:</span>
+                      <span>Referenzen per Klick direkt in Text einfügen:</span>
                     </span>
                     <span className="text-[10px] text-amber-800 font-semibold bg-amber-100/80 px-2 py-0.5 rounded border border-amber-300">
                       {currentReferences.length} Referenzen verfügbar
@@ -981,26 +1311,42 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
                   <div className="flex flex-wrap items-center gap-1.5">
                     {currentReferences.map((ref, idx) => {
                       const tagText = ref.tag || `<Ref ${idx + 1}>`;
+                      const tagWithRef = `${tagText} ${ref.name}`;
                       const insertLine = `- Referenz: ${ref.name} (${tagText}) – Rolle/Aktion: ${ref.roleOrAction || 'Hauptmotiv'}`;
                       return (
-                        <button
+                        <div
                           key={ref.id || idx}
-                          type="button"
-                          onClick={() => {
-                            const current = config.stichpunkte || '';
-                            const updated = current.trim() ? `${current.trim()}\n${insertLine}` : insertLine;
-                            onChangeConfig({ ...config, stichpunkte: updated });
-                            onShowToast('info', `Referenz "${ref.name} (${tagText})" eingefügt.`);
-                          }}
-                          className="group flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-amber-100/90 text-zinc-800 hover:text-amber-950 border border-amber-200 hover:border-amber-400 rounded-lg text-xs font-semibold shadow-2xs transition cursor-pointer"
-                          title={`Aktion / Referenz "${ref.name}" in Stichpunkte übernehmen`}
+                          className="flex items-center bg-white border border-amber-200 rounded-lg shadow-2xs overflow-hidden"
                         >
-                          <span className="w-2 h-2 rounded-full bg-amber-500 group-hover:scale-125 transition" />
-                          <span>+ {ref.name}</span>
-                          <span className="text-[10px] font-mono text-amber-900 bg-amber-100/80 px-1 py-0.2 rounded border border-amber-200">
-                            {tagText}
-                          </span>
-                        </button>
+                          {/* Tag Button: Inlines into cursor sentence */}
+                          <button
+                            type="button"
+                            onClick={() => handleInsertTextIntoStichpunkte(tagWithRef)}
+                            className="group flex items-center gap-1 px-2 py-1 hover:bg-amber-100/90 text-zinc-800 hover:text-amber-950 text-xs font-semibold transition cursor-pointer"
+                            title={`Klicke hier, um "${tagWithRef}" an die Cursor-Position einzufügen (z. B. "${tagWithRef} knutscht mit...")`}
+                          >
+                            <span className="w-2 h-2 rounded-full bg-amber-500 group-hover:scale-125 transition" />
+                            <span>+ {ref.name}</span>
+                            <span className="text-[10px] font-mono text-amber-900 bg-amber-100/80 px-1 py-0.2 rounded border border-amber-200">
+                              {tagText}
+                            </span>
+                          </button>
+
+                          {/* Full Line Button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const current = config.stichpunkte || '';
+                              const updated = current.trim() ? `${current.trim()}\n${insertLine}` : insertLine;
+                              onChangeConfig({ ...config, stichpunkte: updated });
+                              onShowToast('info', `Zeile für "${ref.name}" angehängt.`);
+                            }}
+                            className="px-1.5 py-1 hover:bg-amber-200/60 text-amber-800 text-[10px] font-bold border-l border-amber-200 transition cursor-pointer"
+                            title="Ganze Zeile an Stichpunkte anhängen"
+                          >
+                            + Zeile
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -1026,10 +1372,11 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
                 </div>
 
                 <textarea
+                  ref={stichpunkteTextareaRef}
                   rows={5}
                   value={config.stichpunkte}
                   onChange={(e) => onChangeConfig({ ...config, stichpunkte: e.target.value })}
-                  placeholder="Gib hier deine Stichpunkte ein oder klicke oben auf die Referenz-Buttons..."
+                  placeholder="Gib hier deine Stichpunkte ein (z. B. '<Subject 1> Dirk knutscht mit <Subject 2> Anna...') oder klicke oben auf die Referenz-Buttons..."
                   className="w-full p-4 bg-zinc-50 border border-zinc-300 rounded-xl text-xs text-zinc-900 focus:outline-none focus:border-zinc-900 focus:bg-white resize-none leading-relaxed font-mono shadow-inner"
                 />
               </div>
@@ -1135,7 +1482,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
                 <input
                   type="text"
                   value={config.finalCallToAction || finalCta}
-                  onChange={(e) => onChangeConfig({ ...config, finalCallToAction: e.target.value })}
+                  onChange={(e) => handleUpdateCta(e.target.value)}
                   placeholder="z.B. Jetzt Musterhaus besichtigen & Ihr Traumhaus planen"
                   className="w-full text-xs font-bold bg-white border border-amber-300 rounded-lg px-3 py-2 text-zinc-900 focus:outline-none focus:border-amber-600 shadow-2xs"
                 />
@@ -1143,7 +1490,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
                 <select
                   onChange={(e) => {
                     if (e.target.value) {
-                      onChangeConfig({ ...config, finalCallToAction: e.target.value });
+                      handleUpdateCta(e.target.value);
                     }
                   }}
                   className="w-full sm:w-auto text-xs bg-white border border-amber-300 rounded-lg px-3 py-2 text-zinc-700 focus:outline-none shrink-0"
@@ -1158,6 +1505,28 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
               </div>
             </div>
 
+            {/* Erweiterte Typografie & On-Screen Claims (Imagevideo-Modus) */}
+            <TypographyOverlayCard
+              overlay={config.typographyOverlay}
+              onChangeOverlay={handleUpdateTypographyOverlay}
+              windowCount={config.windowCount}
+              genre={config.genre}
+            />
+
+            {/* Kinetik- & Kausalitäts-Engine (Ultra-Physik, Muskelspannung, Subsurface-Gegenlicht, 4-Phasen Rhythmus) - DEFAULT OFF */}
+            <UltraPhysicsCard
+              enabled={config.ultraPhysicsMode === true}
+              onToggle={(enabled) => onChangeConfig({ ...config, ultraPhysicsMode: enabled })}
+            />
+
+            {/* Kino-Objektiv Portfolio & Bokeh-Engine (Cooke, Leica Noctilux, Helios, Kowa Anamorphic, Dream Lens, Zeiss) - DEFAULT OFF */}
+            <LensSelectorCard
+              enabled={config.lensOpticsMode === true}
+              selectedLens={config.selectedLens || 'auto'}
+              onToggle={(enabled) => onChangeConfig({ ...config, lensOpticsMode: enabled })}
+              onSelectLens={(lensId) => onChangeConfig({ ...config, selectedLens: lensId })}
+            />
+
             {/* Trigger Button: Generate 3 Proposals via LM Studio */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
               <span className="text-xs text-zinc-500">
@@ -1168,13 +1537,25 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
               <button
                 type="button"
                 onClick={handleGenerateProposalsWithLMStudio}
-                disabled={isGeneratingProposals}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition shadow-xs disabled:opacity-50 cursor-pointer"
+                disabled={
+                  isGeneratingProposals ||
+                  (isDarkRetributionGenre(config.genre) && !config.darkRetributionDisclaimerAccepted)
+                }
+                className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer ${
+                  isDarkRetributionGenre(config.genre) && !config.darkRetributionDisclaimerAccepted
+                    ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed border border-zinc-300'
+                    : 'bg-zinc-900 hover:bg-zinc-800 text-white disabled:opacity-50'
+                }`}
               >
                 {isGeneratingProposals ? (
                   <>
                     <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
                     <span>LM Studio denkt &amp; generiert Drehbuch...</span>
+                  </>
+                ) : isDarkRetributionGenre(config.genre) && !config.darkRetributionDisclaimerAccepted ? (
+                  <>
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Zuerst Rache-Disclaimer abhaken</span>
                   </>
                 ) : (
                   <>
@@ -1217,17 +1598,32 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
                         : 'border-zinc-200 hover:border-zinc-300'
                     }`}
                   >
-                    <div className="p-5 space-y-4">
-                      {/* Card Header */}
+                    {/* Top Edge Bar with Button DIRECTLY at the top edge ("direkt oben an die Kante") */}
+                    <div className="px-3.5 sm:px-4 py-2.5 bg-gradient-to-r from-zinc-50 via-indigo-50/30 to-zinc-50 border-b border-zinc-200/80 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-800 bg-indigo-100/80 border border-indigo-200 px-2 py-0.5 rounded shrink-0">
+                          Vorschlag {idx + 1}
+                        </span>
+                        <span className="text-[10px] font-medium text-zinc-500 truncate">
+                          {prop.windowBreakdown.length} Windows
+                        </span>
+                      </div>
+
+                      {/* Der Button direkt oben an die Kante */}
+                      <button
+                        type="button"
+                        onClick={() => setEditingClaimsProposal(prop)}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold text-indigo-700 hover:text-indigo-900 bg-white hover:bg-indigo-50 border border-indigo-200 hover:border-indigo-300 transition shadow-2xs cursor-pointer shrink-0"
+                        title="Claims & Typografie für diesen Vorschlag bearbeiten"
+                      >
+                        <Edit2 className="w-3 h-3 text-indigo-600" />
+                        <span>Claims bearbeiten</span>
+                      </button>
+                    </div>
+
+                    <div className="p-4 sm:p-5 space-y-4">
+                      {/* Card Title & Tagline */}
                       <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">
-                            Vorschlag {idx + 1}
-                          </span>
-                          <span className="text-[10px] font-medium text-zinc-500">
-                            {prop.windowBreakdown.length} Windows &agrave; {windowDuration}s
-                          </span>
-                        </div>
                         <h4 className="text-base font-bold text-zinc-900 leading-snug">
                           {prop.title}
                         </h4>
@@ -1271,19 +1667,54 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
                                   &bdquo;{win.dialogueSnippet}&ldquo;
                                 </p>
                               )}
+
+                              {/* On-Screen Claim Badge with Typography preview */}
+                              {win.claimOrCta && (
+                                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-purple-900 bg-purple-50 px-2 py-0.5 rounded border border-purple-100 font-medium">
+                                  <Type className="w-2.5 h-2.5 text-purple-600 shrink-0" />
+                                  <span className="font-bold text-[9px] text-purple-700 uppercase tracking-wider">
+                                    Claim:
+                                  </span>
+                                  <span className={`truncate italic ${win.claimTypography?.fontStyle === 'handschrift' ? 'font-serif text-amber-900' : ''}`}>
+                                    &bdquo;{win.claimOrCta}&ldquo;
+                                  </span>
+                                  {win.claimTypography && (
+                                    <span className="text-[9px] px-1.5 py-0.2 bg-purple-200/70 text-purple-950 rounded font-semibold">
+                                      {win.claimTypography.fontStyle === 'handschrift'
+                                        ? '✍️ Handschrift'
+                                        : win.claimTypography.fontStyle === 'serif'
+                                        ? 'Editorial Serif'
+                                        : win.claimTypography.fontStyle === 'condensed_bold'
+                                        ? '🎬 Kino-Plakat'
+                                        : 'Blockschrift'}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         ))}
                       </div>
 
                       {/* Final Call to Action Preview */}
-                      <div className="bg-amber-50/60 border border-amber-200/70 p-2.5 rounded-xl">
-                        <span className="text-[10px] font-bold text-amber-900 uppercase tracking-wider block mb-0.5">
-                          Call-to-Action (Outro):
-                        </span>
-                        <p className="text-xs font-bold text-amber-950">
-                          &bdquo;{prop.callToAction || finalCta}&ldquo;
-                        </p>
+                      <div className="bg-amber-50/70 border border-amber-200/80 p-3 rounded-xl flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <span className="text-[10px] font-bold text-amber-900 uppercase tracking-wider block mb-0.5">
+                            Call-to-Action (Outro):
+                          </span>
+                          <p className="text-xs font-bold text-amber-950 truncate">
+                            &bdquo;{prop.callToAction || finalCta}&ldquo;
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setEditingClaimsProposal(prop)}
+                          className="text-[11px] font-bold text-amber-900 hover:text-amber-950 px-2 py-1 rounded-lg bg-white border border-amber-300 hover:bg-amber-100/70 shrink-0 transition shadow-2xs cursor-pointer flex items-center gap-1"
+                          title="CTA & Typografie bearbeiten"
+                        >
+                          <Edit2 className="w-2.5 h-2.5" />
+                          <span>Bearbeiten</span>
+                        </button>
                       </div>
                     </div>
 
@@ -1292,11 +1723,30 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
                       <button
                         type="button"
                         onClick={() => handlePressProposalToSingleLine(prop)}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold rounded-xl text-xs transition shadow-2xs cursor-pointer"
+                        disabled={
+                          isDarkRetributionGenre(config.genre) &&
+                          !config.darkRetributionDisclaimerAccepted
+                        }
+                        className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 font-bold rounded-xl text-xs transition shadow-2xs cursor-pointer ${
+                          isDarkRetributionGenre(config.genre) &&
+                          !config.darkRetributionDisclaimerAccepted
+                            ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed'
+                            : 'bg-amber-400 hover:bg-amber-300 text-zinc-950'
+                        }`}
                       >
-                        <ShieldCheck className="w-4 h-4 text-zinc-950" />
-                        <span>In Single-Line Format pressen</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        {isDarkRetributionGenre(config.genre) &&
+                        !config.darkRetributionDisclaimerAccepted ? (
+                          <>
+                            <AlertTriangle className="w-4 h-4 text-amber-600" />
+                            <span>Zuerst Rache-Disclaimer abhaken</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShieldCheck className="w-4 h-4 text-zinc-950" />
+                            <span>In Single-Line Format pressen</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -1350,6 +1800,16 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
+                onClick={() => setIsTimelineExportOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2.5 bg-amber-500 hover:bg-amber-600 text-zinc-950 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                title="Timeline & Schnitt-Export (DaVinci Resolve EDL, FCPXML, CSV, Markdown, TXT)"
+              >
+                <Film className="w-4 h-4 text-zinc-950" />
+                <span>Timeline-Export (.edl / .fcpxml / .csv)</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={handleCopyAllSingleLineWindows}
                 className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
               >
@@ -1383,6 +1843,75 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
             projectTitle={config.title || config.projectName}
             onShowToast={onShowToast}
           />
+
+          {/* Quick CTA Live-Editor for Window 4 / Final Window */}
+          {config.pressedWindows && config.pressedWindows.length > 0 && (
+            <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-amber-400 text-zinc-950 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                  CTA
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-950 block">
+                    Finaler Call-to-Action (Window {config.pressedWindows.length})
+                  </span>
+                  <span className="text-[11px] text-zinc-600">
+                    Live anpassen – aktualisiert Window {config.pressedWindows.length} sofort im Prompt &amp; Drehbuch:
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-1 max-w-xl">
+                <input
+                  type="text"
+                  value={config.finalCallToAction || finalCta}
+                  onChange={(e) => handleUpdateCta(e.target.value)}
+                  placeholder="z.B. Jetzt Musterhaus besichtigen & Ihr Traumhaus planen"
+                  className="w-full text-xs font-bold bg-white border border-amber-300 rounded-lg px-3 py-2 text-zinc-900 focus:outline-none focus:border-amber-600 shadow-2xs"
+                />
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      handleUpdateCta(e.target.value);
+                    }
+                  }}
+                  className="text-xs bg-white border border-amber-300 rounded-lg px-2.5 py-2 text-zinc-700 focus:outline-none shrink-0"
+                >
+                  <option value="">Vorlagen...</option>
+                  {CALL_TO_ACTION_PRESETS.map((cta, i) => (
+                    <option key={i} value={cta}>
+                      {cta}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Typography Overlay Bar */}
+          <div className="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                <Type className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-950 block">
+                  Imagevideo Typografie-Modus {config.typographyOverlay?.enabled ? '(Aktiv)' : '(Optional)'}
+                </span>
+                <span className="text-[11px] text-zinc-600">
+                  {config.typographyOverlay?.enabled
+                    ? 'Block- & Schreibschrift, Ausblick-Text und Schluss-Claim sind live in die Windows eingepresst.'
+                    : 'Typografie-Einblendungen, Ausblick-Text und stumme Musik für Imagevideos konfigurieren:'}
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab('workflow')}
+              className="px-3 py-1.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-300 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer"
+            >
+              {config.typographyOverlay?.enabled ? 'Typografie-Details bearbeiten' : 'Typografie konfigurieren'}
+            </button>
+          </div>
 
           {/* List of Pressed Single-Line Windows */}
           <div className="space-y-4">
@@ -1691,6 +2220,35 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         currentConfig={config}
         onLoadProject={handleLoadProjectFromDisk}
         onSaveProject={handleSaveProjectToDisk}
+        onShowToast={onShowToast}
+      />
+
+      {/* Interactive Proposal Claims & Typography Modal Dialog */}
+      {editingClaimsProposal && (
+        <ProposalClaimsEditor
+          isOpen={Boolean(editingClaimsProposal)}
+          onClose={() => setEditingClaimsProposal(null)}
+          proposal={editingClaimsProposal}
+          proposalIndex={proposals.findIndex((p) => p.id === editingClaimsProposal.id)}
+          onUpdateWindowClaim={handleUpdateProposalWindowClaim}
+          onUpdateProposalCta={handleUpdateProposalCta}
+          isPressed={Boolean(config.pressedWindows && config.pressedWindows.length > 0)}
+        />
+      )}
+
+      {/* Timeline & Editing Export Modal (DaVinci Resolve EDL, FCPXML, CSV, Markdown, TXT) */}
+      <TimelineExportModal
+        isOpen={isTimelineExportOpen}
+        onClose={() => setIsTimelineExportOpen(false)}
+        windows={config.pressedWindows || []}
+        projectTitle={config.title || config.projectName || 'Musterhaus_Drehbuch'}
+        dialogueLanguage={config.dialogueLanguage || dialogueLang}
+        genre={config.genre || 'Architektur & Lifestyle'}
+        aspectRatio={config.aspectRatio || '16:9'}
+        targetAudienceName={currentTargetAudience?.name}
+        weather={config.globalWeather || 'Sonnig & klar'}
+        background={config.globalBackground || 'Neubausiedlung'}
+        language={language}
         onShowToast={onShowToast}
       />
     </div>

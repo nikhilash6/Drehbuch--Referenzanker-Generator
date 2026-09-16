@@ -6,6 +6,8 @@ import {
   WindowConfig,
   TargetAudience,
   ScreenplayReferenceCategory,
+  TypographyOverlayConfig,
+  WindowClaimTypography,
 } from '../types';
 
 /**
@@ -204,6 +206,13 @@ export const DEFAULT_PROPOSALS: ConceptProposal[] = [
     toneAndStyle: 'Warm, emotional, einladend, High-End Architekturfilm',
     dialogueLanguage: 'German',
     callToAction: 'Jetzt Musterhaus besichtigen & Ihr Traumhaus planen',
+    callToActionTypography: {
+      fontStyle: 'blockschrift',
+      animation: 'blur_reveal',
+      placement: 'center',
+      hasCursiveAccent: true,
+      cursiveNote: 'Exklusiv reservieren',
+    },
     windowBreakdown: [
       {
         windowNumber: 1,
@@ -215,6 +224,11 @@ export const DEFAULT_PROPOSALS: ConceptProposal[] = [
         dialogueSpeaker: 'Bauherrin',
         focus: 'Fassade von <Building 1>, Kubatur und harmonische Einbettung in das Grundstück',
         claimOrCta: 'Architektur, die begeistert',
+        claimTypography: {
+          fontStyle: 'blockschrift',
+          animation: 'blur_reveal',
+          placement: 'lower_third',
+        },
       },
       {
         windowNumber: 2,
@@ -226,6 +240,11 @@ export const DEFAULT_PROPOSALS: ConceptProposal[] = [
         dialogueSpeaker: 'Partner',
         focus: 'Holzlamellen, Naturstein und präzise handwerkliche Fugen',
         claimOrCta: 'Präzision bis ins letzte Detail',
+        claimTypography: {
+          fontStyle: 'serif',
+          animation: 'blur_reveal',
+          placement: 'lower_third',
+        },
       },
       {
         windowNumber: 3,
@@ -237,6 +256,11 @@ export const DEFAULT_PROPOSALS: ConceptProposal[] = [
         dialogueSpeaker: 'Bauherrin',
         focus: 'Offene Raumachsen, Kücheninsel und nahtloser Übergang zum Garten',
         claimOrCta: 'Lichtdurchflutete Raumkonzepte für Generationen',
+        claimTypography: {
+          fontStyle: 'handschrift',
+          animation: 'fade_in',
+          placement: 'lower_third',
+        },
       },
       {
         windowNumber: 4,
@@ -248,6 +272,13 @@ export const DEFAULT_PROPOSALS: ConceptProposal[] = [
         dialogueSpeaker: 'Partner',
         focus: 'Terrasse, warmes Kantenlicht, Übergabe von <Object 1> und Schluss-Grafik',
         claimOrCta: 'Jetzt Musterhaus besichtigen & Ihr Traumhaus planen',
+        claimTypography: {
+          fontStyle: 'blockschrift',
+          animation: 'blur_reveal',
+          placement: 'center',
+          hasCursiveAccent: true,
+          cursiveNote: 'Schlüsselfertig zum Festpreis',
+        },
       },
     ],
   },
@@ -282,6 +313,74 @@ function getDistinctSubjectVisualDefaults(idx: number, name: string, gender?: st
   };
 }
 
+/**
+ * Builds a cinematic, timecoded on-screen typography segment for imagevideos and commercial films.
+ * Allows custom combination of Blockschrift (geometric sans) and Schreibschrift (cursive script)
+ * plus an Ausblick-Text (teaser claim).
+ */
+function buildTypographySegment(
+  overlay: TypographyOverlayConfig | undefined,
+  windowNumber: number,
+  totalWindows: number,
+  timecodes: { tcStart: string; t1End: string; t2End: string; t3End: string; tcEnd: string }
+): string {
+  if (!overlay || !overlay.enabled) return '';
+
+  const parts: string[] = [];
+  const isFirst = windowNumber === 1;
+  const isLast = windowNumber === totalWindows;
+  const isMiddle = !isFirst && !isLast;
+
+  // Window 1: Hook / Opening (Blockschrift + Elegante Schreibschrift)
+  if (isFirst && (overlay.openingMainLine || overlay.openingSubLine)) {
+    const pos = overlay.openingPosition === 'center' ? 'Exact center' : overlay.openingPosition === 'lower_third' ? 'Lower third' : 'Upper third';
+    let hook = `${timecodes.tcStart}–${timecodes.t2End}: ${pos}`;
+    if (overlay.openingMainLine) {
+      hook += ` – pure white geometric block typography: '${sanitizeQuotesForJSON(overlay.openingMainLine)}'.`;
+    }
+    if (overlay.openingSubLine) {
+      hook += ` Below in elegant handwritten cursive: '${sanitizeQuotesForJSON(overlay.openingSubLine)}'.`;
+    }
+    if (overlay.openingAccentRule !== false) {
+      hook += ` Fine gold rule.`;
+    }
+    parts.push(hook);
+  }
+
+  // Middle Windows (or Window 2): Der smarte Ausblick-Text / Teaser Claim
+  if ((isMiddle || (totalWindows <= 2 && isFirst)) && overlay.teaserClaim) {
+    const pos = overlay.teaserPosition === 'lower_left' ? 'Lower left' : overlay.teaserPosition === 'center' ? 'Exact center' : overlay.teaserPosition === 'upper_third' ? 'Upper third' : 'Lower right';
+    const style = overlay.teaserStyle === 'refined_geometric' ? 'refined geometric block' : overlay.teaserStyle === 'italic_sans' ? 'italic sans-serif' : 'soft handwritten script';
+    parts.push(`${timecodes.t1End}–${timecodes.t3End}: ${pos} – ${style}: '${sanitizeQuotesForJSON(overlay.teaserClaim)}'.`);
+  }
+
+  // Final Window: Outro Brand + Callout
+  if (isLast && (overlay.closingBrandName || overlay.closingCallout)) {
+    const pos = overlay.closingPosition === 'lower_third' ? 'Lower third' : 'Exact center';
+    let outro = `${timecodes.t2End}–${timecodes.tcEnd}: ${pos}`;
+    if (overlay.closingBrandName) {
+      outro += ` – ${sanitizeQuotesForJSON(overlay.closingBrandName)} in refined geometric block.`;
+    }
+    if (overlay.closingCallout) {
+      outro += ` Second line in restrained cursive script: '${sanitizeQuotesForJSON(overlay.closingCallout)}'.`;
+    }
+    if (overlay.closingAccentBar !== false) {
+      outro += ` Solid gold accent bar. Gentle warm pulse at transition.`;
+    }
+    parts.push(outro);
+  }
+
+  if (parts.length === 0) return '';
+
+  const texture = overlay.textureLook === 'cinematic_minimal'
+    ? 'All text in ultra-clean cinematic typography. Only opacity fades.'
+    : overlay.textureLook === 'clean_digital'
+    ? 'All text with crisp digital clarity. Minimalist fade transitions.'
+    : 'All text on heavy matte paper texture. Only opacity fades. No harsh cuts.';
+
+  return `TYPOGRAPHY: ${parts.join(' ')} ${texture}`;
+}
+
 export function buildSingleLineWindowPrompt(params: {
   windowNumber: number;
   totalWindows: number;
@@ -298,11 +397,13 @@ export function buildSingleLineWindowPrompt(params: {
   dialogueSpeaker?: string;
   dialogueText?: string;
   claimOrCta?: string;
+  claimTypography?: WindowClaimTypography;
   isLastWindow?: boolean;
   activeSubjects: ConfigReference[];
   allSubjects: ConfigReference[];
   narrativeAction?: string;
   targetAudience?: TargetAudience;
+  typographyOverlay?: TypographyOverlayConfig;
 }): SingleLineWindow {
   const {
     windowNumber,
@@ -310,22 +411,27 @@ export function buildSingleLineWindowPrompt(params: {
     durationSeconds = 14,
     actionCode = 'ASTROCINEMAV01K2T',
     aspectRatio = '16:9',
-    weather = 'Bright daylight, clear blue sky, soft sunbeams, warm natural illumination',
-    background = 'A modern high-end architectural residence with landscaped grounds and wooden terrace',
-    cameraMovement = 'Drohnenflug Orbit 360° gliding smoothly around the building and descending to eye-level',
-    visualFocus = 'Facade, wooden louvers, floor-to-ceiling glass and seamless indoor-outdoor transition',
-    soundDesign = 'Gentle breeze in the trees, footsteps on oak parquet, subtle acoustic warmth',
-    musicStyle = 'Cinematic ambient music, elegant acoustic warmth, no harsh synthesizers',
+    weather = 'Natural clear daylight with balanced atmospheric illumination',
+    background = 'A cinematic environment matching the scene context',
+    cameraMovement = 'Smooth cinematic camera movement',
+    visualFocus = 'Atmospheric scene details and subjects',
+    soundDesign = 'Subtle natural environmental ambience',
+    musicStyle = 'Cinematic ambient score with warm emotional resonance',
     dialogueLanguage = 'German',
     dialogueSpeaker,
-    dialogueText,
+    dialogueText: initialDialogueText,
     claimOrCta,
+    claimTypography,
     isLastWindow = windowNumber === totalWindows,
     activeSubjects = [],
     allSubjects = [],
     narrativeAction,
     targetAudience,
+    typographyOverlay,
   } = params;
+
+  // Stummes Imagevideo Option: Wenn muteVoiceover aktiviert ist, keine gesprochenen Dialoge einfügen
+  const dialogueText = typographyOverlay?.enabled && typographyOverlay?.muteVoiceover ? undefined : initialDialogueText;
 
   const startSec = (windowNumber - 1) * durationSeconds;
   const endSec = windowNumber * durationSeconds;
@@ -372,10 +478,8 @@ export function buildSingleLineWindowPrompt(params: {
   const enSoundDesign = toEnglishCinematicText(soundDesign, 'Natural environmental ambience matching the surroundings');
   const enMusicStyle = toEnglishCinematicText(musicStyle, 'Cinematic music matching the tone of the scene');
 
-  // 2. Setting and Environment (Strict Cinematic English)
-  const audienceColor = targetAudience?.colorSpectrum ? `, Color palette: ${toEnglishCinematicText(targetAudience.colorSpectrum)}` : '';
-  const envWeather = `${enWeather}${audienceColor}`;
-  const settingSegment = `${envWeather}. ${enBackground}. Focus on ${enVisualFocus}.`;
+  // 2. Setting and Environment (Strict Cinematic English - no forced architecture injection)
+  const settingSegment = `${enWeather}. ${enBackground}. Focus on ${enVisualFocus}.`;
 
   // 3. Definitions Segment (Strict Cinematic English & Clean Maestro Anchors)
   const definitionsParts: string[] = [];
@@ -387,13 +491,18 @@ export function buildSingleLineWindowPrompt(params: {
       const maestroAnchor = `@Subject${idx}_${cleanName}`;
       const defaults = getDistinctSubjectVisualDefaults(idx, s.name, s.gender, s.roleOrAction);
 
-      const hair = s.hairOrMaterial ? toEnglishCinematicText(s.hairOrMaterial) : defaults.hair;
-      const eyes = s.eyesOrGlazing ? toEnglishCinematicText(s.eyesOrGlazing) : defaults.eyes;
-      const marks = s.distinguishingMarks ? toEnglishCinematicText(s.distinguishingMarks) : defaults.marks;
-      const clothing = s.clothingOrFinish ? toEnglishCinematicText(s.clothingOrFinish) : defaults.clothing;
-      const age = s.ageRange || defaults.age;
-      const build = s.build ? toEnglishCinematicText(s.build) : defaults.build;
-      const actionDesc = s.roleOrActionEn ? toEnglishCinematicText(s.roleOrActionEn) : (s.roleOrAction ? toEnglishCinematicText(s.roleOrAction) : 'Explores architectural spaces and interacts naturally');
+      const isGenericHair = !s.hairOrMaterial || /gepflegtes|entsprechendes|haar|kleidung|kontext|leinenhemd/i.test(s.hairOrMaterial);
+      const isGenericClothing = !s.clothingOrFinish || /passende|kleidung|kontext|zeitgemäße|leinenhemd|trousers/i.test(s.clothingOrFinish);
+      const isGenericAge = !s.ageRange || /jahre|age/i.test(s.ageRange);
+      const isGenericBuild = !s.build || /statur|posture|natürliche/i.test(s.build);
+
+      const hair = !isGenericHair ? toEnglishCinematicText(s.hairOrMaterial!) : defaults.hair;
+      const eyes = s.eyesOrGlazing && !/blick|augen/i.test(s.eyesOrGlazing) ? toEnglishCinematicText(s.eyesOrGlazing) : defaults.eyes;
+      const marks = s.distinguishingMarks && !/konsistenz|bildfehler/i.test(s.distinguishingMarks) ? toEnglishCinematicText(s.distinguishingMarks) : defaults.marks;
+      const clothing = !isGenericClothing ? toEnglishCinematicText(s.clothingOrFinish!) : defaults.clothing;
+      const age = !isGenericAge ? s.ageRange! : defaults.age;
+      const build = !isGenericBuild ? toEnglishCinematicText(s.build!) : defaults.build;
+      const actionDesc = s.roleOrActionEn ? toEnglishCinematicText(s.roleOrActionEn) : (s.roleOrAction ? toEnglishCinematicText(s.roleOrAction) : 'Interacts naturally in the scene context');
       const relDesc = s.relationshipEn ? toEnglishCinematicText(s.relationshipEn) : (s.relationship ? toEnglishCinematicText(s.relationship) : 'Protagonist in the screenplay');
 
       return `${s.tag} is ${cleanName} (${maestroAnchor}). ${hair}, ${eyes}, ${marks}. Wears exactly ${clothing}. Age ${age}, ${build}. Role & Action: ${actionDesc}. Relationship: ${relDesc}. [UNIQUE IDENTITY LOCK: <Subject ${idx}> has distinct face and attire, zero similarity to other subjects].`;
@@ -527,9 +636,45 @@ export function buildSingleLineWindowPrompt(params: {
   }
 
   // Timecode 4: T3 to End (Final Call to Action or smooth transition)
+  const fontDirective = claimTypography ? (
+    claimTypography.fontStyle === 'handschrift'
+      ? 'elegant handwritten cursive script'
+      : claimTypography.fontStyle === 'serif'
+      ? 'refined editorial serif typography'
+      : claimTypography.fontStyle === 'condensed_bold'
+      ? 'bold condensed cinema block letters'
+      : 'clean modern sans-serif block letters'
+  ) : 'clean modern typography';
+
+  const animDirective = claimTypography ? (
+    claimTypography.animation === 'blur_reveal'
+      ? 'cinematic blur-reveal sliding into sharp focus'
+      : claimTypography.animation === 'typewriter'
+      ? 'sequential typewriter animation reveal'
+      : claimTypography.animation === 'hard_cut'
+      ? 'sharp direct cut on-screen'
+      : 'smooth opacity fade-in'
+  ) : 'smooth opacity fade-in';
+
+  const placeDirective = claimTypography ? (
+    claimTypography.placement === 'center'
+      ? 'exact screen center'
+      : claimTypography.placement === 'top_third'
+      ? 'upper third of frame'
+      : claimTypography.placement === 'lower_right'
+      ? 'lower right corner'
+      : 'cinematic lower-third'
+  ) : (isLastWindow ? 'exact screen center' : 'cinematic lower-third');
+
+  const accentDirective = (claimTypography?.hasCursiveAccent && claimTypography?.cursiveNote)
+    ? ` paired with delicate handwritten cursive subtitle '${sanitizeQuotesForJSON(claimTypography.cursiveNote)}'`
+    : '';
+
   if (isLastWindow && cleanClaimOrCta) {
     const objMention = primaryObject ? ` Featuring ${primaryObject.tag} (${cleanMaestroAnchorName(primaryObject.name, 'Object')}).` : '';
-    timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: The camera captures the final moments of the scene.${objMention} Graphic Call-to-Action overlay fades in with text: '${cleanClaimOrCta}'. Fade to soft cinematic black over the last second.`;
+    timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: The camera captures the final moments of the scene.${objMention} Graphic Call-to-Action overlay appears via ${animDirective} at ${placeDirective} in ${fontDirective}${accentDirective} with text: '${cleanClaimOrCta}'. Fade to soft cinematic black over the last second.`;
+  } else if (cleanClaimOrCta) {
+    timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: Smooth cinematic transition into the next perspective while subtle graphic claim '${cleanClaimOrCta}' appears at ${placeDirective} in ${fontDirective} via ${animDirective}${accentDirective}.`;
   } else {
     timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: Smooth cinematic transition into the next perspective with ${enVisualFocus} gleaming in the light.`;
   }
@@ -541,19 +686,20 @@ export function buildSingleLineWindowPrompt(params: {
     : `EXTREME CLOSE-UP, 100mm macro, T1.8 – reflections and ambient light interacting with the environment, emphasizing depth.`;
   const macro3 = isLastWindow && cleanClaimOrCta
     ? (primaryObject
-        ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – ${primaryObject.tag} (${primaryObject.name}) held firmly in hand, followed by the crisp typography of '${cleanClaimOrCta}'.`
-        : `EXTREME CLOSE-UP, 100mm macro, T1.8 – a central focal detail of the final scene, followed by the pristine typography of '${cleanClaimOrCta}'.`)
-    : `EXTREME CLOSE-UP, 100mm macro, T1.8 – soft light patterns moving slowly across the surface, emphasizing the passage of time.`;
+        ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – ${primaryObject.tag} (${primaryObject.name}) held firmly in hand, followed by the crisp ${fontDirective} of '${cleanClaimOrCta}'.`
+        : `EXTREME CLOSE-UP, 100mm macro, T1.8 – a central focal detail of the final scene, followed by the pristine ${fontDirective} of '${cleanClaimOrCta}'.`)
+    : (cleanClaimOrCta
+        ? `EXTREME CLOSE-UP, 100mm macro, T1.8 – close detail of ${enVisualFocus}, accompanied by the on-screen claim '${cleanClaimOrCta}' in ${fontDirective}.`
+        : `EXTREME CLOSE-UP, 100mm macro, T1.8 – soft light patterns moving slowly across the surface, emphasizing the passage of time.`);
 
   const macroSegment = `${macro1} ${macro2} ${macro3}`;
 
   // 7. Camera section (Strict Cinematic English)
-  const cameraSegment = `Camera: ${envWeather}, ${enBackground}, ${enCamMovement}, focusing on ${primaryHuman1.tag} ${primaryHuman1.name}, ${enVisualFocus}, shallow depth of field, 35mm master prime, cinematic framing, no artifacts, consistent lighting and anatomy throughout.`;
+  const cameraSegment = `Camera: ${enWeather}, ${enBackground}, ${enCamMovement}, focusing on ${primaryHuman1.tag} ${primaryHuman1.name}, ${enVisualFocus}, shallow depth of field, 35mm master prime, cinematic framing, no artifacts, consistent lighting and anatomy throughout.`;
 
   // 8. Audio Delivery, Audio Design & Music (Strict Anti-Babble & Anti-Geplappere Lock)
-  const targetSoundEn = targetAudience?.soundAesthetic ? toEnglishCinematicText(targetAudience.soundAesthetic) : '';
-  const soundAcoustic = targetSoundEn ? `${enSoundDesign}. ${targetSoundEn}` : enSoundDesign;
-  const musicAcoustic = targetSoundEn ? `${enMusicStyle}. ${targetSoundEn}` : enMusicStyle;
+  const soundAcoustic = enSoundDesign;
+  const musicAcoustic = enMusicStyle;
 
   const audioDeliverySegment = dialogueText
     ? `Audio Delivery: STRICTLY ZERO rambling, ZERO background chatter, ZERO unsolicited speech fragments, ZERO voice-over. Only the single precise marked dialogue line spoken cleanly by ${cleanSpeakerName}.`
@@ -587,6 +733,14 @@ export function buildSingleLineWindowPrompt(params: {
     ? `Watermark: Brand logo ${activeLogos.map((l) => l.tag).join(', ')} must appear permanently in the bottom-right corner (bottom-right, 25% opacity, subtle, non-intrusive transparent overlay).`
     : '';
 
+  // 11. Timecoded Typography Overlay Segment (Optional Imagevideo & Commercial Mode)
+  const typographySegment = buildTypographySegment(
+    typographyOverlay,
+    windowNumber,
+    totalWindows,
+    { tcStart, t1End, t2End, t3End, tcEnd }
+  );
+
   // Combine ALL segments into one string and strictly enforce 0 line breaks!
   const rawCombined = [
     windowTag,
@@ -595,6 +749,7 @@ export function buildSingleLineWindowPrompt(params: {
     settingSegment,
     timecodeSegment,
     macroSegment,
+    typographySegment,
     cameraSegment,
     audioDeliverySegment,
     audioDesignSegment,
@@ -639,6 +794,7 @@ export function pressProposalToSingleLineWindows(params: {
   globalBackground?: string;
   finalCallToAction?: string;
   targetAudience?: TargetAudience;
+  typographyOverlay?: TypographyOverlayConfig;
 }): SingleLineWindow[] {
   const {
     proposal,
@@ -651,6 +807,7 @@ export function pressProposalToSingleLineWindows(params: {
     globalBackground,
     finalCallToAction,
     targetAudience,
+    typographyOverlay,
   } = params;
 
   const totalWindows = proposal.windowBreakdown.length;
@@ -659,6 +816,7 @@ export function pressProposalToSingleLineWindows(params: {
   return proposal.windowBreakdown.map((win, idx) => {
     const isLast = idx === totalWindows - 1;
     const cta = isLast ? (finalCallToAction || proposal.callToAction || win.claimOrCta) : win.claimOrCta;
+    const typo = isLast ? (proposal.callToActionTypography || win.claimTypography) : win.claimTypography;
 
     const firstHuman = allSubjects.find((r) => r.category === 'human') || allSubjects[0];
 
@@ -668,28 +826,30 @@ export function pressProposalToSingleLineWindows(params: {
       durationSeconds: windowDurationSeconds,
       actionCode,
       aspectRatio,
-      weather: globalWeather || (targetAudience ? targetAudience.colorSpectrum : 'Bright daylight, warm natural sunlight with crisp architectural shadows'),
-      background: globalBackground || 'Modern energy-efficient residence with landscaped grounds and wooden terrace',
+      weather: globalWeather || 'Natural clear daylight with balanced atmospheric illumination',
+      background: globalBackground || 'Cinematic environment matching the scene context',
       cameraMovement: win.cameraMovement,
       visualFocus: win.focus,
-      soundDesign: win.soundDesign || (targetAudience ? targetAudience.soundAesthetic : 'Gentle breeze, crisp footsteps, acoustic resonance of high ceiling rooms'),
-      musicStyle: win.musicStyle || (targetAudience ? targetAudience.soundAesthetic : 'Cinematic ambient music with warm acoustic presence'),
+      soundDesign: win.soundDesign || 'Natural environmental ambience matching the surroundings',
+      musicStyle: win.musicStyle || 'Cinematic ambient score with warm emotional resonance',
       dialogueLanguage,
-      dialogueSpeaker: win.dialogueSpeaker || firstHuman?.name || 'Bauherrin',
+      dialogueSpeaker: win.dialogueSpeaker || firstHuman?.name || 'Protagonist',
       dialogueText: win.dialogueSnippet,
       claimOrCta: cta,
+      claimTypography: typo,
       isLastWindow: isLast,
       activeSubjects: activeRefs.length > 0 ? activeRefs : allSubjects.slice(0, 3),
       allSubjects,
       narrativeAction: win.actionDescription,
       targetAudience,
+      typographyOverlay,
     });
   });
 }
 
 /**
  * Cinematic English Normalizer & Translator:
- * Translates and standardizes German film, architectural, lighting, acoustic, and character
+ * Translates and standardizes German film, lighting, acoustic, and character
  * descriptions into high-end cinematic English prompt terminology strictly required for MiniMax H3 / Maestro.
  */
 export function toEnglishCinematicText(text?: string, fallback: string = ''): string {
@@ -699,71 +859,79 @@ export function toEnglishCinematicText(text?: string, fallback: string = ''): st
 
   // 1. Exact Multi-Word Phrase & Sentence Replacements (Sorted by specificity)
   const phraseReplacements: [RegExp, string][] = [
-    // Target Audience Color & Atmosphere Presets
-    [/Ruhige,\s*zeitlose\s*Natur-\s*und\s*Erdtöne\s*\(Sandstein,\s*warmes\s*Grau,\s*helles\s*Eichenholz\)[^.]*\./gi, 'Calm, timeless natural earth tones (sandstone, warm gray, light natural oak wood), neutral warm diffused daylight and harmonic contrast.'],
-    [/Monochrome\s*Eleganz\s*mit\s*warmen\s*Akzenten[^.]*\./gi, 'Monochrome architectural elegance with warm accents: anthracite, exposed fair-faced concrete, dark smoked oak, champagne brass details, dramatic blue hour lighting with indirect warm LED lines.'],
-    [/Sanfte\s*Salbei-,\s*Eukalyptus-\s*und\s*helle\s*Naturtöne[^.]*\./gi, 'Soft sage green, eucalyptus and light natural hues, gentle diffused light through architectural louvers, organic shapes, uninterrupted view of lush garden greenery.'],
-    [/Warme,\s*sonnige\s*und\s*lebendige\s*Töne[^.]*\./gi, 'Warm, sunny and vibrant color palette: light golden honey wood, crisp fresh summer daylight, sunlit open spaces, lush green designer garden.'],
-    [/Kreative\s*Loft-Ästhetik[^.]*\./gi, 'Creative loft aesthetic: raw exposed concrete, warm oak slats, matte black steel accents, dynamic architectural lighting.'],
-    [/Warme,\s*edle\s*Cremetöne[^.]*\./gi, 'Warm, sophisticated cream tones, gentle late afternoon golden light, warm timber terrace deck, welcoming and glare-free illumination.'],
+    // Character & Apparel Specific Phrases
+    [/well-groomed\s*Naturhaar\s*with\s*natürlichem\s*Glanz/gi, 'well-groomed natural hair with natural sheen'],
+    [/Wacher,\s*begeisterter\s*Blick/gi, 'alert, enthusiastic gaze'],
+    [/Eindeutiger\s*visueller\s*Anker:\s*Natürlicher\s*Teint,\s*keine\s*auffälligen\s*Uhren,\s*Klon-Ausschluss\s*aktiv/gi, 'distinct visual anchor: natural complexion, no prominent watches, anti-clone lock active'],
+    [/Hochwertiges\s*sandfarbenes\s*Leinenhemd/gi, 'high-quality sand-colored linen shirt'],
+    [/natural\s*aufrechte\s*stature/gi, 'natural upright posture'],
+    [/Edles\s*Lärchenholz\s*&\s*Glattputz/gi, 'fine natural timber and smooth finish'],
+    [/Klar\s*reflektierende\s*Dreifach-Isolierverglasung/gi, 'clearly reflective panoramic glazing'],
+    [/Matt\s*anthracite\s*eloxierte\s*Profile/gi, 'matte anthracite anodized frames'],
+    [/Ruhige,\s*zeitlose\s*Natur-\s*und\s*Erdtöne[^.]*\./gi, 'Calm, timeless natural earth tones and neutral warm diffused daylight.'],
+    [/Monochrome\s*Eleganz\s*mit\s*warmen\s*Akzenten[^.]*\./gi, 'Monochrome visual elegance with warm accents and balanced lighting.'],
+    [/Sanfte\s*Salbei-,\s*Eukalyptus-\s*und\s*helle\s*Naturtöne[^.]*\./gi, 'Soft natural tones with gentle diffused light and serene organic surroundings.'],
+    [/Warme,\s*sonnige\s*und\s*lebendige\s*Töne[^.]*\./gi, 'Warm, sunny and vibrant color palette with crisp daylight and open atmosphere.'],
+    [/Kreative\s*Loft-Ästhetik[^.]*\./gi, 'Creative contemporary aesthetic with dynamic atmospheric lighting.'],
+    [/Warme,\s*edle\s*Cremetöne[^.]*\./gi, 'Warm, sophisticated cream tones and gentle late afternoon golden light.'],
 
     // Target Audience Sound Aesthetic Presets
-    [/Klassisch-harmonische\s*Streicher\s*mit\s*ruhigem\s*Klavier[^.]*\./gi, 'Classical harmonic strings with calm acoustic piano, deep dampened foley of closing solid doors, natural footsteps on real oak parquet, zero harsh electronic synths.'],
-    [/Präziser\s*Modern-Electronic\s*Ambient[^.]*\./gi, 'Precise modern ambient soundscape with subtle sub-bass pulse, delicate neo-classical piano notes, whisper-quiet tactile foley of sliding panoramic glass and high-end switches.'],
-    [/Meditative,\s*organische\s*Klanglandschaft[^.]*\./gi, 'Meditative organic soundscape: gentle warm cello, soft summer breeze in treetops, quiet water ripple, serene acoustic room isolation.'],
-    [/Wärmende\s*akustische\s*Gitarre[^.]*\./gi, 'Warm acoustic guitar, gentle piano melody, lively family comfort ambience, soft breeze.'],
-    [/Inspirierende\s*Neo-Klassik[^.]*\./gi, 'Inspiring neo-classical ambient sound with warm acoustic texture, crisp keyboard foley and vinyl presence.'],
-    [/Ruhige,\s*feinsinnige\s*Akustik[^.]*\./gi, 'Serene, sophisticated acoustic soundscape with piano, acoustic guitar and gentle natural birdsong and soft breeze.'],
+    [/Klassisch-harmonische\s*Streicher\s*mit\s*ruhigem\s*Klavier[^.]*\./gi, 'Classical harmonic strings with calm acoustic piano and natural environmental foley.'],
+    [/Präziser\s*Modern-Electronic\s*Ambient[^.]*\./gi, 'Precise modern ambient soundscape with subtle sub-bass pulse and delicate piano notes.'],
+    [/Meditative,\s*organische\s*Klanglandschaft[^.]*\./gi, 'Meditative organic soundscape: gentle warm cello, soft breeze, and serene acoustic room isolation.'],
+    [/Wärmende\s*akustische\s*Gitarre[^.]*\./gi, 'Warm acoustic guitar, gentle piano melody, and soft ambient breeze.'],
+    [/Inspirierende\s*Neo-Klassik[^.]*\./gi, 'Inspiring neo-classical ambient sound with warm acoustic texture.'],
+    [/Ruhige,\s*feinsinnige\s*Akustik[^.]*\./gi, 'Serene, sophisticated acoustic soundscape with acoustic guitar, piano and soft natural breeze.'],
 
     // Weather & Atmosphere Sentences
     [/Bewölkter\s*Tag\s*bei\s*leichtem\s*Nieselregen[^.]*diffus[^.]*\./gi, 'Overcast day with gentle atmospheric drizzle, soft and diffused cinematic light with cozy and enduring warmth.'],
     [/Warmes\s*Abendlicht\s*&\s*goldene\s*Stunde/gi, 'Warm golden hour sunlight with soft diffused shadows and ambient twilight glow'],
     [/Warmes\s*Nachmittagslicht\s*&\s*goldene\s*Stunde/gi, 'Warm golden hour sunlight with soft diffused shadows and ambient twilight glow'],
-    [/Sonnig\s*&\s*klarer\s*blauer\s*Himmel/gi, 'Sunny and clear blue sky with warm architectural illumination and crisp shadows'],
-    [/Dunst\s*steigt\s*über\s*der\s*Wiese\s*auf[^.]*\./gi, 'Morning mist rising over the meadow, morning sun breaking through pine treetops, casting warm edge light on the facade.'],
+    [/Sonnig\s*&\s*klarer\s*blauer\s*Himmel/gi, 'Sunny and clear blue sky with warm natural illumination'],
+    [/Dunst\s*steigt\s*über\s*der\s*Wiese\s*auf[^.]*\./gi, 'Morning mist rising gently, morning sun breaking through trees, casting warm edge light across the scene.'],
     [/Morgenstille\s*&\s*Naturerwachen/gi, 'Serene morning silence and natural dawn, golden early morning sunlight'],
-    [/Dämmerung\s*&\s*Leuchtendes\s*Zuhause/gi, 'Blue hour twilight, glowing interior warm light emanating through floor-to-ceiling glass'],
+    [/Dämmerung\s*&\s*Leuchtendes\s*Zuhause/gi, 'Blue hour twilight, glowing warm interior light emanating through windows'],
 
     // Camera Movements & Presets
     [/Drohnenflug\s*Orbit\s*360°\s*und\s*sanfter\s*Sinkflug\s*auf\s*Augenhöhe/gi, '360-degree orbital drone flight smoothly descending to eye-level'],
-    [/Drohnenflug\s*Orbit\s*360°/gi, '360-degree orbital drone shot gliding smoothly around the building'],
-    [/Dolly-In\s*durch\s*die\s*Eingangstür\s*mit\s*flüssiger\s*Steadicam-Führung/gi, 'Smooth Steadicam dolly-in gliding through the entrance door into the open foyer'],
-    [/Steadicam\s*Walkthrough\s*entlang\s*der\s*Sichtachse\s*Richtung\s*Garten/gi, 'Fluid Steadicam walkthrough along architectural sightlines towards the garden terrace'],
+    [/Drohnenflug\s*Orbit\s*360°/gi, '360-degree orbital drone shot gliding smoothly'],
+    [/Dolly-In\s*durch\s*die\s*Eingangstür\s*mit\s*flüssiger\s*Steadicam-Führung/gi, 'Smooth Steadicam dolly-in gliding through the entrance door into the room'],
+    [/Steadicam\s*Walkthrough\s*entlang\s*der\s*Sichtachse\s*Richtung\s*Garten/gi, 'Fluid Steadicam walkthrough along visual sightlines towards the background'],
     [/Langsamer\s*Rückwärts-Dolly\s*und\s*Aufstieg\s*der\s*Kamera\s*in\s*die\s*Abenddämmerung/gi, 'Slow reverse dolly and gentle crane rise into the golden evening twilight'],
     [/Dolly-In\s*mit\s*35mm\s*Prime/gi, 'Smooth forward dolly-in with 35mm master prime lens at eye level'],
-    [/Kran-Aufzug\s*&\s*Sunset\s*Outro/gi, 'Slow ascending crane rise pulling back from the wooden terrace into the glowing evening sky'],
-    [/FPV\s*Fly-Through\s*entlang\s*der\s*Dachlinie/gi, 'Dynamic FPV fly-through along the solar roofline and architectural facade'],
+    [/Kran-Aufzug\s*&\s*Sunset\s*Outro/gi, 'Slow ascending crane shot into the glowing evening sky'],
+    [/FPV\s*Fly-Through\s*entlang\s*der\s*Dachlinie/gi, 'Dynamic FPV fly-through smoothly capturing the scene from above'],
     [/Sanfter\s*Kameraschwenk/gi, 'Gentle cinematic camera pan'],
     [/Statische\s*Meistereinstellung\s*mit\s*sanftem\s*Micro-Dolly/gi, 'Static cinematic master shot with gentle micro-dolly track'],
     [/Low-Angle\s*Steadicam\s*auf\s*die\s*Schritte/gi, 'Low-angle Steadicam tracking the footsteps, then tilting up to the face'],
 
     // Actions & Character Interactions
-    [/Er\s*ist\s*(the\s*)?Makler\s*(und|and)\s*Verkäufer\s*(des\s*Hauses)?/gi, 'He is the real estate agent and seller of the house'],
+    [/Er\s*ist\s*(the\s*)?Makler\s*(und|and)\s*Verkäufer\s*(des\s*Hauses)?/gi, 'He is the presenter and guide of the location'],
     [/Sie\s*ist\s*(the\s*)?Partnerin\s*(von|of)\s*subject3_mann/gi, 'She is the partner of Subject 3'],
-    [/Sicht\s*(auf|on)\s*(eine|a)\s*stabile,\s*solide\s*Infrastruktur/gi, 'View facing stable, enduring infrastructure'],
+    [/Sicht\s*(auf|on)\s*(eine|a)\s*stabile,\s*solide\s*Infrastruktur/gi, 'View facing stable, enduring scenery'],
     [/Einfache,\s*funktionale\s*Gestaltung\s*without\s*übermäßige\s*Dekoration/gi, 'Clean, functional design without excessive decoration'],
     [/Szenerie\s*radiates\s*cozy\s*warmth\s*and\s*security\s*and\s*timeless\s*durability/gi, 'Scene radiates cozy warmth, security, and timeless durability'],
-    [/Er\s*begrüßt\s*seine\s*Gäste\s*und\s*führt\s*sie\s*durch\s*das\s*Haus/gi, 'He warmly welcomes his guests and guides them through the architectural residence'],
-    [/Erkundet\s*die\s*Architektur\s*und\s*prüft\s*die\s*Materialien/gi, 'Explores the architectural sightlines, admiring panoramic glass and touching natural wood surfaces'],
-    [/Erkundet\s*die\s*Architektur/gi, 'Explores architectural sightlines, touches tactile timber surfaces and inspects panoramic glass'],
+    [/Er\s*begrüßt\s*seine\s*Gäste\s*und\s*führt\s*sie\s*durch\s*das\s*Haus/gi, 'He warmly welcomes his guests and guides them through the space'],
+    [/Erkundet\s*die\s*Architektur\s*und\s*prüft\s*die\s*Materialien/gi, 'Explores the surroundings and observes the environment with interest'],
+    [/Erkundet\s*die\s*Architektur/gi, 'Explores the scene and interacts naturally with the surroundings'],
     [/Begleitet\s*die\s*Besichtigung/gi, 'Accompanies the walkthrough with confident satisfaction'],
-    [/Sie\s*treten\s*durch\s*die\s*Eingangstür/gi, 'They step through the front entrance into the spacious foyer'],
-    [/Der\s*Blick\s*öffnet\s*sich\s*in\s*den\s*großzügigen\s*Wohn-\s*und\s*Kochbereich/gi, 'The view opens into the spacious open-concept living and kitchen area with natural sunlight pouring in'],
-    [/Beide\s*stehen\s*entspannt\s*auf\s*der\s*Holzterrasse/gi, 'Both stand relaxed on the wooden terrace deck bathed in golden evening light'],
-    [/Die\s*Schlüsselübergabe\s*erfolgt/gi, 'The handover of the keys takes place in a tactile close-up'],
-    [/Geht\s*barfuß\s*über\s*den\s*warmen\s*Parkettboden/gi, 'Walks barefoot across the warm oak parquet flooring, holding a steaming cup of coffee in both hands'],
-    [/Sitzt\s*auf\s*der\s*Lesebank\s*im\s*Fenstererker/gi, 'Sits comfortably on the reading bench by the panoramic bay window with a book on her lap'],
-    [/Zentrales\s*haptisches\s*Detail\s*bei\s*der\s*Übergabe/gi, 'Central tactile prop in handover sequence, held firmly in hand'],
+    [/Sie\s*treten\s*durch\s*die\s*Eingangstür/gi, 'They step through the front door into the room'],
+    [/Der\s*Blick\s*öffnet\s*sich\s*in\s*den\s*großzügigen\s*Wohn-\s*und\s*Kochbereich/gi, 'The view opens into the spacious interior area with natural sunlight pouring in'],
+    [/Beide\s*stehen\s*entspannt\s*auf\s*der\s*Holzterrasse/gi, 'Both stand relaxed together bathed in golden evening light'],
+    [/Die\s*Schlüsselübergabe\s*erfolgt/gi, 'The handover takes place in a tactile close-up'],
+    [/Geht\s*barfuß\s*über\s*den\s*warmen\s*Parkettboden/gi, 'Walks across the warm floor, holding a steaming cup in both hands'],
+    [/Sitzt\s*auf\s*der\s*Lesebank\s*im\s*Fenstererker/gi, 'Sits comfortably on the bench by the panoramic window with a book on her lap'],
+    [/Zentrales\s*haptisches\s*Detail\s*bei\s*der\s*Übergabe/gi, 'Central tactile prop in the sequence, held firmly in hand'],
     [/Permanentes,\s*dezentes\s*Wasserzeichen/gi, 'Permanent discreet transparent watermark anchored in bottom-right corner (25% opacity)'],
 
     // Settings & Environments
-    [/Moderne\s*Architektur\s*in\s*natürlicher\s*Umgebung/gi, 'A modern high-end architectural residence with landscaped grounds and wooden terrace'],
-    [/Neubausiedlung\s*mit\s*gepflegtem\s*Vorgarten/gi, 'Suburban upscale residential setting with manicured lawn and wooden deck'],
-    [/Gut\s*gepflegter,\s*naturnaher\s*Garten\s*mit\s*robusten\s*Bäumen\s*und\s*Sträuchern/gi, 'Well-maintained naturalistic landscaped designer garden with lush trees and shrubs'],
-    [/Gut\s*gepflegter,\s*naturnaher\s*landscaped\s*designer\s*garden\s*mit\s*robusten\s*Bäumen\s*und\s*Sträuchern/gi, 'Well-maintained naturalistic landscaped designer garden with lush trees and shrubs'],
-    [/Subtile\s*Raumakustik\s*&\s*sanftes\s*Windrauschen/gi, 'Subtle acoustic room presence, soft breeze through trees and gentle footsteps on wood'],
-    [/Cinematic\s*Ambient\s*Soundtrack/gi, 'Warm cinematic ambient soundtrack with gentle acoustic guitar and piano accents'],
-    [/Hauptmotiv\s*und\s*architektonische\s*Kulisse/gi, 'Primary architectural facade, modern cubic geometry with vertical larch wood slats and triple-glazed windows'],
+    [/Moderne\s*Architektur\s*in\s*natürlicher\s*Umgebung/gi, 'A scenic cinematic environment in a natural setting'],
+    [/Neubausiedlung\s*mit\s*gepflegtem\s*Vorgarten/gi, 'Upscale scenic residential setting with manicured grounds'],
+    [/Gut\s*gepflegter,\s*naturnaher\s*Garten\s*mit\s*robusten\s*Bäumen\s*und\s*Sträuchern/gi, 'Well-maintained naturalistic setting with lush trees and foliage'],
+    [/Gut\s*gepflegter,\s*naturnaher\s*landscaped\s*designer\s*garden\s*mit\s*robusten\s*Bäumen\s*und\s*Sträuchern/gi, 'Well-maintained naturalistic setting with lush trees and foliage'],
+    [/Subtile\s*Raumakustik\s*&\s*sanftes\s*Windrauschen/gi, 'Subtle room presence, soft breeze through trees and gentle movement'],
+    [/Cinematic\s*Ambient\s*Soundtrack/gi, 'Warm cinematic ambient soundtrack with gentle acoustic instrumentation'],
+    [/Hauptmotiv\s*und\s*architektonische\s*Kulisse/gi, 'Primary visual subject and scenic backdrop throughout all windows'],
   ];
 
   let res = trimmed;
@@ -784,6 +952,21 @@ export function toEnglishCinematicText(text?: string, fallback: string = ''): st
     [/\bleichtes\b/gi, 'light'],
     [/\bleichte\b/gi, 'light'],
     [/\bBart\b/gi, 'beard'],
+    [/\bNaturhaar\b/gi, 'natural hair'],
+    [/\bGlanz\b/gi, 'sheen'],
+    [/\bWacher\b/gi, 'alert'],
+    [/\bwacher\b/gi, 'alert'],
+    [/\bbegeisterter\b/gi, 'enthusiastic'],
+    [/\bBlick\b/gi, 'gaze'],
+    [/\bTeint\b/gi, 'complexion'],
+    [/\bUhren\b/gi, 'watches'],
+    [/\bHochwertiges\s*sandfarbenes\s*Leinenhemd\b/gi, 'high-quality sand-colored linen shirt'],
+    [/\bHochwertiges\b/gi, 'high-quality'],
+    [/\bsandfarbenes\b/gi, 'sand-colored'],
+    [/\bLeinenhemd\b/gi, 'linen shirt'],
+    [/\baufrechte\b/gi, 'upright'],
+    [/\bStatur\b/gi, 'stature'],
+    [/\bJahre\b/gi, 'years'],
     [/\bBartwuchs\b/gi, 'beard growth'],
     [/\bfreundliches\b/gi, 'friendly'],
     [/\bfreundliche\b/gi, 'friendly'],
@@ -1217,6 +1400,7 @@ export function pressConfigToSingleLineWindows(params: {
   globalBackground?: string;
   finalCallToAction?: string;
   targetAudience?: TargetAudience;
+  typographyOverlay?: TypographyOverlayConfig;
 }): SingleLineWindow[] {
   const {
     windows,
@@ -1229,6 +1413,7 @@ export function pressConfigToSingleLineWindows(params: {
     globalBackground,
     finalCallToAction,
     targetAudience,
+    typographyOverlay,
   } = params;
 
   const totalWindows = windows.length;
@@ -1270,6 +1455,7 @@ export function pressConfigToSingleLineWindows(params: {
       allSubjects,
       narrativeAction: `${win.title}: Kamera führt ${win.cameraMovement} aus. Fokus auf ${win.visualFocus}.`,
       targetAudience,
+      typographyOverlay,
     });
   });
 }
