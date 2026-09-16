@@ -66,6 +66,24 @@ The **Single-Line Video Prompt Engine (v1.0.0)** is a high-precision production 
 
 ---
 
+## 🎨 Featured LoRA: Cinematic Style V2 & Detail Enhancer for MiniMax H3
+
+We express our deepest appreciation and special recommendation for one of the most outstanding community contributions to the **MiniMax H3** ecosystem:
+
+- 🎬 **Model**: **Cinematic Style LoRA + Detail Enhancer for MiniMax H3 (Cinema V2)**  
+- 👤 **Creator**: [**Astroburner**](https://civitai.red/user/Astroburner) (Civitai Profile: [https://civitai.red/user/Astroburner](https://civitai.red/user/Astroburner))  
+- 🔗 **Civitai Model Page**: [https://civitai.red/models/2849726/cinematic-style-lora-detail-enhancer-for-minimax-h3](https://civitai.red/models/2849726/cinematic-style-lora-detail-enhancer-for-minimax-h3)
+- 🔑 **Activation Tag**: `ASTROCINEMAV01K2T`
+- 🎯 **Recommended Maestro GUI Weight**: `0.85 – 1.00`
+
+### Why We Love & Integrate Astroburner's LoRA:
+1. **Masterful Dataset Architecture**: Created by **Astroburner**, V2 is built upon **1,852 carefully captioned image-caption pairs (3,704 training files total)**. It significantly expands foundational film aesthetics into deliberate spatial-geometric camera directions (*Dutch angles, overhead shots, over-the-shoulder, aerial perspectives, clean single-subject framing*).
+2. **Organic Film Photorealism**: Rather than forcing an artificial grading LUT, Astroburner's training unlocks authentic cinematic language: motivated practical lighting, balanced environmental fill, true skin translucency, 35mm organic grain, subtle halation, and natural highlight rolloff.
+3. **Seamless Single-Line Integration**: Our prompt engine natively embeds the `ASTROCINEMAV01K2T` activation tag and V2 atmospheric descriptors at the optimal header position of every single-line window prompt, fully synchronized with our **Strict Anti-Babble & Non-Speaking Listener Silence Guard**.
+4. **1-Click Studio Toggle**: Easily switch the LoRA activation on or off directly inside the Screenplay Studio configuration cards with real-time prompt re-pressing.
+
+---
+
 ## 👥 Supporters & Sponsors
 
 We proudly highlight our project supporters and vision partners:

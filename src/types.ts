@@ -261,6 +261,15 @@ export interface TypographyOverlayConfig {
   muteVoiceover?: boolean; // No spoken words. Pure silent ambience and music.
 }
 
+export interface VoiceModulationConfig {
+  enabled: boolean;
+  voiceCharacter?: 'makler_authority' | 'warm_narrator' | 'emotional_buyer' | 'calm_architect' | 'dynamic_commercial'; // Stimmcharakter
+  pacing?: 'measured' | 'relaxed' | 'dynamic'; // Sprechgeschwindigkeit / Pacing
+  acousticEnvironment?: 'studio_condenser' | 'natural_room' | 'warm_foyer' | 'open_terrace'; // Akustik-Raum
+  antiBabbleLock?: boolean; // Strikter Geplapper-Schutz: ZERO phantom mouthing, Münder geschlossen bei Nicht-Sprechen
+  nonSpeakingListenerLock?: boolean; // Begleitpersonen-Schutz: Keine Mundbewegungen bei Zuhörern
+}
+
 export interface DrehbuchKonfiguratorState {
   title?: string;
   windowCount: number;
@@ -289,8 +298,11 @@ export interface DrehbuchKonfiguratorState {
   projectName?: string; // current active project folder name in /data/projects/{projectName}
   projectId?: string;
   typographyOverlay?: TypographyOverlayConfig;
+  voiceModulation?: VoiceModulationConfig;
   darkRetributionDisclaimerAccepted?: boolean;
   ultraPhysicsMode?: boolean; // Ultra-Detail Kausalitätskette, Muskelkontraktion, Subsurface-Gegenlicht & Haptik
+  astroCinemaLoraMode?: boolean; // Cinematic Style V2 LoRA (ASTROCINEMAV01K2T) by red_astronomer
+  astroCinemaLoraKeywords?: boolean; // Add V2 trained terms (motivated lighting, 35mm organic grain, subtle halation)
 }
 
 export type DrehbuchKonfig = DrehbuchKonfiguratorState;

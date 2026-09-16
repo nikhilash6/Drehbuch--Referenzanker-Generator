@@ -69,13 +69,15 @@ import { DesignConceptModal } from './drehbuch/DesignConceptModal';
 import { ProjectManagerModal } from './drehbuch/ProjectManagerModal';
 import { MaestroWindowsBindingList } from './drehbuch/MaestroWindowsBindingList';
 import { TypographyOverlayCard } from './drehbuch/TypographyOverlayCard';
+import { VoiceModulationCard } from './drehbuch/VoiceModulationCard';
+import { AstroCinemaLoraCard } from './drehbuch/AstroCinemaLoraCard';
 import { UltraPhysicsCard } from './drehbuch/UltraPhysicsCard';
 import { LensSelectorCard } from './drehbuch/LensSelectorCard';
 import { RetributionDisclaimerCard } from './drehbuch/RetributionDisclaimerCard';
 import { ProposalClaimsEditor } from './drehbuch/ProposalClaimsEditor';
 import { ReferenceUsageGuideCard } from './drehbuch/ReferenceUsageGuideCard';
 import { TimelineExportModal } from './drehbuch/TimelineExportModal';
-import { TypographyOverlayConfig } from '../types';
+import { TypographyOverlayConfig, VoiceModulationConfig } from '../types';
 import { FolderOpen, FileJson, Video, Palette, HardDrive, FolderPlus, Save, Flame, AlertTriangle, UtensilsCrossed } from 'lucide-react';
 
 interface DrehbuchKonfiguratorProps {
@@ -614,6 +616,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         ultraPhysicsMode: config.ultraPhysicsMode === true,
         lensOpticsMode: config.lensOpticsMode === true,
         selectedLens: config.selectedLens || 'auto',
+        voiceModulation: config.voiceModulation,
       };
 
       const res = await fetch('/api/screenplay/generate-proposals', {
@@ -669,6 +672,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         finalCallToAction: newCta,
         targetAudience: currentTargetAudience,
         typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
       });
       updatedConfig.pressedWindows = rePressed;
     }
@@ -695,6 +699,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         finalCallToAction: config.finalCallToAction || finalCta,
         targetAudience: currentTargetAudience,
         typographyOverlay: newOverlay,
+        voiceModulation: config.voiceModulation,
       });
       updatedConfig.pressedWindows = rePressed;
     } else if (config.windows && config.pressedWindows && config.pressedWindows.length > 0) {
@@ -710,6 +715,113 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         finalCallToAction: config.finalCallToAction || finalCta,
         targetAudience: currentTargetAudience,
         typographyOverlay: newOverlay,
+        voiceModulation: config.voiceModulation,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    }
+    onChangeConfig(updatedConfig);
+  };
+
+  // Handler: Update Voice Modulation with instant live re-pressing of single-line windows
+  const handleUpdateVoiceModulation = (newVoiceConfig: VoiceModulationConfig) => {
+    const activeProposal = selectedProposal || proposals[0];
+    const updatedConfig: DrehbuchKonfiguratorState = {
+      ...config,
+      voiceModulation: newVoiceConfig,
+    };
+    if (activeProposal && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressProposalToSingleLineWindows({
+        proposal: activeProposal,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: newVoiceConfig,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    } else if (config.windows && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressConfigToSingleLineWindows({
+        windows: config.windows,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: newVoiceConfig,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    }
+    onChangeConfig(updatedConfig);
+  };
+
+  // Handler: Update AstroCinema LoRA toggle with instant live re-pressing of single-line windows
+  const handleToggleAstroCinemaLora = (enabled: boolean) => {
+    const activeProposal = selectedProposal || proposals[0];
+    const updatedConfig: DrehbuchKonfiguratorState = {
+      ...config,
+      astroCinemaLoraMode: enabled,
+    };
+    if (activeProposal && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressProposalToSingleLineWindows({
+        proposal: activeProposal,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: enabled,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    }
+    onChangeConfig(updatedConfig);
+    onShowToast('info', enabled ? 'Cinematic Style LoRA (ASTROCINEMAV01K2T) aktiviert' : 'Cinematic Style LoRA deaktiviert');
+  };
+
+  // Handler: Update AstroCinema LoRA keywords toggle
+  const handleToggleAstroCinemaKeywords = (keywordsEnabled: boolean) => {
+    const activeProposal = selectedProposal || proposals[0];
+    const updatedConfig: DrehbuchKonfiguratorState = {
+      ...config,
+      astroCinemaLoraKeywords: keywordsEnabled,
+    };
+    if (activeProposal && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressProposalToSingleLineWindows({
+        proposal: activeProposal,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: keywordsEnabled,
       });
       updatedConfig.pressedWindows = rePressed;
     }
@@ -754,6 +866,9 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         finalCallToAction: activeProp.callToAction || config.finalCallToAction || finalCta,
         targetAudience: currentTargetAudience,
         typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
       });
     }
 
@@ -798,6 +913,9 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         finalCallToAction: newCta,
         targetAudience: currentTargetAudience,
         typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
       });
     }
 
@@ -833,6 +951,9 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
       finalCallToAction: activeCta,
       targetAudience: currentTargetAudience,
       typographyOverlay: config.typographyOverlay,
+      voiceModulation: config.voiceModulation,
+      astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+      astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
     });
 
     onChangeConfig({
@@ -871,6 +992,9 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
       finalCallToAction: finalCta,
       targetAudience: currentTargetAudience,
       typographyOverlay: config.typographyOverlay,
+      voiceModulation: config.voiceModulation,
+      astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+      astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
     });
 
     onChangeConfig({
@@ -1511,6 +1635,21 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
               onChangeOverlay={handleUpdateTypographyOverlay}
               windowCount={config.windowCount}
               genre={config.genre}
+            />
+
+            {/* Voice & Delivery Modulator (Stimmfarbe, Pacing, Raumakustik & Anti-Geplappere-Lock) */}
+            <VoiceModulationCard
+              config={config.voiceModulation}
+              onChangeConfig={handleUpdateVoiceModulation}
+            />
+
+            {/* Cinematic Style V2 LoRA (ASTROCINEMAV01K2T & Detail Enhancer for MiniMax H3) */}
+            <AstroCinemaLoraCard
+              enabled={config.astroCinemaLoraMode !== false}
+              addAtmosphericKeywords={config.astroCinemaLoraKeywords !== false}
+              onToggle={handleToggleAstroCinemaLora}
+              onToggleKeywords={handleToggleAstroCinemaKeywords}
+              language={language}
             />
 
             {/* Kinetik- & Kausalitäts-Engine (Ultra-Physik, Muskelspannung, Subsurface-Gegenlicht, 4-Phasen Rhythmus) - DEFAULT OFF */}

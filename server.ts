@@ -717,6 +717,7 @@ app.post('/api/screenplay/generate-proposals', async (req: Request, res: Respons
       ultraPhysicsMode = false,
       lensOpticsMode = false,
       selectedLens = 'auto',
+      voiceModulation,
     } = req.body;
 
     // Use references array if provided, or fallback to subjects
@@ -806,6 +807,19 @@ For all "actionDescription" and "focus" fields, you MUST enforce physical realis
 `;
     }
 
+    // Voice & Delivery Modulation Directive (Timbre, Pacing, Anti-Babble Lock)
+    let voiceModulationDirective = '';
+    if (voiceModulation && voiceModulation.enabled !== false) {
+      voiceModulationDirective = `
+VOICE MODULATION & STRICT ANTI-BABBLE DIRECTIVE:
+- Voice Character / Timbre: ${voiceModulation.voiceCharacter || 'Makler-Autorität (Souverän & Resonanzstark)'}
+- Pacing & Flow: ${voiceModulation.pacing || 'Bedacht & Gemessen (~110 Wörter/Min)'}
+- Acoustic Environment: ${voiceModulation.acousticEnvironment || 'Warmes Foyer (Dezenter Raumhall)'}
+- Anti-Babble Discipline: Formulate "dialogueSnippet" as concise, impactful, highly modulated sentences without rambling or filler words.
+- In "soundDesign" and "musicStyle", reflect this acoustic depth and clear voice staging. Non-speaking listeners must listen silently with closed lips.
+`;
+    }
+
     const systemPrompt = `Du bist ein hochdotierter internationaler Regisseur und Prompt-Ingenieur für High-End Videos auf Video-KIs (MiniMax H3 / Maestro 2.1.6). Du bist extrem flexibel bezüglich Genres und Themen (z.B. Reiseführung mit Avatar & Kultur-Denkmal, Restaurant & Fine Dining, Comedy, Horror, Erotik, Drama, Reise, Kunst, Lifestyle oder Architektur) und passt die Handlung, die Atmosphäre, die Tonalität und alle Beschreibungen exakt an die Vorgaben des Nutzers an.
 Deine Aufgabe: Entwickle genau 1 KREATIVES, HOCHWERTIGES DREHBUCH-KONZEPT für ein Video bestehend aus ${windowCount} Szenenfenstern (Windows) mit je ${windowDurationSeconds} Sekunden Dauer.
 
@@ -856,6 +870,7 @@ ${audienceDirective}
 ${logoDirective}
 ${genreDirective}
 ${ultraPhysicsDirective}
+${voiceModulationDirective}
 
 VERPFLICHTENDE REFERENZEN (Objekte, Gebäude, Personen, Tiere):
 Die folgenden Referenzen sind Gegenstand des kreativen Gesamtkonzepts. Definiere genau, WER WAS MACHT und WER MIT WEM WIE ZUSAMMEN GEHÖRT:

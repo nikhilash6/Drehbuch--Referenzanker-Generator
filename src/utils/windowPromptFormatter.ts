@@ -8,6 +8,7 @@ import {
   ScreenplayReferenceCategory,
   TypographyOverlayConfig,
   WindowClaimTypography,
+  VoiceModulationConfig,
 } from '../types';
 
 /**
@@ -404,6 +405,9 @@ export function buildSingleLineWindowPrompt(params: {
   narrativeAction?: string;
   targetAudience?: TargetAudience;
   typographyOverlay?: TypographyOverlayConfig;
+  voiceModulation?: VoiceModulationConfig;
+  astroCinemaLoraMode?: boolean;
+  astroCinemaLoraKeywords?: boolean;
 }): SingleLineWindow {
   const {
     windowNumber,
@@ -428,6 +432,9 @@ export function buildSingleLineWindowPrompt(params: {
     narrativeAction,
     targetAudience,
     typographyOverlay,
+    voiceModulation,
+    astroCinemaLoraMode = true,
+    astroCinemaLoraKeywords = true,
   } = params;
 
   // Stummes Imagevideo Option: Wenn muteVoiceover aktiviert ist, keine gesprochenen Dialoge einfügen
@@ -469,7 +476,10 @@ export function buildSingleLineWindowPrompt(params: {
   }
 
   // 1. Window Tag & Action header
-  const windowTag = `window${windowNumber}: (${tcStart}–${tcEnd}) Native ${aspectRatio} widescreen.`;
+  const loraTagPrefix = (astroCinemaLoraMode !== false)
+    ? `${actionCode || 'ASTROCINEMAV01K2T'} depicts a live-action cinematic scene in a native ${aspectRatio} widescreen frame.`
+    : `Native ${aspectRatio} widescreen.`;
+  const windowTag = `window${windowNumber}: (${tcStart}–${tcEnd}) ${loraTagPrefix}`;
 
   // English-normalized scene descriptors
   const enWeather = toEnglishCinematicText(weather, 'Natural clear daylight with balanced atmospheric illumination');
@@ -479,7 +489,10 @@ export function buildSingleLineWindowPrompt(params: {
   const enMusicStyle = toEnglishCinematicText(musicStyle, 'Cinematic music matching the tone of the scene');
 
   // 2. Setting and Environment (Strict Cinematic English - no forced architecture injection)
-  const settingSegment = `${enWeather}. ${enBackground}. Focus on ${enVisualFocus}.`;
+  const loraAtmosphere = (astroCinemaLoraMode !== false && astroCinemaLoraKeywords !== false)
+    ? 'Motivated practical lighting, balanced environmental fill, realistic skin texture, organic fine 35mm film grain, subtle halation, and controlled highlight rolloff.'
+    : '';
+  const settingSegment = [enWeather, enBackground, `Focus on ${enVisualFocus}.`, loraAtmosphere].filter(Boolean).join(' ');
 
   // 3. Definitions Segment (Strict Cinematic English & Clean Maestro Anchors)
   const definitionsParts: string[] = [];
@@ -628,9 +641,13 @@ export function buildSingleLineWindowPrompt(params: {
 
   // Timecode 3: T2 to T3 (Reaction of other humans, e.g. Subject 3 and Subject 4, simultaneous with dialogue)
   const otherHumans = activeHumans.filter((h) => h.id !== speakerObj.id);
+  const listenerSilenceLock = (voiceModulation?.enabled !== false && voiceModulation?.nonSpeakingListenerLock !== false)
+    ? 'with closed mouths, peaceful smile, and subtle attentive nodding (strictly no speaking, zero mouth movement)'
+    : 'react naturally in the environment, taking in the scene';
+
   if (otherHumans.length > 0) {
     const otherNames = otherHumans.map((h) => `${h.tag} ${cleanMaestroAnchorName(h.name, 'Partner')}`).join(' and ');
-    timecodeSegment += `TIMECODE ${t2End}–${t3End}: Simultaneously, ${otherNames} listen attentively and react naturally in the environment, taking in the scene. `;
+    timecodeSegment += `TIMECODE ${t2End}–${t3End}: Simultaneously, ${otherNames} listen attentively ${listenerSilenceLock}. `;
   } else {
     timecodeSegment += `TIMECODE ${t2End}–${t3End}: Simultaneously, the camera glides fluidly across the space, highlighting ${enVisualFocus}. `;
   }
@@ -701,9 +718,41 @@ export function buildSingleLineWindowPrompt(params: {
   const soundAcoustic = enSoundDesign;
   const musicAcoustic = enMusicStyle;
 
+  // Voice Modulator nuance directives
+  const charKey = voiceModulation?.voiceCharacter || 'makler_authority';
+  const voiceCharacterDirective = charKey === 'makler_authority'
+    ? 'calm authoritative baritone timbre with warm confidence and trustworthy resonance'
+    : charKey === 'warm_narrator'
+    ? 'sonorous documentary narrator timbre with grounded warmth and relaxed inflection'
+    : charKey === 'emotional_buyer'
+    ? 'joyful, expressive natural timbre with genuine emotional delight and clear diction'
+    : charKey === 'calm_architect'
+    ? 'deliberate, focused architectural specialist timbre with thoughtful cadence'
+    : 'clear, dynamic, engaging commercial voice with crisp articulation';
+
+  const pacingKey = voiceModulation?.pacing || 'measured';
+  const pacingDirective = pacingKey === 'measured'
+    ? 'measured conversational cadence (~110 wpm) with natural breath pauses before and after the sentence'
+    : pacingKey === 'relaxed'
+    ? 'calm, leisurely pacing (~95 wpm) with smooth breathing and effortless pauses'
+    : 'energetic, fluid cadence (~130 wpm) with vibrant momentum and crisp pronunciation';
+
+  const roomKey = voiceModulation?.acousticEnvironment || 'warm_foyer';
+  const acousticRoomDirective = roomKey === 'warm_foyer'
+    ? 'spacious interior acoustics with gentle natural room reverb'
+    : roomKey === 'studio_condenser'
+    ? 'ultra-clean close-mic condenser acoustic with pristine presence and zero room echo'
+    : roomKey === 'natural_room'
+    ? 'well-damped residential room acoustics with balanced acoustic warmth'
+    : 'open outdoor terrace acoustic with natural airiness and gentle environmental dispersion';
+
+  const antiBabbleDirectives = (voiceModulation?.enabled !== false && voiceModulation?.antiBabbleLock !== false)
+    ? 'STRICT ANTI-BABBLE LOCK: ZERO phantom mouthing, lips stay naturally closed when not speaking, ZERO filler chatter, ZERO unsolicited speech fragments, ZERO mumbling before or after dialogue.'
+    : 'STRICTLY ZERO rambling, ZERO background chatter, ZERO unsolicited speech fragments.';
+
   const audioDeliverySegment = dialogueText
-    ? `Audio Delivery: STRICTLY ZERO rambling, ZERO background chatter, ZERO unsolicited speech fragments, ZERO voice-over. Only the single precise marked dialogue line spoken cleanly by ${cleanSpeakerName}.`
-    : `Audio Delivery: STRICTLY ZERO speech, ZERO rambling, ZERO background talking. Pure silent cinematic ambience only.`;
+    ? `Audio Delivery: ${antiBabbleDirectives} Spoken by ${cleanSpeakerName} in ${voiceCharacterDirective}, delivered with ${pacingDirective}, captured with ${acousticRoomDirective}. Only the single marked dialogue line.`
+    : `Audio Delivery: STRICTLY ZERO speech, ZERO rambling, ZERO background talking, ZERO mouth movements. Pure silent cinematic ambience only.`;
   const audioDesignSegment = `Audio Design: ${soundAcoustic}, nothing else.`;
   const musicSegment = dialogueText
     ? `Music: ${musicAcoustic}. Only ambience and the marked dialogue lines.`
@@ -795,6 +844,9 @@ export function pressProposalToSingleLineWindows(params: {
   finalCallToAction?: string;
   targetAudience?: TargetAudience;
   typographyOverlay?: TypographyOverlayConfig;
+  voiceModulation?: VoiceModulationConfig;
+  astroCinemaLoraMode?: boolean;
+  astroCinemaLoraKeywords?: boolean;
 }): SingleLineWindow[] {
   const {
     proposal,
@@ -808,6 +860,9 @@ export function pressProposalToSingleLineWindows(params: {
     finalCallToAction,
     targetAudience,
     typographyOverlay,
+    voiceModulation,
+    astroCinemaLoraMode = true,
+    astroCinemaLoraKeywords = true,
   } = params;
 
   const totalWindows = proposal.windowBreakdown.length;
@@ -843,6 +898,9 @@ export function pressProposalToSingleLineWindows(params: {
       narrativeAction: win.actionDescription,
       targetAudience,
       typographyOverlay,
+      voiceModulation,
+      astroCinemaLoraMode,
+      astroCinemaLoraKeywords,
     });
   });
 }
@@ -1401,6 +1459,9 @@ export function pressConfigToSingleLineWindows(params: {
   finalCallToAction?: string;
   targetAudience?: TargetAudience;
   typographyOverlay?: TypographyOverlayConfig;
+  voiceModulation?: VoiceModulationConfig;
+  astroCinemaLoraMode?: boolean;
+  astroCinemaLoraKeywords?: boolean;
 }): SingleLineWindow[] {
   const {
     windows,
@@ -1414,6 +1475,9 @@ export function pressConfigToSingleLineWindows(params: {
     finalCallToAction,
     targetAudience,
     typographyOverlay,
+    voiceModulation,
+    astroCinemaLoraMode = true,
+    astroCinemaLoraKeywords = true,
   } = params;
 
   const totalWindows = windows.length;
@@ -1456,6 +1520,9 @@ export function pressConfigToSingleLineWindows(params: {
       narrativeAction: `${win.title}: Kamera führt ${win.cameraMovement} aus. Fokus auf ${win.visualFocus}.`,
       targetAudience,
       typographyOverlay,
+      voiceModulation,
+      astroCinemaLoraMode,
+      astroCinemaLoraKeywords,
     });
   });
 }
