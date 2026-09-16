@@ -570,12 +570,12 @@ export function buildSingleLineWindowPrompt(params: {
       const cleanName = cleanMaestroAnchorName(s.name, `Subject${idx}`);
       return `${s.tag} ${cleanName} (@Subject${idx}_${cleanName})`;
     }).join(' and ');
-    separationSegment = `ANTI-CLONE & IDENTITY LOCK: ${names} are strictly separate, unique human individuals. Zero feature transfer, zero facial blending, zero morphing, and zero twin duplications. Each actor appears strictly ONCE in this frame. No duplicate or background clones.`;
+    separationSegment = `ANTI-CLONE & IDENTITY LOCK: ${names} are strictly separate, unique human individuals. Zero feature transfer, zero facial blending, zero morphing, and zero twin duplications. Each actor appears strictly ONCE in this frame. No duplicate or background clones. ALL background extras, visitors, neighbors, and unanchored people in frame strictly keep closed lips with zero talking, zero mouthing, and zero phantom chatter.`;
   } else if (activeHumans.length === 1) {
     const h = activeHumans[0];
     const idx = h.referenceIndex || 1;
     const cleanName = cleanMaestroAnchorName(h.name, `Subject${idx}`);
-    separationSegment = `ANTI-CLONE & IDENTITY LOCK: ${h.tag} ${cleanName} (@Subject${idx}_${cleanName}) appears strictly ONCE in this frame as a unique individual. Zero duplicate clones, zero face morphing, zero background twins.`;
+    separationSegment = `ANTI-CLONE & IDENTITY LOCK: ${h.tag} ${cleanName} (@Subject${idx}_${cleanName}) appears strictly ONCE in this frame as a unique individual. Zero duplicate clones, zero face morphing, zero background twins. ALL background extras, visitors, neighbors, and unanchored people in frame strictly keep closed lips with zero talking, zero mouthing, and zero phantom chatter.`;
   }
 
   // 5. Timecoded Narrative Sequence (100% Contiguous without time gaps)
@@ -689,9 +689,9 @@ export function buildSingleLineWindowPrompt(params: {
 
   if (isLastWindow && cleanClaimOrCta) {
     const objMention = primaryObject ? ` Featuring ${primaryObject.tag} (${cleanMaestroAnchorName(primaryObject.name, 'Object')}).` : '';
-    timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: The camera captures the final moments of the scene.${objMention} Graphic Call-to-Action overlay appears via ${animDirective} at ${placeDirective} in ${fontDirective}${accentDirective} with text: '${cleanClaimOrCta}'. Fade to soft cinematic black over the last second.`;
+    timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: The camera captures the final moments of the scene.${objMention} On-screen text cleanly displaying '${cleanClaimOrCta}' appears at ${placeDirective} in ${fontDirective}${accentDirective} via ${animDirective}. Fade to soft cinematic black over the last second.`;
   } else if (cleanClaimOrCta) {
-    timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: Smooth cinematic transition into the next perspective while subtle graphic claim '${cleanClaimOrCta}' appears at ${placeDirective} in ${fontDirective} via ${animDirective}${accentDirective}.`;
+    timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: Smooth cinematic transition into the next perspective while on-screen text cleanly displaying '${cleanClaimOrCta}' appears at ${placeDirective} in ${fontDirective} via ${animDirective}${accentDirective}.`;
   } else {
     timecodeSegment += `TIMECODE ${t3End}–${tcEnd}: Smooth cinematic transition into the next perspective with ${enVisualFocus} gleaming in the light.`;
   }
@@ -747,12 +747,12 @@ export function buildSingleLineWindowPrompt(params: {
     : 'open outdoor terrace acoustic with natural airiness and gentle environmental dispersion';
 
   const antiBabbleDirectives = (voiceModulation?.enabled !== false && voiceModulation?.antiBabbleLock !== false)
-    ? 'STRICT ANTI-BABBLE LOCK: ZERO phantom mouthing, lips stay naturally closed when not speaking, ZERO filler chatter, ZERO unsolicited speech fragments, ZERO mumbling before or after dialogue.'
-    : 'STRICTLY ZERO rambling, ZERO background chatter, ZERO unsolicited speech fragments.';
+    ? 'STRICT UNIVERSAL ANTI-BABBLE LOCK: ALL subjects, background extras, visitors, neighbors, and nearby people strictly keep their lips completely closed with ZERO phantom mouthing, ZERO talking, ZERO filler chatter, ZERO unsolicited speech fragments, and ZERO mumbling before or after dialogue. Lips stay naturally closed when not speaking.'
+    : 'STRICTLY ZERO rambling, ZERO background chatter, ZERO unsolicited speech fragments from anyone in frame.';
 
   const audioDeliverySegment = dialogueText
-    ? `Audio Delivery: ${antiBabbleDirectives} Spoken by ${cleanSpeakerName} in ${voiceCharacterDirective}, delivered with ${pacingDirective}, captured with ${acousticRoomDirective}. Only the single marked dialogue line.`
-    : `Audio Delivery: STRICTLY ZERO speech, ZERO rambling, ZERO background talking, ZERO mouth movements. Pure silent cinematic ambience only.`;
+    ? `Audio Delivery: ${antiBabbleDirectives} Spoken ONLY by ${cleanSpeakerName} in ${voiceCharacterDirective}, delivered with ${pacingDirective}, captured with ${acousticRoomDirective}. Only the single marked dialogue line.`
+    : `Audio Delivery: STRICTLY ZERO speech from anyone in frame, ZERO rambling, ZERO background talking, ZERO mouth movements. Pure silent cinematic ambience only.`;
   const audioDesignSegment = `Audio Design: ${soundAcoustic}, nothing else.`;
   const musicSegment = dialogueText
     ? `Music: ${musicAcoustic}. Only ambience and the marked dialogue lines.`
@@ -825,7 +825,7 @@ export function buildSingleLineWindowPrompt(params: {
     extremeCloseups: [macro1, macro2, macro3],
     cameraMove: cameraMovement,
     musicAudio: `${musicAcoustic} / ${soundAcoustic}`,
-    claimOrCta: claimOrCta || (isLastWindow ? 'Call to Action' : undefined),
+    claimOrCta: claimOrCta || undefined,
   };
 }
 
