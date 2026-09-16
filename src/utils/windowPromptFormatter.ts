@@ -649,7 +649,7 @@ export function buildSingleLineWindowPrompt(params: {
 
   // Clean timecoded dialogue trigger: strictly matching working template to prevent off-speaker babbling!
   if (dialogueText) {
-    timecodeSegment += `TIMECODE ${t2End}, ${speakerObj.tag} ${cleanSpeakerName}: ${timePrefix} <d[${cleanSpeakerName}][${dialogueLanguage}]> ${sanitizedDialogue} </d> `;
+    timecodeSegment += `TIMECODE ${t2End}, ${speakerObj.tag} ${cleanSpeakerName}: ${timePrefix} <d[Subject${speakerIdx}][${dialogueLanguage}]> ${sanitizedDialogue} </d> `;
   }
 
   // Timecode 3: T2 to T3 (Reaction of other humans, e.g. Subject 3 and Subject 4, simultaneous with dialogue)
@@ -834,7 +834,7 @@ export function buildSingleLineWindowPrompt(params: {
     summary: narrativeAction || `${visualFocus} mit ${cameraMovement}`,
     activeSubjects: activeSubjects.map((s) => s.name),
     activeReferences: activeSubjects.map((s) => `${s.tag} ${s.name}`),
-    dialogueSnippet: dialogueText ? `${timePrefix} <d[${cleanSpeakerName}][${dialogueLanguage}]> ${sanitizedDialogue} </d>` : undefined,
+    dialogueSnippet: dialogueText ? `${timePrefix} <d[Subject${speakerIdx}][${dialogueLanguage}]> ${sanitizedDialogue} </d>` : undefined,
     extremeCloseups: [macro1, macro2, macro3],
     cameraMove: cameraMovement,
     musicAudio: `${musicAcoustic} / ${soundAcoustic}`,
