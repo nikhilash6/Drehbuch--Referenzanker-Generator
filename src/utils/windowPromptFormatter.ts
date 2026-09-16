@@ -608,17 +608,30 @@ export function buildSingleLineWindowPrompt(params: {
   }
 
   // Dialogue Trigger exactly at T2 (No gap between T2 and dialogue!)
+  const allHumans = allSubjects.filter((s) => s.category === 'human');
   let speakerObj = activeHumans[0] || primaryHuman1;
-  if (dialogueSpeaker) {
-    const allHumans = allSubjects.filter((s) => s.category === 'human');
-    const matched = allHumans.find((h) => 
-      h.tag.toLowerCase() === dialogueSpeaker.toLowerCase() ||
-      h.name.toLowerCase() === dialogueSpeaker.toLowerCase() ||
-      dialogueSpeaker.toLowerCase().includes(h.name.toLowerCase()) ||
-      h.name.toLowerCase().includes(dialogueSpeaker.toLowerCase()) ||
-      (h.roleOrAction && h.roleOrAction.toLowerCase().includes(dialogueSpeaker.toLowerCase())) ||
-      (h.roleOrAction && dialogueSpeaker.toLowerCase().includes(h.roleOrAction.toLowerCase()))
-    );
+
+  const spkQuery = (dialogueSpeaker || narrativeAction || visualFocus || '').toLowerCase();
+  if (spkQuery) {
+    const matched = allHumans.find((h) => {
+      const hTag = h.tag.toLowerCase();
+      const hName = h.name.toLowerCase();
+      const hRole = (h.roleOrAction || '').toLowerCase();
+
+      if (hTag && spkQuery.includes(hTag)) return true;
+      if (hName && (spkQuery.includes(hName) || hName.includes(spkQuery))) return true;
+      if (hRole && (spkQuery.includes(hRole) || hRole.includes(spkQuery))) return true;
+
+      const numMatch = hTag.match(/subject\s*(\d+)/i) || hTag.match(/(\d+)/);
+      if (numMatch && numMatch[1]) {
+        const num = numMatch[1];
+        if (spkQuery.includes(`subject ${num}`) || spkQuery.includes(`subject${num}`) || spkQuery.includes(`subject_${num}`) || spkQuery.includes(`<subject ${num}>`)) {
+          return true;
+        }
+      }
+      return false;
+    });
+
     if (matched) {
       speakerObj = matched;
       if (!activeHumans.some((h) => h.id === speakerObj.id)) {
