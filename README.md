@@ -1,68 +1,99 @@
-# 🎬 Single-Line Video Prompt Engine & Screenplay Generator `v1.0.0`
+# 🎬 Single-Line Video Prompt Engine & Screenplay Generator `v2.1.0`
 
-> **Version 1.0.0 (Release 1.0)**  
+> **Version 2.1.0 (Release 2.1 - Master Kodachrome & Single-Line Windows Engine)**  
 > **Professional Dramaturgical Screenplay Studio & Single-Line Prompt Engine**  
 > Optimized for **MiniMax H3**, **Maestro 2.1.6**, **Kling AI**, and **Runway Gen-3**.
 
 ---
 
-## 🌟 Overview & Reference / Video Inquiries
+## 🌟 Overview & Video Inquiries
 
-The **Single-Line Video Prompt Engine (v1.0.0)** is a high-precision production environment designed for filmmakers, content creators, architects, and AI video producers. It transforms raw bullet points, dramaturgical concepts, and visual references into contiguous, timecoded video windows (e.g. **14.000 seconds per window**, exactly 56s across 4 windows) with zero line breaks.
+The **Single-Line Video Prompt Engine (v2.1.0)** is a high-precision production studio designed for filmmakers, cinematographers, content creators, architects, and AI video producers. It compiles dramaturgical concepts, character references, and physical lighting parameters into contiguous, timecoded video windows (e.g. **14.000 seconds per window**, exactly 28s or 56s across multiple windows) with strictly **zero line breaks**.
 
 ### 📸 Video Showcase & Direct Contact
 - 🎥 **Instagram Showcase & Portfolio**: [https://www.instagram.com/mo_ment_e](https://www.instagram.com/mo_ment_e) (`@mo_ment_e`)
 - 💬 **Video Inquiries & Collaborations**:  
-  *Need custom AI video productions, architectural spatial-axis walkthroughs, or prompt engineering for your projects? Feel free to send a **Direct Message (DM) on Instagram** anytime to [@mo_ment_e](https://www.instagram.com/mo_ment_e)!*
+  *Need custom AI video productions, photorealistic analog film simulations, architectural walkthroughs, or prompt engineering for your projects? Feel free to send a **Direct Message (DM) on Instagram** anytime to [@mo_ment_e](https://www.instagram.com/mo_ment_e)!*
 
 ---
 
-## 🏷️ Versioning
+## 🏷️ Versioning & Release History
 
-- **`v1.0.0` (Current Release - 1.0)**
-  - Full Single-Line Prompt Engine featuring a strict zero-line-break presser.
-  - Multi-Task LM Studio Vision Pipeline (Port 1234) for private local reference and blueprint analysis.
-  - Floorplan & Spatial Axis Director with 4-station tour choreography ($W_1$ to $W_4$), optical lens profiles, and timecode sync.
-  - Synchronized Reference Manager with identity anchors (`<Subject 1..n>`, `<Building 1..n>`, `<Object 1..n>`, `<Logo 1>`).
-  - Multi-format timeline exports (.edl, .fcpxml, .csv, .md) for DaVinci Resolve and Final Cut Pro.
-  - Complete bilingual user interface (English & German).
+- **`v2.1.0` (Current Release - Master Kodachrome & V3 Analog Overhaul)**
+  - **Kodachrome 64 Master Plugin (K-14 Dia)**: Full photochemical color science integration with 5500K neutral daylight balance, dedicated Sclera/Eye-White Protection against yellow/sepia tint, 650nm carmine red halation, and velvety Obsidian D-Max deep blacks.
+  - **Analog-Trimmer & Linsen-Emulation V3 UX**: Streamlined category filtering (*Alle, Kodachrome, Leica, Arri & Master Primes, Anamorphic, Vintage 70s/80s, Super 8*), high-visibility Master Plugin showcase, and collapsible Expert Chemistry Lab drawer.
+  - **LoRA Disentanglement**: Clear operational rules and 1-click controls for toggling the Astroburner Cinematic LoRA (`ASTROCINEMAV01K2T`) on/off during color-critical reversal film runs.
+  - **"Elemental Matter" Scenario Preset**: Instant 1-click dramaturgical template for tactile mineral macro cinematography (*Werk I: Cinnabar Dust* through *Werk VI: Obsidian Core*).
+  - **Single-Line Windows Engine Refinement**: Enhanced regex cleanup enforcing strictly 0 line breaks and seamless timecode synchronization.
+
+- **`v2.0.0` (Major Architecture Release - Spatial & Multi-Window Director)**
+  - Contiguous multi-window generation (14.000s per window).
+  - Interactive Floorplan & Spatial Axis Director with 4-station tour choreography.
+  - DaVinci Resolve (.edl, .fcpxml) and Final Cut Pro timeline export suite.
+  - Multi-task local LM Studio Vision Pipeline (Port 1234) for private reference analysis.
+
+- **`v1.0.0` (Initial Release - Foundation)**
+  - Core single-line prompt presser and character anchoring.
+  - Bilingual interface (German & English).
 
 ---
 
 ## 🚀 Key Features
 
-### 1. 📐 Strict Single-Line Window Pressing (0 Line Breaks)
-- Every generated window prompt is formatted into **exactly 1 line** of text (0 line breaks).
-- Includes character limits, line count validation indicators, and real-time syntax checking.
-- Integrates contiguous timecodes (e.g. `TIMECODE 00:00.000 to 00:14.000`).
+### 1. 🎞️ Kodachrome 64 Master Plugin (K-14 Reversal Chemistry)
+The system features an uncompromising emulation of legendary **Kodachrome 64 Daylight (5500K)** reversal slide film:
+- **K-14 Subtractive Dye-Coupler Science**: Precise three-layer color separation delivering vivid hyper-saturated crimson reds, natural peach/olive skin tones, and rich cobalt shadows.
+- **Sclera Protection (Anti-Sepia Guard)**: Explicit optical rules preventing the uniform yellow/amber wash common in AI film prompts. Keeps the sclera of the eyes naturally ivory-white with neutral specular catchlights.
+- **Obsidian D-Max**: Extremely steep analog contrast curves reaching velvety optical black without digital sensor noise or posterization.
+- **650nm Carmine Halation**: Organic, microscopic red flare bleeding naturally along high-contrast specular borders.
 
-### 2. 🧠 Local LM Studio Integration (Private Vision & Text AI)
+### 2. 🎛️ Analog-Trimmer & Linsen-Emulation (UX V3)
+Redesigned from the ground up for clarity, speed, and creative focus:
+- **Category Filter Tabs**: Switch effortlessly between *Kodachrome, Leica & Kinofilm, Arri Master Primes, Anamorphotisch, Vintage 70er/80er,* and *Super 8 / 16mm*.
+- **Quick Preset Cards**: Visual color palettes, recommended Kelvin temperatures, and optical characteristics at a glance.
+- **Collapsible Expert Lab Drawer**: Advanced grain size trimmers, halation radius sliders, and chemistry defect injectors tucked away to keep the primary workflow clean and uncluttered.
+
+### 3. 📐 Strict Single-Line Window Pressing (0 Line Breaks)
+- Every generated window prompt is formatted into **exactly 1 line** of text (0 line breaks).
+- Prevents syntax breaks and token drops in diffusion video architectures (MiniMax H3 / Hailuo, Maestro 2.1.6, Kling AI).
+- Contiguous timecode stamping:
+  - Window 1: `00:00.000 – 00:14.000`
+  - Window 2: `00:14.000 – 00:28.000`
+  - Window 3: `00:28.000 – 00:42.000`
+  - Window 4: `00:42.000 – 00:56.000`
+
+### 4. 🧠 Local LM Studio Integration (Private Vision & Text AI)
 - Connects directly to local **LM Studio** instances (`http://localhost:1234/v1/chat/completions`) via server proxy.
 - Fully private: No cloud API keys required for local processing.
 - Executes multi-task visual reference analysis for uploaded images (persons, companion pets, architectural facades, floorplans, props).
 
-### 3. 🗺️ Multimodal Floorplan & Architectural Layout Analysis
+### 5. 🗺️ Multimodal Floorplan & Architectural Layout Analysis
 - Reads architectural blueprints and floorplan drawings (`PNG`, `JPG`, `WebP`).
 - Extracts room axes, entrance foyers, kitchen island locations, and sightlines.
-- Translates spatial directions (*"walk from the foyer along the sightline into the kitchen"*) into continuous camera moves (`Steadicam dolly-in along sightline...`).
+- Translates spatial directions into continuous camera moves (`Steadicam dolly-in along sightline...`).
 
-### 4. 🏷️ Identity & Character Anchoring (`compactPromptAnchor`)
+### 6. 🏷️ Identity & Character Anchoring (`compactPromptAnchor`)
 - Locks character features (hair, eyes, age, clothing, facial structure) and prop details using **Maestro 2.1.6** binding tags (`@Subject1_...`, `@Building1_...`, `@Object1_...`, `@Logo1_...`).
 - Prevents identity cross-bleeding and character cloning across multi-window video sequences.
-- Supports custom outfits and specific role assignments (e.g., custom costumes, real estate agents, resilience coaches with companion dogs).
 
-### 5. 👆 Interactive 1-Click Reference Chips & Bullet-Point Clicker
-- Readily extracts all active project references and offers **1-click insert chips** directly above the screenplay text editor.
-- Click to insert formatted references into bullet points (e.g. `+ Client (<Subject 1>)`, `+ Model Home (<Building 1>)`).
-- Built-in scenario presets (e.g. *Resilience Coaching in the Mountain Forest*, *Floorplan-Guided Kitchen Walkthrough*, *Yacht & Pier Voyage*, *Penthouse Smart Home*).
+### 7. 👆 Interactive 1-Click Reference Chips & Scenario Presets
+- Extract all active project references and insert them into the screenplay text editor with one click.
+- Built-in scenario presets:
+  - **Elemental Matter (Kodachrome 64 K-14 Makro-Kunst)**
+  - *Reiseführung & Denkmäler*
+  - *Imagevideo -> Restaurant & Fine Dining*
+  - *Dark Retribution / Ghostrider Action*
+  - *Resilience Coaching in the Mountain Forest*
+  - *Floorplan-Guided Kitchen Walkthrough*
+  - *Yacht & Pier Voyage*
+  - *Luxury Penthouse Smart Home*
 
-### 6. 🌐 Human-Readable Prompt Breakdown ("Plain Explanations")
+### 8. 🌐 Human-Readable Prompt Breakdown ("Plain Explanations")
 - Provides a **1-click German / English breakdown box** for every technical single-line prompt.
-- Clearly details scene action, camera motion, spoken dialogue, 100mm macro close-ups, acoustic soundscapes, and Call-to-Action claims.
+- Clearly details scene action, camera motion, 100mm macro close-ups, acoustic soundscapes, and Call-to-Action claims.
 
-### 7. 🌍 Bilingual GUI (German & English)
-- Full internationalization with persistent language switcher (`DE` / `EN`) in the sidebar.
-- Dynamically translates all UI tabs, buttons, inspectors, and prompt templates.
+### 9. 🎬 Multi-Format Timeline Exports (.edl, .fcpxml, .csv, .md)
+- Export multi-window screenplays directly to professional NLE software (DaVinci Resolve, Final Cut Pro, Premiere Pro) with synchronized timecode markers and metadata.
 
 ---
 
@@ -76,11 +107,24 @@ We express our deepest appreciation and special recommendation for one of the mo
 - 🔑 **Activation Tag**: `ASTROCINEMAV01K2T`
 - 🎯 **Recommended Maestro GUI Weight**: `0.85 – 1.00`
 
-### Why We Love & Integrate Astroburner's LoRA:
-1. **Masterful Dataset Architecture**: Created by **Astroburner**, V2 is built upon **1,852 carefully captioned image-caption pairs (3,704 training files total)**. It significantly expands foundational film aesthetics into deliberate spatial-geometric camera directions (*Dutch angles, overhead shots, over-the-shoulder, aerial perspectives, clean single-subject framing*).
-2. **Organic Film Photorealism**: Rather than forcing an artificial grading LUT, Astroburner's training unlocks authentic cinematic language: motivated practical lighting, balanced environmental fill, true skin translucency, 35mm organic grain, subtle halation, and natural highlight rolloff.
-3. **Seamless Single-Line Integration**: Our prompt engine natively embeds the `ASTROCINEMAV01K2T` activation tag and V2 atmospheric descriptors at the optimal header position of every single-line window prompt, fully synchronized with our **Strict Anti-Babble & Non-Speaking Listener Silence Guard**.
-4. **1-Click Studio Toggle**: Easily switch the LoRA activation on or off directly inside the Screenplay Studio configuration cards with real-time prompt re-pressing.
+### LoRA Guidelines & Disentanglement:
+- **When to Enable**: Ideal for architectural lighting, complex spatial blocking, Dutch angles, aerial perspectives, and atmospheric volumetric fill.
+- **When to Disable**: When executing strict, color-critical photochemical film emulations (such as the **Kodachrome 64 Master Plugin**), turn the LoRA off. Because Astroburner's LoRA carries a heavy film noir / monochrome bias, turning it off allows the pure K-14 subtractive color chemistry, 5500K daylight balance, and natural skin tones to shine without desaturation or amber interference.
+
+---
+
+## 🏆 Production Reference: The "Elemental Matter" Series
+
+Created and executed entirely with Drehbuchstudio Pro and the Kodachrome 64 Master Plugin:
+
+| Werk | Title | Physical Medium & Key Chemistry | Key Lighting & Optical Note |
+|---|---|---|---|
+| **Werk I** | **Cinnabar Dust** | Pure red cinnabar mineral dust, mercury sulfide crystals | 5500K key light, 650nm crimson halation, obsidian D-Max |
+| **Werk II** | **Liquid Aureum** | Viscous colloidal gold, heavy surface tension, alabaster | Microscopic fluid meniscus, pure neutral eye catchlights |
+| **Werk III** | **Ultramarine Ash** | Raw lapis lazuli powder, pyrite inclusions, basalt stone | Strict K-14 cobalt-to-peach spectral color separation |
+| **Werk IV** | **Verdigris Slag** | Crystallized copper carbonate, brittle emerald patina, slate | Granular crust fracturing, jade green vs. natural skin tones |
+| **Werk V** | **Bismuth Matrix** | Stepped 90° hopper bismuth crystal, iridescent oxide film | Prismatic violet-to-cyan refraction, zero sepia drift |
+| **Werk VI** | **Obsidian Core** | Amorphous volcanic glass, conchoidal fractures, graphite ash | Ultimate D-Max black density, pure glass mirror reflections |
 
 ---
 
@@ -101,15 +145,21 @@ We proudly highlight our project supporters and vision partners:
 ```text
 ├── src/
 │   ├── components/
-│   │   ├── DrehbuchKonfigurator.tsx  # Main Screenplay Studio & 1-Click Reference Clicker
+│   │   ├── DrehbuchKonfigurator.tsx  # Screenplay Studio, Scenario Presets & Windows Generator
 │   │   ├── FloorplanDirectorView.tsx # Floorplan & 4-Station Spatial Axis Director
 │   │   ├── ReferenceManager.tsx      # Multimodal Reference & LM Studio Task Manager
 │   │   ├── ScreenplayGenerator.tsx   # Card-Based Shot Breakdown & Prompt Exporter
-│   │   ├── Sidebar.tsx               # Navigation, Sponsor Links & Language Switcher
+│   │   ├── Sidebar.tsx               # Navigation, Version Badge (v2.1) & Language Switcher
 │   │   ├── Header.tsx                # App Header & System Status Bar
-│   │   └── drehbuch/                 # Target Audience, Timeline Export & Reference sub-components
+│   │   └── drehbuch/                 # Specialized Sub-Modules:
+│   │       ├── AnalogFilmCard.tsx    # V3 Analog Trimmer & Kodachrome 64 Master Plugin
+│   │       ├── AstroCinemaLoraCard.tsx # Astroburner LoRA V2 Manager
+│   │       ├── LensSelectorCard.tsx  # Optical Focal Length & Aperture Profiles
+│   │       ├── UltraPhysicsCard.tsx  # Dynamic Fluid & Gravity Physics Triggers
+│   │       ├── ProposalClaimsEditor.tsx # Typographic CTA & Claim Overlays
+│   │       └── TimelineExportModal.tsx # DaVinci Resolve & FCP XML/EDL Exporter
 │   ├── utils/
-│   │   ├── windowPromptFormatter.ts  # Single-Line Prompt Presser & German Prompt Translator
+│   │   ├── windowPromptFormatter.ts  # Single-Line Prompt Presser & Kodachrome K-14 Engine
 │   │   ├── anchorParser.ts           # Multimodal Anchor Parser (Persons, Buildings, Floorplans)
 │   │   ├── i18n.ts                   # Internationalization (DE / EN) Translation System
 │   │   ├── targetAudienceCatalog.ts  # Target Audience Color & Sound Profiles
@@ -118,7 +168,7 @@ We proudly highlight our project supporters and vision partners:
 │   └── types.ts                      # Shared TypeScript Interfaces & Enums
 ├── server.ts                         # Express Backend Server & LM Studio Proxy Gateway
 ├── metadata.json                     # Applet Metadata & Capabilities
-└── package.json                      # Project Dependencies & Scripts
+└── package.json                      # Project Dependencies & Version (2.1.0)
 ```
 
 ---
@@ -149,36 +199,23 @@ npm start
 
 ---
 
-## 📋 Recommended Workflow
+## 📋 Recommended Production Workflow
 
 1. **Upload References (Step 1)**:
    - Drag & drop images of people, companion pets, buildings, architectural floorplans, or props into the **Reference Manager**.
    - Click **"Send All Tasks to LM Studio"** to extract vision anchors automatically.
 
-2. **Configure Story & Target Audience (Step 2)**:
-   - Choose your target audience (e.g., *Families & Builders*, *Luxury Architecture*, *Wellness & Resilience*).
-   - Use the **1-Click Reference Chips** to insert your references into the bullet points editor.
+2. **Select Analog Film & Lens Profile (Step 2)**:
+   - Open **Drehbuch-Konfigurator** -> **Analog-Trimmer & Linsen-Emulation (V3)**.
+   - Choose **Kodachrome 64 Master Plugin** for photorealistic color reversal with 5500K daylight and neutral sclera protection.
 
-3. **Generate & Press Single-Line Windows (Step 3)**:
+3. **Configure Scenario & LoRA (Step 3)**:
+   - Load a scenario preset (e.g. *Elemental Matter*, *Restaurant Fine Dining*, or *Floorplan Walkthrough*).
+   - If using Kodachrome 64, leave the Astroburner LoRA turned off for pure K-14 color fidelity, or enable it when building atmospheric architectural shots.
+
+4. **Press into Single-Line Windows (Step 4)**:
    - Click **"Press into Single-Line Windows"**.
-   - Review each 1-line prompt, verify line-break count (strictly 0), and expand the prompt breakdown card to verify scene content.
-   - Copy prompts directly into **MiniMax H3**, **Maestro**, or **Kling AI**.
-
----
-
-## 🗺️ Roadmap & Implemented Milestones
-
-- [x] **Strict Single-Line Prompt Pressing (0 line breaks per window)**
-- [x] **LM Studio Multimodal Vision Proxy & Task Pipeline**
-- [x] **Floorplan & Architectural Sightline Analysis (`floorplan` category)**
-- [x] **1-Click Reference Insertion Chips in Bullet Points Editor**
-- [x] **Human-Readable Prompt Breakdown Card**
-- [x] **Bilingual GUI (German / English) with Persistent Toggle**
-- [x] **Sponsor & Supporter Integration (AI Wizards & Johannes Wobus)**
-- [x] **DaVinci Resolve / Final Cut Pro XML Export**: Export timeline markers and timecode windows (.edl, .fcpxml, .csv, .md).
-- [x] **Floorplan & Spatial Axis Director**: Interactive 2D layout with 4 room stations, camera sightlines, target audience styling, and 1-click sync to screenplay.
-- [ ] **Direct API Integration**: One-click batch submission to MiniMax H3 / Kling API endpoints.
-- [ ] **Audio & Voiceover Generator**: Automatic TTS dialogue generation per window.
+   - Copy prompts directly into **MiniMax H3 / Hailuo**, **Maestro 2.1.6**, or **Kling AI**.
 
 ---
 

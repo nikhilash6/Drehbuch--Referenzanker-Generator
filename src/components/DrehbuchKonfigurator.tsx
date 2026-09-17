@@ -73,6 +73,8 @@ import { VoiceModulationCard } from './drehbuch/VoiceModulationCard';
 import { AstroCinemaLoraCard } from './drehbuch/AstroCinemaLoraCard';
 import { UltraPhysicsCard } from './drehbuch/UltraPhysicsCard';
 import { LensSelectorCard } from './drehbuch/LensSelectorCard';
+import { VisualStyleCard } from './drehbuch/VisualStyleCard';
+import { AnalogFilmCard, ANALOG_PROFILES } from './drehbuch/AnalogFilmCard';
 import { RetributionDisclaimerCard } from './drehbuch/RetributionDisclaimerCard';
 import { ProposalClaimsEditor } from './drehbuch/ProposalClaimsEditor';
 import { ReferenceUsageGuideCard } from './drehbuch/ReferenceUsageGuideCard';
@@ -163,6 +165,17 @@ const CALL_TO_ACTION_PRESETS = [
 ];
 
 const SAMPLE_STICHPUNKTE_LIST = [
+  {
+    label: 'Elemental Matter: Kodachrome 64 K-14 Makro-Kunst (Pigment, Metall & Kinetik)',
+    text: `- Genre: Kunst / Experimental
+- Protagonist: <Subject 1> Johannes Wobus (@Subject1_johannes_wobus), minimalistischer dunkler Künstler-Mantel, intensive braune Augen, natürliche klare weiße Sklera, 5500K neutrales Tageslicht
+- Setting: Dunkles Studio, Basaltstein-Gefäß, samtige Obsidian D-Max Schatten, kein gelblicher Sepia-Drift
+- Emulation: Kodachrome 64 Master Plugin (5500K Tageslicht, 650nm Karminrot-Halation, echte K-14 Subtraktivfarben)
+- Fenster 1: Makro 100mm T1.8: Hand von @Subject1_johannes_wobus berührt trockenes mineralisches Pulver im Basalttiegel, mikroskopische Pyrit- und Goldreflexe im 5500K Direktlicht
+- Fenster 2: Kontrastlinie & Finish: Zieht Pigmentstreifen über Wangenknochen und Hals, samtige Obsidian D-Max Schattenkante, zentrierter Blur-Reveal Titel und Ausklang in reinem Schwarz
+- Audio & Score: Reibung von mineralischem Staub auf Stein und Haut, getragener Kontrabass/Cello-Subbass
+- Call to Action: "Elemental Matter — Pure Material Kinetics"`,
+  },
   {
     label: 'Reiseführung: Avatar moderiert Denkmal & Kultur-Highlight',
     text: `- Genre: Reiseführung (Reisevideos & Tourismus)
@@ -673,6 +686,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         targetAudience: currentTargetAudience,
         typographyOverlay: config.typographyOverlay,
         voiceModulation: config.voiceModulation,
+        visualStyle: config.visualStyle,
       });
       updatedConfig.pressedWindows = rePressed;
     }
@@ -700,6 +714,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         targetAudience: currentTargetAudience,
         typographyOverlay: newOverlay,
         voiceModulation: config.voiceModulation,
+        visualStyle: config.visualStyle,
       });
       updatedConfig.pressedWindows = rePressed;
     } else if (config.windows && config.pressedWindows && config.pressedWindows.length > 0) {
@@ -716,6 +731,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         targetAudience: currentTargetAudience,
         typographyOverlay: newOverlay,
         voiceModulation: config.voiceModulation,
+        visualStyle: config.visualStyle,
       });
       updatedConfig.pressedWindows = rePressed;
     }
@@ -745,6 +761,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         voiceModulation: newVoiceConfig,
         astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
         astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: config.visualStyle,
       });
       updatedConfig.pressedWindows = rePressed;
     } else if (config.windows && config.pressedWindows && config.pressedWindows.length > 0) {
@@ -763,6 +780,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         voiceModulation: newVoiceConfig,
         astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
         astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: config.visualStyle,
       });
       updatedConfig.pressedWindows = rePressed;
     }
@@ -792,6 +810,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         voiceModulation: config.voiceModulation,
         astroCinemaLoraMode: enabled,
         astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: config.visualStyle,
       });
       updatedConfig.pressedWindows = rePressed;
     }
@@ -822,6 +841,263 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         voiceModulation: config.voiceModulation,
         astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
         astroCinemaLoraKeywords: keywordsEnabled,
+        visualStyle: config.visualStyle,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    }
+    onChangeConfig(updatedConfig);
+  };
+
+  // Handler: Update Visual Style with instant live re-pressing of single-line windows
+  const handleSelectVisualStyle = (styleId: string) => {
+    const activeProposal = selectedProposal || proposals[0];
+    const updatedConfig: DrehbuchKonfiguratorState = {
+      ...config,
+      visualStyle: styleId,
+    };
+    if (activeProposal && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressProposalToSingleLineWindows({
+        proposal: activeProposal,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: styleId,
+        analogLaborStörung: config.analogLaborStörung,
+        analogMacroRecipe: config.analogMacroRecipe,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    } else if (config.windows && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressConfigToSingleLineWindows({
+        windows: config.windows,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: styleId,
+        analogLaborStörung: config.analogLaborStörung,
+        analogMacroRecipe: config.analogMacroRecipe,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    }
+    onChangeConfig(updatedConfig);
+
+    const styleNames: Record<string, string> = {
+      natural: 'Natürlicher Tageslicht-Stil',
+      golden_hour: 'Warm Golden Hour Stil',
+      art_noir: 'Mamiya RZ67 Art Noir (Monochrom/Chiaroscuro) Stil',
+      vintage_16mm: 'Vintage 16mm Analog-Film Stil',
+      svema_zenit: 'Svema Color & Helios/Jupiter Emulation',
+      kodachrome: 'Kodachrome 64 Dia Emulation',
+      krasnogorsk_16mm: 'Krasnogorsk-3 16mm Emulation',
+      polaroid_fp100c: 'Fujifilm FP-100C Trennbild Emulation',
+      wet_plate: 'Kollodium-Nassplatte (1851) Emulation',
+      petzval: 'Petzval 1840 Optik-Emulation',
+      leica_noctilux: 'Leica Noctilux f/0.95 Optik-Emulation',
+      technicolor_v4: 'Technicolor System No. 4 (1935) Emulation',
+      aerochrome_infrared: 'Kodak Aerochrome Infrared Emulation',
+      orwo_nc21: 'ORWO Color NC21 Emulation',
+      agfachrome_50s: 'Agfachrome 50S Pastell Emulation',
+      super8_tri_x: 'Super 8 Kodak Tri-X/Ektachrome Emulation',
+      '35mm_anamorphic': '35mm Cine-Scope Kodak Vision3 Emulation',
+      '70mm_imax': '70mm IMAX Large Format Emulation',
+    };
+    onShowToast('success', `${styleNames[styleId] || styleId} aktiviert!`);
+  };
+
+  // Handler: Update Analog Labor Störung with instant live re-pressing
+  const handleSelectLaborStörung = (störung: 'none' | 'cross_processing' | 'film_soup' | 'thermal_shock' | 'bleach_bypass') => {
+    const activeProposal = selectedProposal || proposals[0];
+    const updatedConfig: DrehbuchKonfiguratorState = {
+      ...config,
+      analogLaborStörung: störung,
+    };
+    if (activeProposal && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressProposalToSingleLineWindows({
+        proposal: activeProposal,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: config.visualStyle,
+        analogLaborStörung: störung,
+        analogMacroRecipe: config.analogMacroRecipe,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    } else if (config.windows && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressConfigToSingleLineWindows({
+        windows: config.windows,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: config.visualStyle,
+        analogLaborStörung: störung,
+        analogMacroRecipe: config.analogMacroRecipe,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    }
+    onChangeConfig(updatedConfig);
+    
+    const störungNames = {
+      none: 'Keine chemische Störung',
+      cross_processing: 'Cross-Processing (C-41 in E-6)',
+      film_soup: 'Film-Souping (Chemischer Gelatine-Fraß)',
+      thermal_shock: 'Thermal Shock (Hitzeschaden)',
+      bleach_bypass: 'Bleach Bypass (Silberrückhaltung)',
+    };
+    onShowToast('success', `${störungNames[störung]} aktiviert!`);
+  };
+
+  // Handler: Update Analog Macro Recipe with instant live re-pressing
+  const handleSelectMacroRecipe = (recipeId: 'none' | 'chemical_feast' | 'silver_scar' | 'saturated_rust') => {
+    const activeProposal = selectedProposal || proposals[0];
+    const updatedConfig: DrehbuchKonfiguratorState = {
+      ...config,
+      analogMacroRecipe: recipeId,
+    };
+    // If a recipe is chosen, automatically set a domain-appropriate visualStyle/profile if none is active
+    if (recipeId === 'chemical_feast' && config.visualStyle !== 'svema_zenit') {
+      updatedConfig.visualStyle = 'svema_zenit';
+    } else if (recipeId === 'silver_scar' && config.visualStyle !== 'wet_plate') {
+      updatedConfig.visualStyle = 'wet_plate';
+    } else if (recipeId === 'saturated_rust' && config.visualStyle !== 'kodachrome') {
+      updatedConfig.visualStyle = 'kodachrome';
+    }
+
+    if (activeProposal && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressProposalToSingleLineWindows({
+        proposal: activeProposal,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: updatedConfig.visualStyle || config.visualStyle,
+        analogLaborStörung: config.analogLaborStörung,
+        analogMacroRecipe: recipeId,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    } else if (config.windows && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressConfigToSingleLineWindows({
+        windows: config.windows,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: config.actionCode || 'ASTROCINEMAV01K2T',
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: updatedConfig.visualStyle || config.visualStyle,
+        analogLaborStörung: config.analogLaborStörung,
+        analogMacroRecipe: recipeId,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    }
+    onChangeConfig(updatedConfig);
+
+    const recipeNames = {
+      none: 'Standard-Makrofokus',
+      chemical_feast: 'Rezept: „The Chemical Feast“ (Svema-Souping)',
+      silver_scar: 'Rezept: „The Silver Scar“ (Kollodium-Quecksilber)',
+      saturated_rust: 'Rezept: „Saturated Rust“ (Kodachrome-Glut)',
+    };
+    onShowToast('success', `${recipeNames[recipeId]} geladen und injiziert!`);
+  };
+
+  // Handler: Update custom LoRA Action Code with live re-pressing
+  const handleUpdateActionCode = (newCode: string) => {
+    const activeProposal = selectedProposal || proposals[0];
+    const updatedConfig: DrehbuchKonfiguratorState = {
+      ...config,
+      actionCode: newCode,
+    };
+    if (activeProposal && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressProposalToSingleLineWindows({
+        proposal: activeProposal,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: newCode,
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: config.visualStyle,
+      });
+      updatedConfig.pressedWindows = rePressed;
+    } else if (config.windows && config.pressedWindows && config.pressedWindows.length > 0) {
+      const rePressed = pressConfigToSingleLineWindows({
+        windows: config.windows,
+        allSubjects: currentReferences,
+        windowDurationSeconds: windowDuration,
+        dialogueLanguage: dialogueLang,
+        actionCode: newCode,
+        aspectRatio: config.aspectRatio || '16:9',
+        globalWeather: config.globalWeather,
+        globalBackground: config.globalBackground,
+        finalCallToAction: config.finalCallToAction || finalCta,
+        targetAudience: currentTargetAudience,
+        typographyOverlay: config.typographyOverlay,
+        voiceModulation: config.voiceModulation,
+        astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
+        astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: config.visualStyle,
       });
       updatedConfig.pressedWindows = rePressed;
     }
@@ -869,6 +1145,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         voiceModulation: config.voiceModulation,
         astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
         astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: config.visualStyle,
       });
     }
 
@@ -916,6 +1193,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
         voiceModulation: config.voiceModulation,
         astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
         astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+        visualStyle: config.visualStyle,
       });
     }
 
@@ -954,6 +1232,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
       voiceModulation: config.voiceModulation,
       astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
       astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+      visualStyle: config.visualStyle,
     });
 
     onChangeConfig({
@@ -995,6 +1274,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
       voiceModulation: config.voiceModulation,
       astroCinemaLoraMode: config.astroCinemaLoraMode !== false,
       astroCinemaLoraKeywords: config.astroCinemaLoraKeywords !== false,
+      visualStyle: config.visualStyle,
     });
 
     onChangeConfig({
@@ -1643,6 +1923,35 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
               onChangeConfig={handleUpdateVoiceModulation}
             />
 
+            {/* Visueller Stil & Filmstock (Königsweg-Ästhetik-Ebene) */}
+            <VisualStyleCard
+              selectedStyleId={config.visualStyle || 'natural'}
+              onSelectStyle={handleSelectVisualStyle}
+            />
+
+            {/* Analog-Film & Emulsions-Triebwerk (Ultra-Präzise chemisch-optische Simulation) */}
+            <AnalogFilmCard
+              enabled={ANALOG_PROFILES.some(p => p.id === config.visualStyle)}
+              selectedProfileId={ANALOG_PROFILES.some(p => p.id === config.visualStyle) ? config.visualStyle! : 'svema_zenit'}
+              onToggleEnabled={(enabled) => {
+                if (enabled) {
+                  handleSelectVisualStyle('svema_zenit');
+                } else {
+                  handleSelectVisualStyle('natural');
+                }
+              }}
+              onSelectProfile={(profileId) => handleSelectVisualStyle(profileId)}
+              loraEnabled={config.astroCinemaLoraMode !== false}
+              onToggleLora={handleToggleAstroCinemaLora}
+              actionCode={config.actionCode || 'ASTROCINEMAV01K2T'}
+              onChangeActionCode={handleUpdateActionCode}
+              language={language === 'EN' ? 'EN' : 'DE'}
+              analogLaborStörung={config.analogLaborStörung || 'none'}
+              onSelectLaborStörung={handleSelectLaborStörung}
+              analogMacroRecipe={config.analogMacroRecipe || 'none'}
+              onSelectMacroRecipe={handleSelectMacroRecipe}
+            />
+
             {/* Cinematic Style V2 LoRA (ASTROCINEMAV01K2T & Detail Enhancer for MiniMax H3) */}
             <AstroCinemaLoraCard
               enabled={config.astroCinemaLoraMode !== false}
@@ -2283,6 +2592,7 @@ export const DrehbuchKonfigurator: React.FC<DrehbuchKonfiguratorProps> = ({
                 globalBackground: config.globalBackground,
                 finalCallToAction: finalCta,
                 targetAudience: currentTargetAudience,
+                visualStyle: config.visualStyle,
               });
               onApplyToScreenplay({
                 ...config,

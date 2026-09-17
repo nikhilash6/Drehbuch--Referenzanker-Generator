@@ -303,6 +303,9 @@ export interface DrehbuchKonfiguratorState {
   ultraPhysicsMode?: boolean; // Ultra-Detail Kausalitätskette, Muskelkontraktion, Subsurface-Gegenlicht & Haptik
   astroCinemaLoraMode?: boolean; // Cinematic Style V2 LoRA (ASTROCINEMAV01K2T) by red_astronomer
   astroCinemaLoraKeywords?: boolean; // Add V2 trained terms (motivated lighting, 35mm organic grain, subtle halation)
+  visualStyle?: string; // Visueller Stil & Filmstock (e.g. 'natural', 'golden_hour', 'art_noir', 'vintage_16mm')
+  analogLaborStörung?: 'none' | 'cross_processing' | 'film_soup' | 'thermal_shock' | 'bleach_bypass';
+  analogMacroRecipe?: 'none' | 'chemical_feast' | 'silver_scar' | 'saturated_rust';
 }
 
 export type DrehbuchKonfig = DrehbuchKonfiguratorState;

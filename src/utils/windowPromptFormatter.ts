@@ -408,6 +408,9 @@ export function buildSingleLineWindowPrompt(params: {
   voiceModulation?: VoiceModulationConfig;
   astroCinemaLoraMode?: boolean;
   astroCinemaLoraKeywords?: boolean;
+  visualStyle?: string;
+  analogLaborStörung?: string;
+  analogMacroRecipe?: string;
 }): SingleLineWindow {
   const {
     windowNumber,
@@ -435,10 +438,16 @@ export function buildSingleLineWindowPrompt(params: {
     voiceModulation,
     astroCinemaLoraMode = true,
     astroCinemaLoraKeywords = true,
+    visualStyle = 'natural',
+    analogLaborStörung,
+    analogMacroRecipe,
   } = params;
 
-  // Stummes Imagevideo Option: Wenn muteVoiceover aktiviert ist, keine gesprochenen Dialoge einfügen
-  const dialogueText = typographyOverlay?.enabled && typographyOverlay?.muteVoiceover ? undefined : initialDialogueText;
+  // Stummes Imagevideo Option: Wenn muteVoiceover aktiviert ist, oder art_noir / wet_plate aktiv ist, keine gesprochenen Dialoge einfügen
+  const isArtNoir = visualStyle === 'art_noir';
+  const isWetPlate = visualStyle === 'wet_plate';
+  const isSilentStyle = isArtNoir || isWetPlate;
+  const dialogueText = (typographyOverlay?.enabled && typographyOverlay?.muteVoiceover) || isSilentStyle ? undefined : initialDialogueText;
 
   const startSec = (windowNumber - 1) * durationSeconds;
   const endSec = windowNumber * durationSeconds;
@@ -476,23 +485,171 @@ export function buildSingleLineWindowPrompt(params: {
   }
 
   // 1. Window Tag & Action header
+  let styleLabel = 'cinematic scene';
+  if (isArtNoir) {
+    styleLabel = 'monochrome art noir masterpiece';
+  } else if (isWetPlate) {
+    styleLabel = 'strictly monochrome wet-plate collodion masterpiece from 1851';
+  } else if (visualStyle === 'svema_zenit') {
+    styleLabel = 'chemically degraded analog Svema lomo masterpiece with heavy grain';
+  } else if (visualStyle === 'kodachrome') {
+    styleLabel = 'legendary Kodachrome 64 analog color reversal slide masterpiece';
+  } else if (visualStyle === 'krasnogorsk_16mm') {
+    styleLabel = 'strictly monochrome vintage 16mm Krasnogorsk-3 movie masterpiece';
+  } else if (visualStyle === 'polaroid_fp100c') {
+    styleLabel = 'peel-apart analog polaroid FP-100C packfilm masterpiece';
+  } else if (visualStyle === 'petzval') {
+    styleLabel = 'historical Petzval 1840 optical masterpiece with swirling background';
+  } else if (visualStyle === 'leica_noctilux') {
+    styleLabel = 'ultra-shallow depth-of-field Leica Noctilux f/0.95 cinematic masterpiece';
+  } else if (visualStyle === 'super8_tri_x') {
+    styleLabel = 'flickering analog Super 8 Tri-X / Ektachrome movie masterpiece with heavy gate-weave';
+  } else if (visualStyle === '35mm_anamorphic') {
+    styleLabel = '35mm Cine-Scope Kodak Vision3 500T cinematic masterpiece with horizontal flares';
+  } else if (visualStyle === '70mm_imax') {
+    styleLabel = '70mm IMAX large format Kodak Vision3 cinema masterpiece with immense clarity';
+  }
+
   const loraTagPrefix = (astroCinemaLoraMode !== false)
-    ? `${actionCode || 'ASTROCINEMAV01K2T'} depicts a live-action cinematic scene in a native ${aspectRatio} widescreen frame.`
+    ? `${actionCode || 'ASTROCINEMAV01K2T'} depicts a live-action ${styleLabel} in a native ${aspectRatio} widescreen frame.`
     : `Native ${aspectRatio} widescreen.`;
   const windowTag = `window${windowNumber}: (${tcStart}–${tcEnd}) ${loraTagPrefix}`;
 
   // English-normalized scene descriptors
-  const enWeather = toEnglishCinematicText(weather, 'Natural clear daylight with balanced atmospheric illumination');
-  const enBackground = toEnglishCinematicText(background, 'A cinematic environment matching the scene context');
+  let enWeather = toEnglishCinematicText(weather, 'Natural clear daylight with balanced atmospheric illumination');
+  let enBackground = toEnglishCinematicText(background, 'A cinematic environment matching the scene context');
   const enCamMovement = toEnglishCinematicText(cameraMovement, 'Smooth cinematic camera glide');
-  const enSoundDesign = toEnglishCinematicText(soundDesign, 'Natural environmental ambience matching the surroundings');
-  const enMusicStyle = toEnglishCinematicText(musicStyle, 'Cinematic music matching the tone of the scene');
+  let enSoundDesign = toEnglishCinematicText(soundDesign, 'Natural environmental ambience matching the surroundings');
+  let enMusicStyle = toEnglishCinematicText(musicStyle, 'Cinematic music matching the tone of the scene');
+
+  if (isArtNoir) {
+    enWeather = 'Stark contrast chiaroscuro overhead Rembrandt key light with dramatic shadow fall-off, casting deep shadows';
+    enBackground = 'A pure pitch-black matte negative space void background';
+    if (!soundDesign || soundDesign.toLowerCase().includes('subtle natural') || soundDesign.toLowerCase().includes('natural environmental')) {
+      enSoundDesign = 'The dry, textured sound of fingers sliding over rough surfaces, faint analog film grain crackle, and slow heavy breathing';
+    }
+    if (!musicStyle || musicStyle.toLowerCase().includes('cinematic ambient score') || musicStyle.toLowerCase().includes('cinematic music')) {
+      enMusicStyle = 'A single, deeply melancholic solo violin note swelling slowly in the dark void';
+    }
+  } else if (isWetPlate) {
+    enWeather = 'Stark, high-contrast historical photography key-lighting with dark shadow fall-off and overexposed, glowing highlights';
+    enBackground = 'An 1850s vintage portrait studio backdrop with muddy textures and dark vignette framing';
+    if (!soundDesign || soundDesign.toLowerCase().includes('subtle natural') || soundDesign.toLowerCase().includes('natural environmental')) {
+      enSoundDesign = 'Faint chemical sizzle, old wooden camera squeaking, metallic plate scratches, and historical room silence';
+    }
+    if (!musicStyle || musicStyle.toLowerCase().includes('cinematic ambient score') || musicStyle.toLowerCase().includes('cinematic music')) {
+      enMusicStyle = 'A distant, crackling wax cylinder recording of a dusty solo cello playing a slow melody';
+    }
+  } else if (visualStyle === 'svema_zenit') {
+    enWeather = 'Warm sulfur-yellow late-afternoon sunlight with dramatic vintage contrast, casting long yellow-hued shadows';
+    enBackground = 'A nostalgic analog background with heavy lomo-vibe, shot on chemically degraded film stock';
+  } else if (visualStyle === 'kodachrome') {
+    enWeather = 'Neutral 5500K daylight-balanced directional key light with pure white specular highlights, crisp spectral color separation, and deep neutral shadow fall-off, strictly avoiding yellow or sepia cast';
+    enBackground = 'A clean, deep neutral-dark studio background with zero amber tint and velvety obsidian D-Max shadows';
+  } else if (visualStyle === 'krasnogorsk_16mm') {
+    enWeather = 'Harsh, dramatic, high-contrast industrial lighting with raw shadowed zones and stark overexposed highlight regions';
+    enBackground = 'An old vintage film studio backdrop or textured industrial environment with active lens dust and film gate flutter';
+    if (!soundDesign || soundDesign.toLowerCase().includes('subtle natural') || soundDesign.toLowerCase().includes('natural environmental')) {
+      enSoundDesign = 'The rapid mechanical whirring click-clack of a 16mm wind-up spring motor, rhythmic camera shutter flutter, and coarse vintage environmental crackle';
+    }
+    if (!musicStyle || musicStyle.toLowerCase().includes('cinematic ambient score') || musicStyle.toLowerCase().includes('cinematic music')) {
+      enMusicStyle = 'A grainy, distorted brass or accordion solo recording playing a slow, nostalgic Eastern-European melody';
+    }
+  } else if (visualStyle === 'polaroid_fp100c') {
+    enWeather = 'Soft-contrast milky daylight with elegant highlight rolloff and neutral, pleasant diffuse filling';
+    enBackground = 'A soft-focus background with slightly desaturated colors and cool indigo-blue undertones';
+  } else if (visualStyle === 'super8_tri_x') {
+    enWeather = 'Soft, warm retro late afternoon sunlight with continuous frame flicker and dust particles dancing in the air';
+    enBackground = 'A nostalgic 8mm home-video background with active film gate flutter, vertical mechanical shake, and warm yellow edge vignettes';
+    if (!soundDesign || soundDesign.toLowerCase().includes('subtle natural') || soundDesign.toLowerCase().includes('natural environmental')) {
+      enSoundDesign = 'The rhythmic, mechanical high-pitched whirring chatter of a Super 8 projector motor, celluloid scratch sounds, and crackling vintage warmth';
+    }
+    if (!musicStyle || musicStyle.toLowerCase().includes('cinematic ambient score') || musicStyle.toLowerCase().includes('cinematic music')) {
+      enMusicStyle = 'A nostalgic, lo-fi warm synth progression with heavy tape-wobble and slow mechanical crackle';
+    }
+  } else if (visualStyle === '35mm_anamorphic') {
+    enWeather = 'Moody nighttime street lighting with heavy rain, glowing neon highlights, and horizontal blue anamorphic lens flares';
+    enBackground = 'An atmospheric, rain-soaked urban cityscape with warm neon sign reflections and cinematic out-of-focus background details';
+    if (!soundDesign || soundDesign.toLowerCase().includes('subtle natural') || soundDesign.toLowerCase().includes('natural environmental')) {
+      enSoundDesign = 'Gentle falling rain pattering on asphalt, distant low city hum, and wet tire splashes on pavement';
+    }
+    if (!musicStyle || musicStyle.toLowerCase().includes('cinematic ambient score') || musicStyle.toLowerCase().includes('cinematic music')) {
+      enMusicStyle = 'A deep, immersive electronic analog synthwave sequence with lush retro-futuristic pads';
+    }
+  } else if (visualStyle === '70mm_imax') {
+    enWeather = 'Breathtaking, crystal-clear high-altitude volumetric daylight with majestic light shafts and perfect contrast rendering';
+    enBackground = 'A monumental, ultra-high-resolution landscape or architectural vista with majestic depth-of-field and absolute picture stability';
+  } else if (visualStyle === 'golden_hour') {
+    enWeather = 'Warm golden hour late afternoon sunlight with soft volumetric light beams and long casting shadows';
+  }
 
   // 2. Setting and Environment (Strict Cinematic English - no forced architecture injection)
-  const loraAtmosphere = (astroCinemaLoraMode !== false && astroCinemaLoraKeywords !== false)
+  let loraAtmosphere = (astroCinemaLoraMode !== false && astroCinemaLoraKeywords !== false)
     ? 'Motivated practical lighting, balanced environmental fill, realistic skin texture, organic fine 35mm film grain, subtle halation, and controlled highlight rolloff.'
     : '';
-  const settingSegment = [enWeather, enBackground, `Focus on ${enVisualFocus}.`, loraAtmosphere].filter(Boolean).join(' ');
+
+  if (isArtNoir) {
+    loraAtmosphere = 'strictly monochrome black-and-white art-noir aesthetic, extremely deep rich blacks, textured high-contrast silver-greys, high silver halide density, visible organic 120mm medium format analog film grain (Mamiya RZ67 style), subtle vintage halation, and controlled cinematic highlight rolloff.';
+  } else if (isWetPlate) {
+    loraAtmosphere = 'strictly monochrome wet-plate collodion silver-nitrate glass plate style from 1851, orthochromatic sensitivity rendering warm colors pitch black and light blue tones white, heavy dark irregular silver pouring stains and chemical flow marks bleeding from corners, visible dust, hairline emulsion cracks, and fine metallic scratches embedded directly in the silver plate.';
+  } else if (visualStyle === 'svema_zenit') {
+    loraAtmosphere = 'distinctive swirly vortex bokeh at f/2 using Helios-44-2 58mm or Jupiter-9 85mm lenses, background rapidly distorting in a circular spinning blur around the sharp center subject, chemically expired C-41 analog Svema filmstock with toxic emerald-green tint in the deep shadows and warm sulfur-yellow/magenta hues in the highlights, dramatic analog light-leak flares in hot orange and crimson red bleeding from the left edge of the frame, heavy 35mm film emulsion grain structure with subtle reticulation.';
+  } else if (visualStyle === 'kodachrome') {
+    loraAtmosphere = 'photochemical film emulation: authentic Kodachrome 64 daylight-balanced (5500K) color reversal slide film processed in genuine K-14 chemistry. Three-layer subtractive dye-coupler color science delivering iconic hyper-saturated crimson reds, natural peach-and-olive skin tones, and rich cobalt shadows with pure spectral separation. Sclera of the eyes remains natural clean ivory-white with neutral specular catchlights, irises retain natural deep eye color, strictly avoiding glowing yellow eyes or uniform amber sepia wash. Extremely steep analog contrast curve featuring obsidian-black D-Max shadows with zero digital noise. Silky highlight rolloff with distinctive warm 650nm crimson halation bleed along high-contrast specular edges. Crisp microscopic dye-grain celluloid texture with tactile organic sharpness, zero artificial edge haloing, zero digital smoothing.';
+  } else if (visualStyle === 'krasnogorsk_16mm') {
+    loraAtmosphere = 'shot on Soviet Krasnogorsk-3 16mm wind-up cine-camera with Meteor 5-1 f/1.9 zoom lens, strictly monochrome black-and-white, coarse high-contrast silver-nitrate emulsion grain, visible physical film vertical frame jitter and gate-weave (shaking), vintage optical distortion at focal edges, with subtle hair-thin emulsion scratches, dust flecks, and chemical residue stains flickering between frames.';
+  } else if (visualStyle === 'polaroid_fp100c') {
+    loraAtmosphere = 'shot on peel-apart Fujifilm FP-100C packfilm, signature creamy emulsion contrast, warm pastel skin tones, soft and silky highlight roll-off with milky white levels, cool indigo-blue shadow undertones, framed by raw unpeeled chemical development borders with brown caustic developer paste stains and organic torn emulsion edges.';
+  } else if (visualStyle === 'petzval') {
+    loraAtmosphere = 'shot on historical 19th-century Petzval portrait lens, extreme field curvature and astigmatism with a tiny razor-sharp focal spot in the exact center, aggressive swirling vortex bokeh that rapidly spins the background in circular patterns, deep heavy vignette framing, and nostalgic vintage contrast.';
+  } else if (visualStyle === 'leica_noctilux') {
+    loraAtmosphere = 'shot on high-end Leica Noctilux-M 50mm f/0.95 lens, paper-thin razor-sharp depth of field, dramatic 3D subject pop-out separation against a butter-smooth melted background, exquisite out-of-focus highlights rendered as cat-eye optical vignetted shapes at the outer edges of the frame.';
+  } else if (visualStyle === 'technicolor_v4') {
+    loraAtmosphere = 'captured using legendary Technicolor System Three-Strip DF-24 Beam Splitter Camera with Taylor-Hobson Cooke Speed Panchro f/2.0 lenses, glorious highly-saturated three-strip dye-transfer color process, extraordinarily dense scarlet reds, deep mustard yellows, and lush organic emerald greens, velvety thick shadow levels, pristine dye-matrix saturation with three-dimensional depth, and subtle glowing highlight halation from vintage studio floodlights.';
+  } else if (visualStyle === 'aerochrome_infrared') {
+    loraAtmosphere = 'shot on false-color Kodak Aerochrome IV 2443 infrared filmstock with Carl Zeiss Distagon 40mm f/4 lens and a yellow Tiffen Wratten 12 filter, all live foliage and green vegetation glowing in vibrant surreal crimson red, deep magenta, and hot pink colors, sky and water rendered in stark pechschwarz black and deep ink-indigo, high infrared luminescence bloom (glowing halo effect) along high-contrast interfaces, with medium-coarse organic grain structure.';
+  } else if (visualStyle === 'orwo_nc21') {
+    loraAtmosphere = 'shot on East German ORWO Color NC21 filmstock with Carl Zeiss Jena Pancolar 50mm f/1.8 lens using radioactive thorium glass, beautiful warm golden-yellow color cast from the glass, soft retro-melancholic color palette, earthy muted blues and pastels, ultra-soft and gentle edge contrast, very dense wolkenartiges 35mm film grain, with delicate glowing lens flare streaks.';
+  } else if (visualStyle === 'agfachrome_50s') {
+    loraAtmosphere = 'shot on classic Agfachrome Professional 50S dia slide film with Carl Zeiss Sonnar 40mm f/2.8 HFT lens, vintage AP41 reversal chemistry processing, extremely beautiful muted watercolor-like pastel tones, cool minty sage greens and delicate pale blue hues, soft creamy white highlight rolloff, with pronounced painterly film grain giving a gorgeous impressionistic texture.';
+  } else if (visualStyle === 'super8_tri_x') {
+    loraAtmosphere = 'shot on vintage 8mm Super 8 Tri-X black-and-white or Ektachrome 100D color reversal film with Canon Auto Zoom 1014 camera, characteristic rapid vertical gate-weave picture shake, heavy coarse flickering film emulsion grain, visible physical hair-thin scratches, dust particles, and beautiful amber-orange film burn-in flare transitions bleeding from frame edges, soft analog edge resolution, and nostalgic home-video texture.';
+  } else if (visualStyle === '35mm_anamorphic') {
+    loraAtmosphere = 'shot on legendary 35mm Cine-Scope Kodak Vision3 500T (ECN-2 process) with Arriflex 35 IIC and Panavision C-Series anamorphic lenses, spectacular wide horizontal anamorphic blue light flares (lens streaks) slicing across the frame, gorgeous out-of-focus highlights rendered as vertically elongated oval bokeh circles, rich cinematic color palette, velvety deep shadows with kühle teal-indigo tint, and ultra-organic fine film grain.';
+  } else if (visualStyle === '70mm_imax') {
+    loraAtmosphere = 'shot on high-end 70mm IMAX MSM 9802 cine-camera on Kodak Vision3 250D daylight cinematic filmstock with Hasselblad large-format prime lenses, breathtaking panoramic clarity and ultra-high resolution texture, virtually invisible micro-fine grain structure, immense razor-sharp three-dimensional depth-of-field separation, perfect color fidelity, and exceptionally smooth highlights rolloff.';
+  } else if (visualStyle === 'golden_hour') {
+    loraAtmosphere = 'motivated warm golden hour backlight, soft volumetric dust flares, high-contrast warm glow, organic fine 35mm film grain, subtle halation, and controlled highlight rolloff.';
+  } else if (visualStyle === 'vintage_16mm') {
+    loraAtmosphere = 'vintage 16mm analog indie film look, warm nostalgic retro color grading, soft contrast, subtle organic chromatic aberration, active grain structure, and nostalgic atmosphere.';
+  }
+
+  // Apply Analog Labor Störungen (Chemical/Physical abuses) to loraAtmosphere
+  if (analogLaborStörung && analogLaborStörung !== 'none') {
+    if (analogLaborStörung === 'cross_processing') {
+      loraAtmosphere += ' Subjected to creative chemical cross-processing (C-41 developed in E-6 chemistry) producing hyper-saturated yellow highlight glares and extremely toxic emerald-green and turquoise shadow tones with a raw vintage contrast surge.';
+    } else if (analogLaborStörung === 'film_soup') {
+      loraAtmosphere += ' Processed in a custom boiling chemical film-soup mixture (lemon juice, seawater, and liquid soap), causing active organic emulsion erosion, beautiful fractal oxidation patterns, and microscopic chemical bubble residues floating over the gelatin carrier.';
+    } else if (analogLaborStörung === 'thermal_shock') {
+      loraAtmosphere += ' Subjected to intense heat thermal shock prior to development, resulting in semi-melted gelatin layers, bizarre capillary-like deep red veins and crimson artifacts creeping from the film borders, with beautiful edge-softness and dynamic light leaks.';
+    } else if (analogLaborStörung === 'bleach_bypass') {
+      loraAtmosphere += ' Developed with a harsh bleach-bypass technique (retaining metallic silver in the emulsion) yielding a brutal high-contrast industrial aesthetic, heavily desaturated color tones, deep hard charcoal blacks, and intense silver-halide grain shimmer.';
+    }
+  }
+
+  // Apply Macro Recipe if selected
+  let finalVisualFocus = enVisualFocus;
+  if (analogMacroRecipe && analogMacroRecipe !== 'none') {
+    if (analogMacroRecipe === 'chemical_feast') {
+      finalVisualFocus = 'A magnificent, high-magnification extreme macro shot detailing active chemical corrosion, copper-carbonate green oxidation boiling under a microscope lens, with organic gelatine bubbling and blistering under extreme heat.';
+    } else if (analogMacroRecipe === 'silver_scar') {
+      finalVisualFocus = 'An intense, extreme macro close-up of pure liquid silver mercury flowing slowly across a cracked obsidian surface, with silver-nitrate crystallization and stark metallic reflections captured with microscopically shallow depth of field.';
+    } else if (analogMacroRecipe === 'saturated_rust') {
+      finalVisualFocus = 'An extreme macro close-up of bubbling red rust and metal oxidation being hit by high-contrast crimson sparks, revealing beautiful golden-orange crystalline structures and coarse glowing heat textures under heavy light.';
+    }
+  }
+
+  const settingSegment = [enWeather, enBackground, `Focus on ${finalVisualFocus}.`, loraAtmosphere].filter(Boolean).join(' ');
 
   // 3. Definitions Segment (Strict Cinematic English & Clean Maestro Anchors)
   const definitionsParts: string[] = [];
@@ -860,6 +1017,9 @@ export function pressProposalToSingleLineWindows(params: {
   voiceModulation?: VoiceModulationConfig;
   astroCinemaLoraMode?: boolean;
   astroCinemaLoraKeywords?: boolean;
+  visualStyle?: string;
+  analogLaborStörung?: string;
+  analogMacroRecipe?: string;
 }): SingleLineWindow[] {
   const {
     proposal,
@@ -876,6 +1036,9 @@ export function pressProposalToSingleLineWindows(params: {
     voiceModulation,
     astroCinemaLoraMode = true,
     astroCinemaLoraKeywords = true,
+    visualStyle = 'natural',
+    analogLaborStörung,
+    analogMacroRecipe,
   } = params;
 
   const totalWindows = proposal.windowBreakdown.length;
@@ -914,6 +1077,9 @@ export function pressProposalToSingleLineWindows(params: {
       voiceModulation,
       astroCinemaLoraMode,
       astroCinemaLoraKeywords,
+      visualStyle,
+      analogLaborStörung,
+      analogMacroRecipe,
     });
   });
 }
@@ -1475,6 +1641,9 @@ export function pressConfigToSingleLineWindows(params: {
   voiceModulation?: VoiceModulationConfig;
   astroCinemaLoraMode?: boolean;
   astroCinemaLoraKeywords?: boolean;
+  visualStyle?: string;
+  analogLaborStörung?: string;
+  analogMacroRecipe?: string;
 }): SingleLineWindow[] {
   const {
     windows,
@@ -1491,6 +1660,9 @@ export function pressConfigToSingleLineWindows(params: {
     voiceModulation,
     astroCinemaLoraMode = true,
     astroCinemaLoraKeywords = true,
+    visualStyle = 'natural',
+    analogLaborStörung,
+    analogMacroRecipe,
   } = params;
 
   const totalWindows = windows.length;
@@ -1536,6 +1708,9 @@ export function pressConfigToSingleLineWindows(params: {
       voiceModulation,
       astroCinemaLoraMode,
       astroCinemaLoraKeywords,
+      visualStyle,
+      analogLaborStörung,
+      analogMacroRecipe,
     });
   });
 }
