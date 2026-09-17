@@ -113,21 +113,6 @@ We express our deepest appreciation and special recommendation for one of the mo
 
 ---
 
-## 🏆 Production Reference: The "Elemental Matter" Series
-
-Created and executed entirely with Drehbuchstudio Pro and the Kodachrome 64 Master Plugin:
-
-| Werk | Title | Physical Medium & Key Chemistry | Key Lighting & Optical Note |
-|---|---|---|---|
-| **Werk I** | **Cinnabar Dust** | Pure red cinnabar mineral dust, mercury sulfide crystals | 5500K key light, 650nm crimson halation, obsidian D-Max |
-| **Werk II** | **Liquid Aureum** | Viscous colloidal gold, heavy surface tension, alabaster | Microscopic fluid meniscus, pure neutral eye catchlights |
-| **Werk III** | **Ultramarine Ash** | Raw lapis lazuli powder, pyrite inclusions, basalt stone | Strict K-14 cobalt-to-peach spectral color separation |
-| **Werk IV** | **Verdigris Slag** | Crystallized copper carbonate, brittle emerald patina, slate | Granular crust fracturing, jade green vs. natural skin tones |
-| **Werk V** | **Bismuth Matrix** | Stepped 90° hopper bismuth crystal, iridescent oxide film | Prismatic violet-to-cyan refraction, zero sepia drift |
-| **Werk VI** | **Obsidian Core** | Amorphous volcanic glass, conchoidal fractures, graphite ash | Ultimate D-Max black density, pure glass mirror reflections |
-
----
-
 ## 👥 Supporters & Sponsors
 
 We proudly highlight our project supporters and vision partners:
