@@ -37,6 +37,21 @@ export interface AnalogProfile {
 
 export const ANALOG_PROFILES: AnalogProfile[] = [
   {
+    id: 'art_noir',
+    name: 'Mamiya RZ67 Pro II (120 Mittelformat • Studio Noir)',
+    camera: 'Mamiya RZ67 Pro II (6x7 Mittelformat)',
+    lens: 'Mamiya Sekor Z 110mm f/2.8 W / Sekor Z 140mm Macro',
+    chemistry: 'Kodak Tri-X 400 / Ilford HP5 Plus (120 Rollfilm S/W, D-76 Push +1)',
+    description: 'Radikaler Chiaroscuro-Kontrast im Stil klassischer Studio-Porträts, samtiges D-Max Tiefschwarz ohne Streulicht, organisch fühlbares 120er Silbersalzkorn und kompromisslose mikroskopische Textur ohne künstliche CGI-Glättung.',
+    colorShift: 'Streng monochrom (Schwarz-Weiß), steile Gradationskurve, reines Silber-Graustufenspektrum, samtig pechschwarzer Negativraum-Hintergrund',
+    grain: 'Sichtbares, haptisch fühlbares 120mm Mittelformat-Silbersalzkorn mit organischer Struktur und überragender Plastizität',
+    flare: 'Kein Schleier; rasiermesserscharfe Lichtkanten durch tiefes Rembrandt-Oberlicht',
+    badge: 'Mittelformat S/W',
+    badgeStyle: 'bg-zinc-900 text-zinc-100 border-zinc-700',
+    paletteColors: ['#000000', '#27272A', '#71717A', '#F4F4F5'],
+    recommendedTemp: 'Monochrom Chiaroscuro'
+  },
+  {
     id: 'kodachrome',
     name: 'Kodachrome 64 Master Plugin (K-14 Dia)',
     camera: 'Leica M3 Rangefinder / Bolex H16',
@@ -50,6 +65,21 @@ export const ANALOG_PROFILES: AnalogProfile[] = [
     badgeStyle: 'bg-rose-500/10 text-rose-700 border-rose-500/30',
     paletteColors: ['#DC2626', '#F59E0B', '#FDE68A', '#0F172A'],
     recommendedTemp: '5500K Neutral'
+  },
+  {
+    id: 'cinestill_800t',
+    name: 'CineStill 800T Master Plugin (Tungsten & 650nm Halation)',
+    camera: 'Arriflex 35 III / Leica M6 Cine-Mod',
+    lens: 'Zeiss Super Speed 50mm T1.3 MK II / Cooke Speed Panchro',
+    chemistry: 'Kodak Vision3 500T (5219) mit entfernter Remjet-Rußschicht, C-41 / ECN-2 Chemie',
+    description: 'Das offizielle CineStill 800T Master Plugin für cinematische Nacht- und Kunstlicht-Ästhetik. Durch die mechanische Entfernung der Remjet-Rückschicht streut Licht direkt in die rote Emulsionsschicht und erzeugt die ikonische 650nm karminrote Halation um Punktlichtquellen, Neonschilder und Glanzlichter.',
+    colorShift: '3200K Kunstlicht-Abstimmung (Tungsten), kühle Cyan-Kobalt-Schatten, leuchtend warmes Kunstlicht und samtiges Tiefschwarz',
+    grain: 'Charakteristisches feines Kinofilm-Korn (Vision3 500T Stock) mit organischer Mikroschärfe',
+    flare: 'Ikonische karminrote 650nm Halation-Aura (Remjet-Removal Bleed) um Lichtquellen, Glühlampen und metallische Reflexionen',
+    badge: 'Master Plugin v1.0',
+    badgeStyle: 'bg-red-500/10 text-red-700 border-red-500/30',
+    paletteColors: ['#EF4444', '#06B6D4', '#F59E0B', '#09090B'],
+    recommendedTemp: '3200K Tungsten'
   },
   {
     id: 'leica_noctilux',
@@ -285,9 +315,9 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
   const [showLabSection, setShowLabSection] = useState(false);
 
   // Group definitions for clear filtering
-  const FAVORITES_IDS = ['kodachrome', 'leica_noctilux', '70mm_imax'];
-  const PHOTO_CLASSIC_IDS = ['kodachrome', 'polaroid_fp100c', 'svema_zenit', 'agfachrome_50s', 'orwo_nc21'];
-  const CINE_IDS = ['70mm_imax', '35mm_anamorphic', 'technicolor_v4', 'krasnogorsk_16mm', 'super8_tri_x'];
+  const FAVORITES_IDS = ['art_noir', 'kodachrome', 'cinestill_800t', 'leica_noctilux', '70mm_imax'];
+  const PHOTO_CLASSIC_IDS = ['art_noir', 'kodachrome', 'cinestill_800t', 'polaroid_fp100c', 'svema_zenit', 'agfachrome_50s', 'orwo_nc21'];
+  const CINE_IDS = ['art_noir', 'cinestill_800t', '70mm_imax', '35mm_anamorphic', 'technicolor_v4', 'krasnogorsk_16mm', 'super8_tri_x'];
   const HISTORIC_IDS = ['wet_plate', 'petzval', 'aerochrome_infrared'];
 
   const filteredProfiles = ANALOG_PROFILES.filter((p) => {
@@ -299,6 +329,7 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
   });
 
   const isKodachrome = currentProfile.id === 'kodachrome';
+  const isCineStill = currentProfile.id === 'cinestill_800t';
 
   return (
     <div
@@ -334,6 +365,13 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
               <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3 text-emerald-600" />
                 <span>5500K Farbtreue &amp; Sklera-Schutz Aktiv</span>
+              </span>
+            )}
+
+            {enabled && isCineStill && (
+              <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-red-50 text-red-700 border border-red-200 flex items-center gap-1">
+                <Flame className="w-3 h-3 text-red-600" />
+                <span>3200K Tungsten &amp; 650nm Halation Aktiv</span>
               </span>
             )}
           </div>
@@ -573,6 +611,91 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
             </div>
           )}
 
+          {/* 2b. DEDICATED CINESTILL 800T MASTER COCKPIT (Shown when CineStill 800T is selected) */}
+          {isCineStill && (
+            <div className="p-4.5 rounded-2xl bg-gradient-to-br from-red-50/90 via-white to-cyan-50/60 border-2 border-red-500/40 shadow-xs space-y-4">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-red-600 text-white shadow-xs">
+                    <Flame className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-black text-red-950">
+                        CineStill 800T Plugin (Master Edition)
+                      </h4>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-red-600 text-white">
+                        Aktiv &amp; Kalibriert
+                      </span>
+                    </div>
+                    <p className="text-xs text-red-800/80 font-medium mt-0.5">
+                      Kodak Vision3 500T (5219) Kinofilm mit entfernter Remjet-Rußschicht für C-41 / ECN-2 Entwicklung.
+                    </p>
+                  </div>
+                </div>
+
+                {/* LoRA Info Tag */}
+                <div className="flex items-center gap-2">
+                  <div className="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>3200K Tungsten &amp; 650nm Halation injiziert</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 Core Verification Guarantees */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                <div className="p-3 rounded-xl bg-white border border-red-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-red-700 font-bold text-xs">
+                    <Flame className="w-4 h-4 text-red-600" />
+                    <span>650nm Karminrot-Halation</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    Ikonische rote Lichthöfe um Punktlichtquellen, Neonschilder, Autoscheinwerfer und Glanzlichter.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-red-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-red-700 font-bold text-xs">
+                    <Sun className="w-4 h-4 text-amber-500" />
+                    <span>3200K Tungsten-Balance</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    Auf Kunstlicht abgestimmte Emulsion; taucht Umgebungslicht in samtiges Cyan-Kobalt-Blau.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-red-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-red-700 font-bold text-xs">
+                    <Layers className="w-4 h-4 text-cyan-600" />
+                    <span>Remjet-Removal Physik</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    Rückseitige Anti-Halations-Rußschicht chemisch entfernt; Licht reflektiert in die rote Schicht.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-red-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-red-700 font-bold text-xs">
+                    <Eye className="w-4 h-4 text-zinc-800" />
+                    <span>Vision3 500T Kinokorn</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    Organisches 35mm Hollywood-Filmkorn mit hoher Mikroschärfe, ECN-2/C-41 Farbseparation ohne CGI-Look.
+                  </p>
+                </div>
+              </div>
+
+              {/* Technical Recipe / Knowledge Box */}
+              <div className="p-3 rounded-xl bg-red-100/50 border border-red-200 text-xs text-red-950 leading-relaxed flex items-start gap-2">
+                <Info className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong>Photochemische Emulation:</strong> CineStill 800T basiert auf originalem <code>Kodak Vision3 500T (5219)</code> Filmstock. Das System injiziert automatisch die prompt-verbindlichen Direktiven: <code>3200K tungsten balanced</code>, <code>650nm carmine-red halation bleed</code>, <code>Remjet layer removed</code> und <code>ECN-2 / C-41 color cross</code>.
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 3. ACTIVE PROFILE DETAIL COCKPIT (Clean, high-contrast, fully readable) */}
           <div className="p-4.5 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-4">
             <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -793,7 +916,9 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
                 LoRA-Kopplung (ASTROCINEMAV01K2T):
               </span>
               <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${loraEnabled ? 'bg-amber-200 text-amber-900' : 'bg-zinc-200 text-zinc-600'}`}>
-                {loraEnabled ? 'Gekoppelt' : 'Getrennt (Empfohlen für Kodachrome Farbdia)'}
+                {loraEnabled
+                  ? (isCineStill ? 'Gekoppelt (CineStill 800T Cinema Mode)' : 'Gekoppelt')
+                  : (isKodachrome ? 'Getrennt (Empfohlen für Kodachrome Farbdia)' : 'Getrennt')}
               </span>
             </div>
 

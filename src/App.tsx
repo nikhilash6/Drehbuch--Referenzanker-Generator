@@ -87,9 +87,10 @@ export default function App() {
       dialogueLanguage: 'German',
       actionCode: 'ASTROCINEMAV01K2T',
       aspectRatio: '16:9',
-      globalWeather: 'Sonnig & klarer blauer Himmel',
-      globalBackground: 'Neubausiedlung / Grüne Wohnsiedlung mit gepflegtem Vorgarten',
-      finalCallToAction: 'Jetzt Musterhaus besichtigen & Ihr Traumhaus planen',
+      globalWeather: 'Stark contrast chiaroscuro overhead Rembrandt key light with dramatic shadow fall-off',
+      globalBackground: 'Pechschwarzer Studio-Negativraum (Void)',
+      finalCallToAction: 'Mamiya RZ67 — The Pure Essence of Medium Format Cinema',
+      visualStyle: 'art_noir',
     });
 
     const saved = localStorage.getItem('drehbuch_konfig_state');
@@ -97,16 +98,27 @@ export default function App() {
       try {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed.windowCount === 'number') {
+          const rawRefs = Array.isArray(parsed.references) ? parsed.references : (Array.isArray(parsed.subjects) ? parsed.subjects : DEFAULT_SUBJECT_REFERENCES);
+          const updatedRefs = rawRefs
+            .filter((r: any) => !r.name?.includes('Axel') && !r.dataUrl?.includes('20200120') && !r.photoUrl?.includes('20200120') && r.id !== 'ref-axel-rz67')
+            .map((r: any) => {
+              if (r.id === 'ref-1') {
+                return DEFAULT_SUBJECT_REFERENCES[0];
+              }
+              return r;
+            });
+
           return {
             ...parsed,
+            visualStyle: parsed.visualStyle || 'art_noir',
             windowDurationSeconds: parsed.windowDurationSeconds || 14,
             dialogueLanguage: parsed.dialogueLanguage || 'German',
             actionCode: parsed.actionCode || 'ASTROCINEMAV01K2T',
             aspectRatio: parsed.aspectRatio || '16:9',
             genre: parsed.genre || 'Architektur & Lifestyle (Immobilien)',
             targetAudienceId: parsed.targetAudienceId || 'oeffentlicher-dienst',
-            references: Array.isArray(parsed.references) ? parsed.references : (Array.isArray(parsed.subjects) ? parsed.subjects : DEFAULT_SUBJECT_REFERENCES),
-            subjects: Array.isArray(parsed.references) ? parsed.references : (Array.isArray(parsed.subjects) ? parsed.subjects : DEFAULT_SUBJECT_REFERENCES),
+            references: updatedRefs,
+            subjects: updatedRefs,
             proposals: parsed.proposals && parsed.proposals.length > 0 ? parsed.proposals : DEFAULT_PROPOSALS,
             selectedProposalId: parsed.selectedProposalId || DEFAULT_PROPOSALS[0].id,
             pressedWindows: parsed.pressedWindows && parsed.pressedWindows.length > 0 ? parsed.pressedWindows : defaultPressed,
@@ -121,16 +133,17 @@ export default function App() {
       dialogueLanguage: 'German',
       actionCode: 'ASTROCINEMAV01K2T',
       aspectRatio: '16:9',
-      genre: 'Architektur & Lifestyle (Immobilien)',
-      finalCallToAction: 'Jetzt Musterhaus besichtigen & Ihr Traumhaus planen',
-      globalWeather: 'Sonnig & klarer blauer Himmel',
-      globalBackground: 'Neubausiedlung / Grüne Wohnsiedlung mit gepflegtem Vorgarten',
-      globalMusic: 'Cinematic Ambient (Elegante Streicher, dezente Synths, exklusiver Touch)',
-      globalSoundDesign: 'Drohnensurren & sanfte Sommerwind-Brise',
+      genre: 'Autorenkino & Charakterstudie (Mamiya RZ67 Noir)',
+      finalCallToAction: 'Mamiya RZ67 — The Pure Essence of Medium Format Cinema',
+      globalWeather: 'Stark contrast chiaroscuro overhead Rembrandt key light with dramatic shadow fall-off',
+      globalBackground: 'A pure pitch-black matte negative space void background',
+      globalMusic: 'Cinematic Ambient (Tiefes melancholisches Streicher-Pad & Analog-Knistern)',
+      globalSoundDesign: 'Trockenes Texturgeräusch, sanftes Atmen, 120mm Film-Gate Flutter',
       rawClaimsText: '',
       extractedClaims: [],
       stichpunkte: '',
       targetAudienceId: 'oeffentlicher-dienst',
+      visualStyle: 'art_noir',
       references: DEFAULT_SUBJECT_REFERENCES,
       subjects: DEFAULT_SUBJECT_REFERENCES,
       proposals: DEFAULT_PROPOSALS,

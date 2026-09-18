@@ -103,7 +103,7 @@ export const DEFAULT_SUBJECT_REFERENCES: ConfigReference[] = [
     tag: '<Subject 1>',
     charTag: 'char Protagonist1',
     name: 'Protagonist 1',
-    roleOrAction: 'Erkundet die Architektur und interagiert natürlich',
+    roleOrAction: 'Erkundet die Architektur und interagiert natürlich im Raum',
     relationship: 'Hauptdarsteller',
     gender: 'female',
     ageRange: '',
@@ -494,6 +494,8 @@ export function buildSingleLineWindowPrompt(params: {
     styleLabel = 'chemically degraded analog Svema lomo masterpiece with heavy grain';
   } else if (visualStyle === 'kodachrome') {
     styleLabel = 'legendary Kodachrome 64 analog color reversal slide masterpiece';
+  } else if (visualStyle === 'cinestill_800t') {
+    styleLabel = 'legendary CineStill 800T tungsten motion picture analog film masterpiece with carmine-red halation';
   } else if (visualStyle === 'krasnogorsk_16mm') {
     styleLabel = 'strictly monochrome vintage 16mm Krasnogorsk-3 movie masterpiece';
   } else if (visualStyle === 'polaroid_fp100c') {
@@ -546,6 +548,15 @@ export function buildSingleLineWindowPrompt(params: {
   } else if (visualStyle === 'kodachrome') {
     enWeather = 'Neutral 5500K daylight-balanced directional key light with pure white specular highlights, crisp spectral color separation, and deep neutral shadow fall-off, strictly avoiding yellow or sepia cast';
     enBackground = 'A clean, deep neutral-dark studio background with zero amber tint and velvety obsidian D-Max shadows';
+  } else if (visualStyle === 'cinestill_800t') {
+    enWeather = 'Atmospheric 3200K tungsten-balanced practical incandescent lighting mixed with deep cyan-cobalt ambient shadows, sharp specular reflections, and intense carmine-red 650nm halation glows around point light sources';
+    enBackground = 'A cinematic moody urban night interior or exterior with glowing practical tungsten lamps, neon signs, and velvety obsidian shadow fall-off';
+    if (!soundDesign || soundDesign.toLowerCase().includes('subtle natural') || soundDesign.toLowerCase().includes('natural environmental')) {
+      enSoundDesign = 'Subtle low-frequency electrical hum of tungsten lamps, distant urban neon buzz, and quiet ambient night resonance';
+    }
+    if (!musicStyle || musicStyle.toLowerCase().includes('cinematic ambient score') || musicStyle.toLowerCase().includes('cinematic music')) {
+      enMusicStyle = 'A moody, slow-tempo cinematic noir ambient score with deep warm analog synth pads and subtle tape-saturated texture';
+    }
   } else if (visualStyle === 'krasnogorsk_16mm') {
     enWeather = 'Harsh, dramatic, high-contrast industrial lighting with raw shadowed zones and stark overexposed highlight regions';
     enBackground = 'An old vintage film studio backdrop or textured industrial environment with active lens dust and film gate flutter';
@@ -589,13 +600,15 @@ export function buildSingleLineWindowPrompt(params: {
     : '';
 
   if (isArtNoir) {
-    loraAtmosphere = 'strictly monochrome black-and-white art-noir aesthetic, extremely deep rich blacks, textured high-contrast silver-greys, high silver halide density, visible organic 120mm medium format analog film grain (Mamiya RZ67 style), subtle vintage halation, and controlled cinematic highlight rolloff.';
+    loraAtmosphere = 'strictly monochrome black-and-white art-noir aesthetic, photochemical medium format emulation: captured on Mamiya RZ67 Pro II with Mamiya Sekor Z 110mm f/2.8 lens on 120 roll film (Kodak Tri-X 400 / Ilford HP5+ chemistry). Masterpiece chiaroscuro Rembrandt directional overhead keylight casting dramatic shadows into pure matte-black void. Extreme tactile microcontrast on pores, beard stubble, and fabric weave, strictly zero artificial CGI skin smoothing, zero waxiness. Rich continuous silver-halide tonal gradation, obsidian D-Max blacks, razor-sharp focus plane with buttery medium-format depth-of-field falloff.';
   } else if (isWetPlate) {
     loraAtmosphere = 'strictly monochrome wet-plate collodion silver-nitrate glass plate style from 1851, orthochromatic sensitivity rendering warm colors pitch black and light blue tones white, heavy dark irregular silver pouring stains and chemical flow marks bleeding from corners, visible dust, hairline emulsion cracks, and fine metallic scratches embedded directly in the silver plate.';
   } else if (visualStyle === 'svema_zenit') {
     loraAtmosphere = 'distinctive swirly vortex bokeh at f/2 using Helios-44-2 58mm or Jupiter-9 85mm lenses, background rapidly distorting in a circular spinning blur around the sharp center subject, chemically expired C-41 analog Svema filmstock with toxic emerald-green tint in the deep shadows and warm sulfur-yellow/magenta hues in the highlights, dramatic analog light-leak flares in hot orange and crimson red bleeding from the left edge of the frame, heavy 35mm film emulsion grain structure with subtle reticulation.';
   } else if (visualStyle === 'kodachrome') {
     loraAtmosphere = 'photochemical film emulation: authentic Kodachrome 64 daylight-balanced (5500K) color reversal slide film processed in genuine K-14 chemistry. Three-layer subtractive dye-coupler color science delivering iconic hyper-saturated crimson reds, natural peach-and-olive skin tones, and rich cobalt shadows with pure spectral separation. Sclera of the eyes remains natural clean ivory-white with neutral specular catchlights, irises retain natural deep eye color, strictly avoiding glowing yellow eyes or uniform amber sepia wash. Extremely steep analog contrast curve featuring obsidian-black D-Max shadows with zero digital noise. Silky highlight rolloff with distinctive warm 650nm crimson halation bleed along high-contrast specular edges. Crisp microscopic dye-grain celluloid texture with tactile organic sharpness, zero artificial edge haloing, zero digital smoothing.';
+  } else if (visualStyle === 'cinestill_800t') {
+    loraAtmosphere = 'photochemical motion picture film emulation: authentic CineStill 800T (modified Kodak Vision3 500T 5219 emulsion with Remjet carbon backing layer mechanically removed, processed in ECN-2 / C-41 color cross chemistry). Calibrated 3200K tungsten color balance delivering lush amber-gold highlights against deep cyan-cobalt-tinted ambient shadows and velvety obsidian D-Max blacks. Signature 650nm carmine-red halation bleed glowing intensely around direct point light sources, exposed filaments, street lamps, and specular chrome reflections due to uninhibited light bouncing off the camera pressure plate back into the red-sensitive emulsion layer. Organic Vision3 cinema micro-grain structure, crisp physical edge definition, natural lifelike skin texture with warm tungsten catchlights, strictly zero artificial CGI smoothing, zero plastic digital noise.';
   } else if (visualStyle === 'krasnogorsk_16mm') {
     loraAtmosphere = 'shot on Soviet Krasnogorsk-3 16mm wind-up cine-camera with Meteor 5-1 f/1.9 zoom lens, strictly monochrome black-and-white, coarse high-contrast silver-nitrate emulsion grain, visible physical film vertical frame jitter and gate-weave (shaking), vintage optical distortion at focal edges, with subtle hair-thin emulsion scratches, dust flecks, and chemical residue stains flickering between frames.';
   } else if (visualStyle === 'polaroid_fp100c') {
@@ -661,10 +674,10 @@ export function buildSingleLineWindowPrompt(params: {
       const maestroAnchor = `@Subject${idx}_${cleanName}`;
       const defaults = getDistinctSubjectVisualDefaults(idx, s.name, s.gender, s.roleOrAction);
 
-      const isGenericHair = !s.hairOrMaterial || /gepflegtes|entsprechendes|haar|kleidung|kontext|leinenhemd/i.test(s.hairOrMaterial);
-      const isGenericClothing = !s.clothingOrFinish || /passende|kleidung|kontext|zeitgemäße|leinenhemd|trousers/i.test(s.clothingOrFinish);
-      const isGenericAge = !s.ageRange || /jahre|age/i.test(s.ageRange);
-      const isGenericBuild = !s.build || /statur|posture|natürliche/i.test(s.build);
+      const isGenericHair = !s.hairOrMaterial || /^(gepflegtes haar|kurze haare|standard|n\/a)$/i.test(s.hairOrMaterial.trim());
+      const isGenericClothing = !s.clothingOrFinish || /^(passende kleidung|zeitgemäße kleidung|standard|n\/a)$/i.test(s.clothingOrFinish.trim());
+      const isGenericAge = !s.ageRange || /^(standard|n\/a)$/i.test(s.ageRange.trim());
+      const isGenericBuild = !s.build || /^(standard|n\/a)$/i.test(s.build.trim());
 
       const hair = !isGenericHair ? toEnglishCinematicText(s.hairOrMaterial!) : defaults.hair;
       const eyes = s.eyesOrGlazing && !/blick|augen/i.test(s.eyesOrGlazing) ? toEnglishCinematicText(s.eyesOrGlazing) : defaults.eyes;
@@ -1097,6 +1110,10 @@ export function toEnglishCinematicText(text?: string, fallback: string = ''): st
   // 1. Exact Multi-Word Phrase & Sentence Replacements (Sorted by specificity)
   const phraseReplacements: [RegExp, string][] = [
     // Character & Apparel Specific Phrases
+    [/vollständig\s*kahl\s*geschorener\s*Schädel[^,]*/gi, 'completely clean-shaven bald head with distinct smooth cranial contours'],
+    [/dichter\s*kurz\s*gestutzter\s*melierter\s*Vollbart[^.]*/gi, 'dense neatly trimmed salt-and-pepper full beard with fine grey and silver stubble'],
+    [/tief\s*liegende,?\s*durchdringende\s*Augen[^.]*/gi, 'deep-set piercing eyes with a direct, steady and concentrated gaze into the lens'],
+    [/helles\s*Leinen-?\s*oder\s*Oxford-Hemd[^.]*/gi, 'lightweight linen or oxford collared shirt open at the neck'],
     [/well-groomed\s*Naturhaar\s*with\s*natürlichem\s*Glanz/gi, 'well-groomed natural hair with natural sheen'],
     [/Wacher,\s*begeisterter\s*Blick/gi, 'alert, enthusiastic gaze'],
     [/Eindeutiger\s*visueller\s*Anker:\s*Natürlicher\s*Teint,\s*keine\s*auffälligen\s*Uhren,\s*Klon-Ausschluss\s*aktiv/gi, 'distinct visual anchor: natural complexion, no prominent watches, anti-clone lock active'],
@@ -1345,6 +1362,17 @@ export function toEnglishCinematicText(text?: string, fallback: string = ''): st
     [/\bTageslicht\b/gi, 'natural daylight'],
     [/\bSonnenstrahl\b/gi, 'sunbeam'],
     [/\bSonnenlicht\b/gi, 'sunlight'],
+    [/\bKunstlicht\b/gi, '3200K tungsten practical lighting'],
+    [/\bHalation\b/gi, '650nm carmine-red halation'],
+    [/\bLichthof\b/gi, 'carmine-red halation aura'],
+    [/\bLichthöfe\b/gi, 'carmine-red halation blooms'],
+    [/\bGlühlampe\b/gi, 'tungsten incandescent bulb'],
+    [/\bGlühlampen\b/gi, 'tungsten incandescent lamps'],
+    [/\bLeuchtstoffröhre\b/gi, 'fluorescent light tube'],
+    [/\bLeuchtstoffröhren\b/gi, 'fluorescent light tubes'],
+    [/\bNeonschild\b/gi, 'glowing neon sign'],
+    [/\bNeonschilder\b/gi, 'glowing neon signs'],
+    [/\bNeonschrift\b/gi, 'illuminated neon lettering'],
 
     // Architecture & Spaces
     [/\bFassade\b/gi, 'facade'],

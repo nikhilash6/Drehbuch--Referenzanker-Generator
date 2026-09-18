@@ -4,7 +4,7 @@ import { PROMPT_CATALOG, getPromptForCategory } from './promptCatalog';
 // Default prompt fallback if none selected
 export const DEFAULT_ANCHOR_PROMPT = PROMPT_CATALOG[0].prompt;
 
-// Initial references: Start empty as requested by user ("ich schmeisse da die referenzen als bilder rein")
+// Initial references: Start empty so user can add references
 export const INITIAL_REFERENCES: ReferenceImage[] = [];
 
 // Optional Demo Presets (Clean, multi-category examples: 1 Person, 1 Person mit 2 Hunden, 1 Gegenstand)
