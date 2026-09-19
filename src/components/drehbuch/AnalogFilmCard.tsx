@@ -37,6 +37,21 @@ export interface AnalogProfile {
 
 export const ANALOG_PROFILES: AnalogProfile[] = [
   {
+    id: 'kodak_5247',
+    name: 'Kodak 5247 Master Plugin (100T • ENR Bleach-Bypass)',
+    camera: 'Arriflex 35 III / Panavision Panaflex Gold II (35mm Cine)',
+    lens: 'Zeiss Super Speed Mk II (T1.3 Primes: 35mm / 50mm / 100mm Macro)',
+    chemistry: 'Kodak 5247 100T Color Negative (100% ENR Silver-Retention Bleach-Bypass)',
+    description: 'Das offizielle Kodak 5247 Master Plugin für die 6-teilige Katastrophen-Dramaturgie. Emuliert den legendären 100T Kinofilm mit 100% ENR Bleach-Bypass: Stark entsättigte Farben, brutaler Mikrokontrast durch metallische Silberrückhaltung, clashing 5500K Daylight vs. 2800K Tungsten und abgrundtiefes D-Max Schwarz.',
+    colorShift: 'Strikte Entsättigung, eiskaltes 5500K Tageslicht prallt auf 2800K Tungsten, metallischer Silberschimmer, stahlblaue Schatten & tiefschwarzes D-Max',
+    grain: 'Nadelscharfes 100T Silberhalogenid-Korn mit plastischer Mikroschärfe auf Poren, Hautstaub und zerborstenem Glas',
+    flare: 'Harte Lichtkanten, klinische T1.3 Reflexionen ohne Weichzeichner, metallische Glanzlichter',
+    badge: 'Master Plugin v2.2',
+    badgeStyle: 'bg-amber-500/15 text-amber-900 border-amber-500/40',
+    paletteColors: ['#0F172A', '#334155', '#D97706', '#F8FAFC'],
+    recommendedTemp: '5500K/2800K Clash'
+  },
+  {
     id: 'art_noir',
     name: 'Mamiya RZ67 Pro II (120 Mittelformat • Studio Noir)',
     camera: 'Mamiya RZ67 Pro II (6x7 Mittelformat)',
@@ -315,9 +330,9 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
   const [showLabSection, setShowLabSection] = useState(false);
 
   // Group definitions for clear filtering
-  const FAVORITES_IDS = ['art_noir', 'kodachrome', 'cinestill_800t', 'leica_noctilux', '70mm_imax'];
+  const FAVORITES_IDS = ['kodak_5247', 'kodachrome', 'cinestill_800t', 'art_noir', 'leica_noctilux', '70mm_imax'];
   const PHOTO_CLASSIC_IDS = ['art_noir', 'kodachrome', 'cinestill_800t', 'polaroid_fp100c', 'svema_zenit', 'agfachrome_50s', 'orwo_nc21'];
-  const CINE_IDS = ['art_noir', 'cinestill_800t', '70mm_imax', '35mm_anamorphic', 'technicolor_v4', 'krasnogorsk_16mm', 'super8_tri_x'];
+  const CINE_IDS = ['kodak_5247', 'cinestill_800t', '70mm_imax', '35mm_anamorphic', 'technicolor_v4', 'krasnogorsk_16mm', 'super8_tri_x', 'art_noir'];
   const HISTORIC_IDS = ['wet_plate', 'petzval', 'aerochrome_infrared'];
 
   const filteredProfiles = ANALOG_PROFILES.filter((p) => {
@@ -328,6 +343,7 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
     return true;
   });
 
+  const isKodak5247 = currentProfile.id === 'kodak_5247';
   const isKodachrome = currentProfile.id === 'kodachrome';
   const isCineStill = currentProfile.id === 'cinestill_800t';
 
@@ -358,6 +374,13 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
               <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-red-50 text-red-700 border border-red-200 flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3 text-red-600" />
                 <span>Aktiv: {currentProfile.name.split(' (')[0]}</span>
+              </span>
+            )}
+
+            {enabled && isKodak5247 && (
+              <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-900 border border-amber-500/40 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-600" />
+                <span>100% ENR Bleach-Bypass &amp; 5500K/2800K Clash Aktiv</span>
               </span>
             )}
 
@@ -691,6 +714,91 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
                 <Info className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                 <div>
                   <strong>Photochemische Emulation:</strong> CineStill 800T basiert auf originalem <code>Kodak Vision3 500T (5219)</code> Filmstock. Das System injiziert automatisch die prompt-verbindlichen Direktiven: <code>3200K tungsten balanced</code>, <code>650nm carmine-red halation bleed</code>, <code>Remjet layer removed</code> und <code>ECN-2 / C-41 color cross</code>.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 2c. DEDICATED KODAK 5247 MASTER COCKPIT (Shown when Kodak 5247 is selected) */}
+          {isKodak5247 && (
+            <div className="p-4.5 rounded-2xl bg-gradient-to-br from-amber-50/90 via-white to-slate-100/70 border-2 border-amber-500/40 shadow-xs space-y-4">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-amber-600 text-white shadow-xs">
+                    <Film className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-black text-amber-950">
+                        Kodak 5247 Master Plugin (ENR Bleach-Bypass Edition • v2.2)
+                      </h4>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-600 text-white">
+                        Aktiv &amp; Kalibriert
+                      </span>
+                    </div>
+                    <p className="text-xs text-amber-900/80 font-medium mt-0.5">
+                      Kodak Eastman Color Negative II 5247 (100T) • 100% ENR Silberrückhaltung (Bleach-Bypass) • Zeiss Super Speed Mk II (T1.3 &amp; 100mm Macro).
+                    </p>
+                  </div>
+                </div>
+
+                {/* LoRA & Physics Sync Status */}
+                <div className="flex items-center gap-2">
+                  <div className="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
+                    <span>5500K/2800K Clash &amp; ENR Silber injiziert</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 Core Verification Guarantees for Kodak 5247 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                <div className="p-3 rounded-xl bg-white border border-amber-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
+                    <Layers className="w-4 h-4 text-amber-600" />
+                    <span>100% ENR Silberrückhaltung</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    Reines metallisches Silber verbleibt in der Gelatineschicht; liefert unbarmherzigen Mikrokontrast und metallischen Schimmer.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-amber-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
+                    <Sun className="w-4 h-4 text-sky-600" />
+                    <span>5500K / 2800K Clash</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    Kollision extremer Lichtfarben: Eiskaltes 5500K Tageslicht trifft auf intensives 2800K Kunstlicht im Innenraum.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-amber-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
+                    <Eye className="w-4 h-4 text-zinc-800" />
+                    <span>Zeiss T1.3 &amp; 100mm Macro</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    Rasiermesserscharfe Optik ohne Weichzeichner; löst Poren, Staubstatue-Partikel und zerborstenes Glas mikroskopisch auf.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-amber-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
+                    <Flame className="w-4 h-4 text-slate-900" />
+                    <span>Obsidian D-Max &amp; Entsättigung</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    Steilste Gradation, tiefes kohlrabenschwarzes D-Max und unterkühlte, aschige Schiefer- und Stahlblautöne.
+                  </p>
+                </div>
+              </div>
+
+              {/* Technical Recipe / Knowledge Box */}
+              <div className="p-3 rounded-xl bg-amber-100/60 border border-amber-200 text-xs text-amber-950 leading-relaxed flex items-start gap-2">
+                <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                <div>
+                  <strong>Photochemische Master-Emulation:</strong> Kodak 5247 (100T) ist das filmische Fundament der 6-teiligen Katastrophen-Dramaturgie. Das Plugin injiziert verbindlich: <code>Kodak 5247 100T tungsten-balanced</code>, <code>100% ENR silver retention bleach-bypass</code>, <code>clashing 5500K daylight vs 2800K tungsten</code>, <code>Zeiss Super Speed Mk II (T1.3 &amp; 100mm macro)</code> und <code>obsidian D-Max blacks with zero CGI smoothing</code>.
                 </div>
               </div>
             </div>

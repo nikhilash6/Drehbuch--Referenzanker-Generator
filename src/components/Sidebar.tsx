@@ -141,7 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {t(language, 'header.title')}
                 </h1>
                 <span className="px-1.5 py-0.5 text-[9px] font-extrabold uppercase bg-amber-100 text-amber-900 border border-amber-300 rounded-md tracking-wider">
-                  v2.1
+                  v2.2
                 </span>
               </div>
               <p className="text-[11px] font-medium text-zinc-500">

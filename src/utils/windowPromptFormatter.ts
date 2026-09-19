@@ -490,6 +490,8 @@ export function buildSingleLineWindowPrompt(params: {
     styleLabel = 'monochrome art noir masterpiece';
   } else if (isWetPlate) {
     styleLabel = 'strictly monochrome wet-plate collodion masterpiece from 1851';
+  } else if (visualStyle === 'kodak_5247') {
+    styleLabel = 'legendary Kodak 5247 100T motion picture masterpiece with 100% ENR silver-retention bleach-bypass and clashing color temperature';
   } else if (visualStyle === 'svema_zenit') {
     styleLabel = 'chemically degraded analog Svema lomo masterpiece with heavy grain';
   } else if (visualStyle === 'kodachrome') {
@@ -541,6 +543,15 @@ export function buildSingleLineWindowPrompt(params: {
     }
     if (!musicStyle || musicStyle.toLowerCase().includes('cinematic ambient score') || musicStyle.toLowerCase().includes('cinematic music')) {
       enMusicStyle = 'A distant, crackling wax cylinder recording of a dusty solo cello playing a slow melody';
+    }
+  } else if (visualStyle === 'kodak_5247') {
+    enWeather = 'Stark clashing dual lighting: cold 5500K exterior daylight cutting sharply through windows against warm 2800K tungsten interior practical lamps, casting razor-sharp high-contrast shadows with obsidian D-Max blacks';
+    enBackground = 'A stark disaster-zone or high-contrast interior framed by cold 5500K window light and warm 2800K tungsten lamps, rendered with metallic silver retention, pulverized glass dust, and deep pitch-black negative space';
+    if (!soundDesign || soundDesign.toLowerCase().includes('subtle natural') || soundDesign.toLowerCase().includes('natural environmental')) {
+      enSoundDesign = 'Ominous low-frequency sub-bass pressure, the sharp high-frequency sound of shattering glass, falling dust particulate, and slow rhythmic breathing';
+    }
+    if (!musicStyle || musicStyle.toLowerCase().includes('cinematic ambient score') || musicStyle.toLowerCase().includes('cinematic music')) {
+      enMusicStyle = 'A cold, minimalist industrial drone with deep sub-bass vibrations and a distant echoing metallophone chime';
     }
   } else if (visualStyle === 'svema_zenit') {
     enWeather = 'Warm sulfur-yellow late-afternoon sunlight with dramatic vintage contrast, casting long yellow-hued shadows';
@@ -603,6 +614,8 @@ export function buildSingleLineWindowPrompt(params: {
     loraAtmosphere = 'strictly monochrome black-and-white art-noir aesthetic, photochemical medium format emulation: captured on Mamiya RZ67 Pro II with Mamiya Sekor Z 110mm f/2.8 lens on 120 roll film (Kodak Tri-X 400 / Ilford HP5+ chemistry). Masterpiece chiaroscuro Rembrandt directional overhead keylight casting dramatic shadows into pure matte-black void. Extreme tactile microcontrast on pores, beard stubble, and fabric weave, strictly zero artificial CGI skin smoothing, zero waxiness. Rich continuous silver-halide tonal gradation, obsidian D-Max blacks, razor-sharp focus plane with buttery medium-format depth-of-field falloff.';
   } else if (isWetPlate) {
     loraAtmosphere = 'strictly monochrome wet-plate collodion silver-nitrate glass plate style from 1851, orthochromatic sensitivity rendering warm colors pitch black and light blue tones white, heavy dark irregular silver pouring stains and chemical flow marks bleeding from corners, visible dust, hairline emulsion cracks, and fine metallic scratches embedded directly in the silver plate.';
+  } else if (visualStyle === 'kodak_5247') {
+    loraAtmosphere = 'photochemical cinema film emulation: authentic Kodak Eastman Color Negative II 5247 (100T) motion picture stock processed with 100% ENR (Ernesto Novelli Rouch) silver-retention bleach-bypass technique. Zeiss Super Speed Mk II (T1.3 35mm/50mm and 100mm macro) optical rendering with clinical microcontrast, razor-sharp edge fidelity, and zero optical diffusion. Stark clashing color temperature: icy 5500K daylight clashing against warm 2800K tungsten practical lighting. Heavy color desaturation, muted slate-blues, cold graphite, and bone-pale skin tones, punctuated by deep metallic silver-halide shimmer in highlights and velvety obsidian D-Max blacks. Extremely tactile micro-grain structure resolving skin pores, perspiration beads, glass micro-fractures, and floating particulate dust with razor precision, strictly zero CGI smoothing, zero plastic AI artifacts.';
   } else if (visualStyle === 'svema_zenit') {
     loraAtmosphere = 'distinctive swirly vortex bokeh at f/2 using Helios-44-2 58mm or Jupiter-9 85mm lenses, background rapidly distorting in a circular spinning blur around the sharp center subject, chemically expired C-41 analog Svema filmstock with toxic emerald-green tint in the deep shadows and warm sulfur-yellow/magenta hues in the highlights, dramatic analog light-leak flares in hot orange and crimson red bleeding from the left edge of the frame, heavy 35mm film emulsion grain structure with subtle reticulation.';
   } else if (visualStyle === 'kodachrome') {

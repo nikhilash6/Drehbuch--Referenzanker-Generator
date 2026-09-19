@@ -1,6 +1,6 @@
-# 🎬 Single-Line Video Prompt Engine & Screenplay Generator `v2.1.0`
+# 🎬 Single-Line Video Prompt Engine & Screenplay Generator `v2.2.0`
 
-> **Version 2.1.0 (Release 2.1 - Master Kodachrome & Single-Line Windows Engine)**  
+> **Version 2.2.0 (Release 2.2 - Kodak 5247 Master Plugin & Apocalyptic Dramaturgy Engine)**  
 > **Professional Dramaturgical Screenplay Studio & Single-Line Prompt Engine**  
 > Optimized for **MiniMax H3**, **Maestro 2.1.6**, **Kling AI**, and **Runway Gen-3**.
 
@@ -8,7 +8,7 @@
 
 ## 🌟 Overview & Video Inquiries
 
-The **Single-Line Video Prompt Engine (v2.1.0)** is a high-precision production studio designed for filmmakers, cinematographers, content creators, architects, and AI video producers. It compiles dramaturgical concepts, character references, and physical lighting parameters into contiguous, timecoded video windows (e.g. **14.000 seconds per window**, exactly 28s or 56s across multiple windows) with strictly **zero line breaks**.
+The **Single-Line Video Prompt Engine (v2.2.0)** is a high-precision production studio designed for filmmakers, cinematographers, content creators, architects, and AI video producers. It compiles dramaturgical concepts, character references, and physical lighting parameters into contiguous, timecoded video windows (e.g. **14.000 seconds per window**, exactly 28s or 56s across multiple windows) with strictly **zero line breaks**.
 
 ### 📸 Video Showcase & Direct Contact
 - 🎥 **Instagram Showcase & Portfolio**: [https://www.instagram.com/mo_ment_e](https://www.instagram.com/mo_ment_e) (`@mo_ment_e`)
@@ -19,7 +19,20 @@ The **Single-Line Video Prompt Engine (v2.1.0)** is a high-precision production 
 
 ## 🏷️ Versioning & Release History
 
-- **`v2.1.0` (Current Release - Master Kodachrome & V3 Analog Overhaul)**
+- **`v2.2.0` (Current Release - Kodak 5247 Master Plugin & 6-Part Apocalyptic Dramaturgy Engine)**
+  - **Kodak 5247 Master Plugin (100T • ENR Bleach-Bypass)**: Vollständige photochemische Kinofilm-Emulation des legendären *Kodak Eastman Color Negative II 5247 (100T)* Filmstocks in Kombination mit **100% ENR Silberrückhaltung** (Ernesto Novelli Rouch Bleach-Bypass).
+  - **5500K / 2800K Color Clash Engine**: Eiskaltes 5500K Tageslicht (Außenraum / Explosion / Schockwelle) prallt rasiermesserscharf auf 2800K warmes Tungsten-Wolfram-Innenlicht.
+  - **Zeiss Super Speed Mk II (T1.3 & 100mm Macro Optik)**: Klinischer Mikrokontrast ohne Weichzeichner; mikroskopische Auflösung von Hautporen, Schweiß, Mikro-Glassplittern und zerfallenden Staubpartikeln.
+  - **Obsidian D-Max & Desaturation**: Radikale Farbdämpfung hin zu aschigen Schiefer- und Stahlblautönen mit abgrundtiefen, rauschfreien D-Max Schwarzwerten.
+  - **6-Part Disaster Dramaturgy Engine**: Perfekt aufeinander abgestimmte 6-teilige Videosequenz ("Die Mechanik der Katastrophe"):
+    - *Teil 1:* Die Illusion von Kontrolle & die Machtlosigkeit der Masse
+    - *Teil 2:* Medien-Hysterie & Narrative ("Wir schaffen das")
+    - *Teil 3:* Die 5-Sekunden-Warnung & das Ticken der Zünder
+    - *Teil 4:* Die Spaltung der Gesellschaft & Eliten-Flucht
+    - *Teil 5:* 5 Sekunden vor 12 & die persönliche Ohnmacht
+    - *Teil 6:* Das Finale – Druckwelle, Detonation, Splitterflug, Verwandlung in eine zerfallende Staubstatue (inkl. Zeiss 100mm Makro).
+
+- **`v2.1.0` (Master Kodachrome & V3 Analog Overhaul)**
   - **Kodachrome 64 Master Plugin (K-14 Dia)**: Full photochemical color science integration with 5500K neutral daylight balance, dedicated Sclera/Eye-White Protection against yellow/sepia tint, 650nm carmine red halation, and velvety Obsidian D-Max deep blacks.
   - **Analog-Trimmer & Linsen-Emulation V3 UX**: Streamlined category filtering (*Alle, Kodachrome, Leica, Arri & Master Primes, Anamorphic, Vintage 70s/80s, Super 8*), high-visibility Master Plugin showcase, and collapsible Expert Chemistry Lab drawer.
   - **LoRA Disentanglement**: Clear operational rules and 1-click controls for toggling the Astroburner Cinematic LoRA (`ASTROCINEMAV01K2T`) on/off during color-critical reversal film runs.
@@ -40,20 +53,28 @@ The **Single-Line Video Prompt Engine (v2.1.0)** is a high-precision production 
 
 ## 🚀 Key Features
 
-### 1. 🎞️ Kodachrome 64 Master Plugin (K-14 Reversal Chemistry)
+### 1. 🎞️ Kodak 5247 Master Plugin (100T • ENR Bleach-Bypass)
+Das offizielle Kodak 5247 Master Plugin liefert eine physikalisch akkurate Kinofilm-Emulation:
+- **100% ENR Silberrückhaltung (Bleach-Bypass)**: Reines elementares Silber verbleibt in der Farbfilmemulsion. Erzeugt den charakteristischen kalten, metallischen Schimmer und unbarmherzigen Mikrokontrast.
+- **5500K vs. 2800K Lichtquellen-Clash**: Harte Kollision zwischen kaltem Tageslicht / Detonationslicht und warmen Wolfram-Glühfäden im Rauminneren.
+- **Zeiss Super Speed Mk II (T1.3 & 100mm Macro)**: Unübertroffene Kantenschärfe ohne diffuse AI-Glättung; mikroskopische Schärfentiefe für Makro-Aufnahmen von fliegenden Glassplittern und Hautstaub.
+- **Obsidian D-Max**: Steilste Dichtekurve mit kohlrabenschwarzen Schattenwerten ohne Schleier oder AI-Rauschen.
+
+### 2. 🎞️ Kodachrome 64 Master Plugin (K-14 Reversal Chemistry)
 The system features an uncompromising emulation of legendary **Kodachrome 64 Daylight (5500K)** reversal slide film:
 - **K-14 Subtractive Dye-Coupler Science**: Precise three-layer color separation delivering vivid hyper-saturated crimson reds, natural peach/olive skin tones, and rich cobalt shadows.
 - **Sclera Protection (Anti-Sepia Guard)**: Explicit optical rules preventing the uniform yellow/amber wash common in AI film prompts. Keeps the sclera of the eyes naturally ivory-white with neutral specular catchlights.
 - **Obsidian D-Max**: Extremely steep analog contrast curves reaching velvety optical black without digital sensor noise or posterization.
 - **650nm Carmine Halation**: Organic, microscopic red flare bleeding naturally along high-contrast specular borders.
 
-### 2. 🎛️ Analog-Trimmer & Linsen-Emulation (UX V3)
+### 3. 🎛️ Analog-Trimmer & Linsen-Emulation (UX V3)
 Redesigned from the ground up for clarity, speed, and creative focus:
-- **Category Filter Tabs**: Switch effortlessly between *Kodachrome, Leica & Kinofilm, Arri Master Primes, Anamorphotisch, Vintage 70er/80er,* and *Super 8 / 16mm*.
+- **Category Filter Tabs**: Switch effortlessly between *Favoriten, Foto-Klassiker, Kino & Anamorphotisch, Historisch & Labor*.
 - **Quick Preset Cards**: Visual color palettes, recommended Kelvin temperatures, and optical characteristics at a glance.
-- **Collapsible Expert Lab Drawer**: Advanced grain size trimmers, halation radius sliders, and chemistry defect injectors tucked away to keep the primary workflow clean and uncluttered.
+- **Dedicated Master Cockpits**: Live indicator panels for Kodak 5247, Kodachrome 64, and CineStill 800T with 1-click verification.
+- **Collapsible Expert Lab Drawer**: Advanced grain size trimmers, halation radius sliders, and chemistry defect injectors.
 
-### 3. 📐 Strict Single-Line Window Pressing (0 Line Breaks)
+### 4. 📐 Strict Single-Line Window Pressing (0 Line Breaks)
 - Every generated window prompt is formatted into **exactly 1 line** of text (0 line breaks).
 - Prevents syntax breaks and token drops in diffusion video architectures (MiniMax H3 / Hailuo, Maestro 2.1.6, Kling AI).
 - Contiguous timecode stamping:
@@ -110,6 +131,21 @@ We express our deepest appreciation and special recommendation for one of the mo
 ### LoRA Guidelines & Disentanglement:
 - **When to Enable**: Ideal for architectural lighting, complex spatial blocking, Dutch angles, aerial perspectives, and atmospheric volumetric fill.
 - **When to Disable**: When executing strict, color-critical photochemical film emulations (such as the **Kodachrome 64 Master Plugin**), turn the LoRA off. Because Astroburner's LoRA carries a heavy film noir / monochrome bias, turning it off allows the pure K-14 subtractive color chemistry, 5500K daylight balance, and natural skin tones to shine without desaturation or amber interference.
+
+---
+
+## 🏆 Production Reference: The "Elemental Matter" Series
+
+Created and executed entirely with Drehbuchstudio Pro and the Kodachrome 64 Master Plugin:
+
+| Werk | Title | Physical Medium & Key Chemistry | Key Lighting & Optical Note |
+|---|---|---|---|
+| **Werk I** | **Cinnabar Dust** | Pure red cinnabar mineral dust, mercury sulfide crystals | 5500K key light, 650nm crimson halation, obsidian D-Max |
+| **Werk II** | **Liquid Aureum** | Viscous colloidal gold, heavy surface tension, alabaster | Microscopic fluid meniscus, pure neutral eye catchlights |
+| **Werk III** | **Ultramarine Ash** | Raw lapis lazuli powder, pyrite inclusions, basalt stone | Strict K-14 cobalt-to-peach spectral color separation |
+| **Werk IV** | **Verdigris Slag** | Crystallized copper carbonate, brittle emerald patina, slate | Granular crust fracturing, jade green vs. natural skin tones |
+| **Werk V** | **Bismuth Matrix** | Stepped 90° hopper bismuth crystal, iridescent oxide film | Prismatic violet-to-cyan refraction, zero sepia drift |
+| **Werk VI** | **Obsidian Core** | Amorphous volcanic glass, conchoidal fractures, graphite ash | Ultimate D-Max black density, pure glass mirror reflections |
 
 ---
 
