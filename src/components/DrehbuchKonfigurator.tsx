@@ -166,6 +166,20 @@ const CALL_TO_ACTION_PRESETS = [
 
 const SAMPLE_STICHPUNKTE_LIST = [
   {
+    label: 'Agfachrome CT18: Das Erlöschen des Spektrums (6-Teiliger Film-Zyklus)',
+    text: `- Genre: Drama / Apokalyptisch / Psychologischer Thriller
+- Setting: Dekadente Metropole, monolithische Regierungsbauten, verlassene Wohnkorridore und Bunkeranlagen im schleichenden Zusammenbruch
+- Film-Emulation: Agfachrome CT18 Master Plugin (AP-41 Reversal Chemistry, kalte Salbei- & Schiefergrün-Schatten, verblassendes Ocker, malerisches Farbstoffkorn, Zeiss Sonnar & Planar Optik)
+- Audio-Architektur: Rhythmisches Dröhnen (18Hz Infraschall), mechanischer Marschtritt, getragene Cello-Klagemotive und berstende Hochfrequenz-Resonanzen
+- Teil 1 (00:00-00:14): Die Illusion von Kontrolle & die Machtlosigkeit der Masse – Monolithisches Ministerium für Informationssicherheit, flackernde Monitore, dumpfes Vibrieren.
+- Teil 2 (00:14-00:28): Medien-Hysterie & Narrative ("Wir schaffen das") – Verlassenes TV-Broadcast-Studio, rot blinkendes ON AIR, zitternde Moderatorin, verblassende Teleprompter-Phrasen.
+- Teil 3 (00:28-00:42): Die 5-Sekunden-Warnung & das Ticken der Zünder – Akustische Sirenen im Infraschall-Bereich, abbrechende Handy-Netze, digitaler Blackout.
+- Teil 4 (00:42-00:56): Die Spaltung der Gesellschaft & Eliten-Flucht – Absperrgitter, fluchtartige Konvois gepanzerter Limousinen, zersplitterte Glasbarrieren.
+- Teil 5 (00:56-01:10): 5 Sekunden vor 12 & die persönliche Ohnmacht – Verlassenes Apartment, stillstehende mechanische Wanduhr, Staub wirbelt im letzten Sonnenstrahl.
+- Teil 6 (01:10-01:24): Das Finale – Das Erlöschen des Spektrums – Stille vor der Druckwelle, thermische Entfärbung, Transformation in verwehende Staubstatuen im Carl Zeiss 100mm Makro.
+- Call to Action: "Das Erlöschen des Spektrums — Ein photochemischer Film-Zyklus auf Agfachrome CT18"`,
+  },
+  {
     label: 'Elemental Matter: Kodachrome 64 K-14 Makro-Kunst (Pigment, Metall & Kinetik)',
     text: `- Genre: Kunst / Experimental
 - Protagonist: <Subject 1> Johannes Wobus (@Subject1_johannes_wobus), minimalistischer dunkler Künstler-Mantel, intensive braune Augen, natürliche klare weiße Sklera, 5500K neutrales Tageslicht

@@ -490,6 +490,8 @@ export function buildSingleLineWindowPrompt(params: {
     styleLabel = 'monochrome art noir masterpiece';
   } else if (isWetPlate) {
     styleLabel = 'strictly monochrome wet-plate collodion masterpiece from 1851';
+  } else if (visualStyle === 'agfachrome_ct18') {
+    styleLabel = 'legendary Agfachrome CT18 AP-41 photochemical reversal film masterpiece with cold sage shadows and faded ocher highlights';
   } else if (visualStyle === 'kodak_5247') {
     styleLabel = 'legendary Kodak 5247 100T motion picture masterpiece with 100% ENR silver-retention bleach-bypass and clashing color temperature';
   } else if (visualStyle === 'svema_zenit') {
@@ -543,6 +545,15 @@ export function buildSingleLineWindowPrompt(params: {
     }
     if (!musicStyle || musicStyle.toLowerCase().includes('cinematic ambient score') || musicStyle.toLowerCase().includes('cinematic music')) {
       enMusicStyle = 'A distant, crackling wax cylinder recording of a dusty solo cello playing a slow melody';
+    }
+  } else if (visualStyle === 'agfachrome_ct18') {
+    enWeather = 'Subtle, overcast 5000K daylight with delicate muted pastel rolloff, soft ambient glow, casting cool sage-green and slate shadows with gentle highlight rolloff';
+    enBackground = 'A contemplative, decaying modern environment or quiet interior with muted watercolor-like tones, cold sage shadows, faded ocher accents, and deep velvety D-Max blacks';
+    if (!soundDesign || soundDesign.toLowerCase().includes('subtle natural') || soundDesign.toLowerCase().includes('natural environmental')) {
+      enSoundDesign = 'Acoustic breathing resonance, rhythmic synchronized mechanical marching steps, deep infrasound pressure hum, and subtle room reverberation';
+    }
+    if (!musicStyle || musicStyle.toLowerCase().includes('cinematic ambient score') || musicStyle.toLowerCase().includes('cinematic music')) {
+      enMusicStyle = 'A somber, haunting acoustic cello motif underscored by an 18Hz sub-bass drone and decaying metallic harmonic resonance';
     }
   } else if (visualStyle === 'kodak_5247') {
     enWeather = 'Stark clashing dual lighting: cold 5500K exterior daylight cutting sharply through windows against warm 2800K tungsten interior practical lamps, casting razor-sharp high-contrast shadows with obsidian D-Max blacks';
@@ -614,6 +625,8 @@ export function buildSingleLineWindowPrompt(params: {
     loraAtmosphere = 'strictly monochrome black-and-white art-noir aesthetic, photochemical medium format emulation: captured on Mamiya RZ67 Pro II with Mamiya Sekor Z 110mm f/2.8 lens on 120 roll film (Kodak Tri-X 400 / Ilford HP5+ chemistry). Masterpiece chiaroscuro Rembrandt directional overhead keylight casting dramatic shadows into pure matte-black void. Extreme tactile microcontrast on pores, beard stubble, and fabric weave, strictly zero artificial CGI skin smoothing, zero waxiness. Rich continuous silver-halide tonal gradation, obsidian D-Max blacks, razor-sharp focus plane with buttery medium-format depth-of-field falloff.';
   } else if (isWetPlate) {
     loraAtmosphere = 'strictly monochrome wet-plate collodion silver-nitrate glass plate style from 1851, orthochromatic sensitivity rendering warm colors pitch black and light blue tones white, heavy dark irregular silver pouring stains and chemical flow marks bleeding from corners, visible dust, hairline emulsion cracks, and fine metallic scratches embedded directly in the silver plate.';
+  } else if (visualStyle === 'agfachrome_ct18') {
+    loraAtmosphere = 'photochemical cinema film emulation: authentic Agfachrome CT18 (50S) color reversal slide film processed in genuine Agfacolor AP-41 reversal chemistry. Signature German reversal color palette with muted watercolor pastel tones, cold sage-green and slate-moss shadows, desaturated warm hues, and faded ocher accents representing civilizational decay. Captured on Arriflex 35 BL4 with Carl Zeiss Sonnar 40mm f/2.8 HFT and Planar 50mm T1.4 lenses. Soft creamy highlight rolloff, pronounced painterly dye-cloud grain structure with velvety tactile edge sharpness resolving skin dust, micro-fractures, and fabric textures with microscopic clarity, deep velvety D-Max blacks, strictly zero artificial CGI smoothing, zero plastic AI artifacts.';
   } else if (visualStyle === 'kodak_5247') {
     loraAtmosphere = 'photochemical cinema film emulation: authentic Kodak Eastman Color Negative II 5247 (100T) motion picture stock processed with 100% ENR (Ernesto Novelli Rouch) silver-retention bleach-bypass technique. Zeiss Super Speed Mk II (T1.3 35mm/50mm and 100mm macro) optical rendering with clinical microcontrast, razor-sharp edge fidelity, and zero optical diffusion. Stark clashing color temperature: icy 5500K daylight clashing against warm 2800K tungsten practical lighting. Heavy color desaturation, muted slate-blues, cold graphite, and bone-pale skin tones, punctuated by deep metallic silver-halide shimmer in highlights and velvety obsidian D-Max blacks. Extremely tactile micro-grain structure resolving skin pores, perspiration beads, glass micro-fractures, and floating particulate dust with razor precision, strictly zero CGI smoothing, zero plastic AI artifacts.';
   } else if (visualStyle === 'svema_zenit') {

@@ -140,8 +140,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <h1 className="font-bold text-sm tracking-tight text-zinc-900">
                   {t(language, 'header.title')}
                 </h1>
-                <span className="px-1.5 py-0.5 text-[9px] font-extrabold uppercase bg-amber-100 text-amber-900 border border-amber-300 rounded-md tracking-wider">
-                  v2.2
+                <span className="px-1.5 py-0.5 text-[9px] font-extrabold uppercase bg-emerald-100 text-emerald-950 border border-emerald-300 rounded-md tracking-wider">
+                  v3.0
                 </span>
               </div>
               <p className="text-[11px] font-medium text-zinc-500">

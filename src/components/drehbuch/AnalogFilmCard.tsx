@@ -37,6 +37,21 @@ export interface AnalogProfile {
 
 export const ANALOG_PROFILES: AnalogProfile[] = [
   {
+    id: 'agfachrome_ct18',
+    name: 'Agfachrome CT18 Master Plugin (AP-41 Reversal • Das Erlöschen des Spektrums)',
+    camera: 'Arriflex 35 BL4 / Leica M4 Rangefinder (Photochemical 35mm)',
+    lens: 'Carl Zeiss Sonnar 40mm f/2.8 HFT & Planar 50mm T1.4 (Pure Optical Macro)',
+    chemistry: 'Agfacolor AP-41 Reversal Chemistry (Cold Sage, Muted Ocher & Watercolor Dye)',
+    description: 'Das offizielle Agfachrome CT18 Master Plugin für den 6-teiligen Film-Zyklus "Das Erlöschen des Spektrums". Emuliert die legendäre deutsche AP-41 Farbumkehr-Chemie: Entsättigung warmer Farbtöne, kalte Salbei- & Schiefergrün-Schatten, bernsteinfarbenes Glühen verfallender Zivilisation und malerisches Farbstoffkorn mit weichem Highlight-Rolloff ohne digitale AI-Glättung.',
+    colorShift: 'Subtile Entsättigung, pastellige Salbei- & Schiefergrün-Schatten, verblassendes Ocker, aschige Hauttöne & sanftes D-Max Tiefschwarz',
+    grain: 'Ausgeprägtes, malerisches AP-41 Farbstoffkorn mit weichen Kanten, mikroskopischer Plastizität auf Hautstaub, Rissen und Glasbruch',
+    flare: 'Diffuser analoger Lichthof an extremen Lichtkanten, gedämpftes Glühen ohne digitales Blooming',
+    badge: 'Master Plugin v3.0',
+    badgeStyle: 'bg-emerald-500/15 text-emerald-950 border-emerald-500/40',
+    paletteColors: ['#2A4736', '#879883', '#D4B483', '#1A1E1C'],
+    recommendedTemp: '5000K AP-41'
+  },
+  {
     id: 'kodak_5247',
     name: 'Kodak 5247 Master Plugin (100T • ENR Bleach-Bypass)',
     camera: 'Arriflex 35 III / Panavision Panaflex Gold II (35mm Cine)',
@@ -330,9 +345,9 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
   const [showLabSection, setShowLabSection] = useState(false);
 
   // Group definitions for clear filtering
-  const FAVORITES_IDS = ['kodak_5247', 'kodachrome', 'cinestill_800t', 'art_noir', 'leica_noctilux', '70mm_imax'];
-  const PHOTO_CLASSIC_IDS = ['art_noir', 'kodachrome', 'cinestill_800t', 'polaroid_fp100c', 'svema_zenit', 'agfachrome_50s', 'orwo_nc21'];
-  const CINE_IDS = ['kodak_5247', 'cinestill_800t', '70mm_imax', '35mm_anamorphic', 'technicolor_v4', 'krasnogorsk_16mm', 'super8_tri_x', 'art_noir'];
+  const FAVORITES_IDS = ['agfachrome_ct18', 'kodak_5247', 'kodachrome', 'cinestill_800t', 'art_noir', 'leica_noctilux', '70mm_imax'];
+  const PHOTO_CLASSIC_IDS = ['agfachrome_ct18', 'art_noir', 'kodachrome', 'cinestill_800t', 'polaroid_fp100c', 'svema_zenit', 'agfachrome_50s', 'orwo_nc21'];
+  const CINE_IDS = ['agfachrome_ct18', 'kodak_5247', 'cinestill_800t', '70mm_imax', '35mm_anamorphic', 'technicolor_v4', 'krasnogorsk_16mm', 'super8_tri_x', 'art_noir'];
   const HISTORIC_IDS = ['wet_plate', 'petzval', 'aerochrome_infrared'];
 
   const filteredProfiles = ANALOG_PROFILES.filter((p) => {
@@ -343,6 +358,7 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
     return true;
   });
 
+  const isAgfachromeCT18 = currentProfile.id === 'agfachrome_ct18';
   const isKodak5247 = currentProfile.id === 'kodak_5247';
   const isKodachrome = currentProfile.id === 'kodachrome';
   const isCineStill = currentProfile.id === 'cinestill_800t';
@@ -537,7 +553,92 @@ export const AnalogFilmCard: React.FC<AnalogFilmCardProps> = ({
             </div>
           </div>
 
-          {/* 2. DEDICATED KODACHROME 64 MASTER COCKPIT (Shown when Kodachrome is selected) */}
+          {/* 2. DEDICATED AGFACHROME CT18 MASTER COCKPIT (Shown when Agfachrome CT18 is selected) */}
+          {isAgfachromeCT18 && (
+            <div className="p-4.5 rounded-2xl bg-gradient-to-br from-emerald-50/90 via-white to-amber-50/70 border-2 border-emerald-600/40 shadow-xs space-y-4">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-emerald-700 text-white shadow-xs">
+                    <Film className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-black text-emerald-950">
+                        Agfachrome CT18 Master Plugin (AP-41 Reversal • Das Erlöschen des Spektrums)
+                      </h4>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-700 text-white">
+                        Aktiv &amp; Kalibriert
+                      </span>
+                    </div>
+                    <p className="text-xs text-emerald-900/80 font-medium mt-0.5">
+                      Agfacolor AP-41 Farbumkehr-Chemie • Kalte Salbei- &amp; Schiefergrün-Schatten • Verblassendes Ocker • Carl Zeiss Sonnar 40mm f/2.8 &amp; Planar 50mm T1.4.
+                    </p>
+                  </div>
+                </div>
+
+                {/* LoRA & Physics Sync Status */}
+                <div className="flex items-center gap-2">
+                  <div className="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>AP-41 Reversal &amp; Salbei-Palette injiziert</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 Core Verification Guarantees for Agfachrome CT18 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                <div className="p-3 rounded-xl bg-white border border-emerald-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
+                    <Palette className="w-4 h-4 text-emerald-700" />
+                    <span>AP-41 Spektral-Verschiebung</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    Verdrängt warmes Rot zugunsten kühler, melancholischer Salbei-, Moos- und Schiefergrüntöne; pastelliger Aquarell-Charakter.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-emerald-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
+                    <Sun className="w-4 h-4 text-amber-600" />
+                    <span>Bernstein &amp; Zivilisations-Verfall</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    Verblassendes Ocker und gedämpfte Amber-Glühfäden in den Lichtern spiegeln das schleichende Erlöschen moderner Systeme wider.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-emerald-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
+                    <Eye className="w-4 h-4 text-zinc-800" />
+                    <span>Zeiss Sonnar &amp; Planar Optik</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    HFT-Vergütung löst feinste Risse, Staubablagerungen auf Glas und Textilgewebe mikroskopisch plastisch auf – ohne digitales Überschärfen.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-emerald-200/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
+                    <Layers className="w-4 h-4 text-emerald-800" />
+                    <span>Malerisches Farbstoffkorn</span>
+                  </div>
+                  <p className="text-xs text-zinc-600 leading-snug">
+                    Organisches, weichkörniges Farbstoffwolken-Korn der AP-41 Chemie mit samtig analogem Highlight-Rolloff und tiefem D-Max.
+                  </p>
+                </div>
+              </div>
+
+              {/* Technical Recipe / Knowledge Box */}
+              <div className="p-3 rounded-xl bg-emerald-100/60 border border-emerald-200 text-xs text-emerald-950 leading-relaxed flex items-start gap-2">
+                <Info className="w-4 h-4 text-emerald-800 shrink-0 mt-0.5" />
+                <div>
+                  <strong>Photochemische Master-Emulation:</strong> Agfachrome CT18 (50S / AP-41) ist das filmische Fundament des 6-teiligen Zyklus <em>&quot;Das Erlöschen des Spektrums&quot;</em>. Das Plugin injiziert verbindlich: <code>Agfachrome CT18 AP-41 reversal chemistry</code>, <code>muted cold sage and slate-green shadows</code>, <code>faded ocher highlights</code>, <code>Carl Zeiss Sonnar 40mm f/2.8 HFT &amp; Planar 50mm T1.4</code> und <code>painterly organic dye-cloud grain with zero CGI smoothing</code>.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 2a. DEDICATED KODACHROME 64 MASTER COCKPIT (Shown when Kodachrome is selected) */}
           {isKodachrome && (
             <div className="p-4.5 rounded-2xl bg-gradient-to-br from-rose-50/80 via-white to-amber-50/50 border-2 border-rose-500/40 shadow-xs space-y-4">
               <div className="flex items-start justify-between gap-3 flex-wrap">
